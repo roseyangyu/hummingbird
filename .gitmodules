@@ -1,0 +1,6 @@
+[submodule "src/apriltags2_ros"]
+	path = src/apriltags2_ros
+	url = https://github.com/Vuwij/apriltags2_ros
+[submodule "src/vicon_bridge"]
+	path = src/vicon_bridge
+	url = https://github.com/ethz-asl/vicon_bridge

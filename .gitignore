@@ -1,0 +1,9 @@
+build/
+devel/
+logs/
+.catkin_tools/
+*~
+*.pyc
+src/.idea
+src/cmake-build-debug/
+*.log

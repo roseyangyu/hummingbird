@@ -1,0 +1,9 @@
+<launch>
+    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch" />
+
+    <include file="$(find odometry)/launch/odometry.launch" />
+
+    <node pkg="rviz" type="rviz" name="rviz"/>
+
+    <include file="$(find px4)/launch/mavros_posix_sitl.launch" />
+</launch>

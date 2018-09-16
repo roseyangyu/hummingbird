@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+TerminalOptions=bash
+Exec=bash -c "source ~/.bashrc;~/hummingbird_ws/scripts/gazebo.sh"
+Icon=/home/odroid/hummingbird_ws/scripts/tailsitter.jpg
+Name=Tailsitter Gazebo
