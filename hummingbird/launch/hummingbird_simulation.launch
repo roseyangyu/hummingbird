@@ -4,16 +4,18 @@
     <arg name="gui" default="true"/>
 
     <!-- Launches april tag detection -->
-    <remap from="/camera/color" to="/realsense/camera/color"/>
-    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch"/>
+    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch">
+        <arg name="camera_name" default="realsense/camera/color"/>
+        <arg name="camera_frame" default="camera"/>
+        <arg name="image_topic" default="image_raw"/>
+    </include>
 
     <!-- Launches odometry and tf publishers -->
     <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
 
     <!-- Launches the simulation -->
-    <remap from="/realsense/camera/color/image_rect_raw" to="/realsense/camera/color/image_raw"/>
     <include file="$(find px4)/launch/mavros_posix_sitl.launch">
-        <arg name="gui" default="$(arg gui)"/>
+        <arg name="gui" value="$(arg gui)"/>
     </include>
 
     <!-- Launches the display -->

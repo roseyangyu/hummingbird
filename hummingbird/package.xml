@@ -9,9 +9,14 @@
 
   <depend>hummingbird_odometry</depend>
   <depend>realsense_gazebo_plugin</depend>
+  <depend>geographiclib</depend>
+  <depend>geographiclib-tools</depend>
   <depend>apriltags2_ros</depend>
   <depend>vicon_bridge</depend>
+  <depend>libogre-dev</depend>
   <depend>mavros</depend>
+  <depend>mavros-extrasg</depend>
   <depend>mavlink</depend>
+  <depend>protobuf-dev</depend>
 
 </package>
