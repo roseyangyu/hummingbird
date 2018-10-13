@@ -79,7 +79,7 @@
   <!--<param name="odometry/tag6/calib/rotation/y" value="0" type="double"/>-->
   <!--<param name="odometry/tag6/calib/rotation/z" value="0" type="double"/>-->
 
-  <node pkg="odometry" type="odometry_node" name="odometry" output="screen" />
-  <node pkg="odometry" type="ts_location_estimator" name="ts_location_estimator" output="screen" />
-  <node pkg="odometry" type="ts_location_publisher" name="ts_location_publisher" output="screen" />
+  <node pkg="hummingbird_odometry" type="odometry_node" name="odometry" output="screen"/>
+  <node pkg="hummingbird_odometry" type="ts_location_estimator" name="ts_location_estimator" output="screen"/>
+  <node pkg="hummingbird_odometry" type="ts_location_publisher" name="ts_location_publisher" output="screen"/>
 </launch>

@@ -11,6 +11,7 @@
   <depend>realsense_gazebo_plugin</depend>
   <depend>apriltags2_ros</depend>
   <depend>vicon_bridge</depend>
-
+  <depend>mavros</depend>
+  <depend>mavlink</depend>
 
 </package>
