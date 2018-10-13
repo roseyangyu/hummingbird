@@ -1,0 +1,22 @@
+<!-- The launch files for the simulated robot -->
+
+<launch>
+    <arg name="gui" default="true"/>
+
+    <!-- Launches april tag detection -->
+    <remap from="/camera/color" to="/realsense/camera/color"/>
+    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch"/>
+
+    <!-- Launches odometry and tf publishers -->
+    <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
+
+    <!-- Launches the simulation -->
+    <remap from="/realsense/camera/color/image_rect_raw" to="/realsense/camera/color/image_raw"/>
+    <include file="$(find px4)/launch/mavros_posix_sitl.launch">
+        <arg name="gui" default="$(arg gui)"/>
+    </include>
+
+    <!-- Launches the display -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hummingbird)/rviz/hummingbird.rviz"/>
+
+</launch>

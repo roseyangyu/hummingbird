@@ -1,0 +1,25 @@
+<!-- The real launch files for the robot -->
+<launch>
+    <arg name="fcu_url" default=""/>
+    <arg name="gcs_url" default="udp://:14550@:14555"/>
+
+    <!-- Launches april tag detection -->
+    <remap from="/camera/color" to="/realsense/camera/color"/>
+    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch"/>
+
+    <!-- Launches odometry and tf publishers -->
+    <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
+
+    <!-- Launches the connection to mavros -->
+    <include file="$(find px4)/launch/mavros.launch">
+        <arg name="ns" default="/"/>
+        <arg name="fcu_url" default="$(arg fcu_url)"/>
+        <arg name="gcs_url" default="$(arg gcs_url)"/>
+        <arg name="tgt_system" default="1"/>
+        <arg name="tgt_component" default="1"/>
+    </include>
+
+    <!-- Launches the display -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hummingbird)/rviz/hummingbird.rviz"/>
+
+</launch>

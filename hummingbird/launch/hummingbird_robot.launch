@@ -1,6 +1,0 @@
-<launch>
-	<include file="$(find launcher)/launch/hummingbird_computer.launch">
-    </include>
-    <include file="$(find px4)/launch/mavros.launch">
-    </include>
-</launch>
