@@ -30,6 +30,7 @@ git checkout initials_branchname
 cd ~/catkin_ws
 rosdep update
 rosdep install --from-paths src --ignore-src -r -y # To install all dependencies
+sudo ./src/Hummingbird-ROS/hummingbird/scripts/install_geographiclib_datasets.sh # For MAVROS to work
 catkin build soccerbot
 source devel/setup.bash # Needs to be done everytime you finish building
 ```
