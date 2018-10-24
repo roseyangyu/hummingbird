@@ -39,6 +39,9 @@ geometry_msgs::PoseStamped transformToPoseStamped(geometry_msgs::Transform & t) 
 	return ps;
 }
 
+/*
+ * This node publishes the location of the partner tailsitter relative to itself on /ts_location_estimates
+ */
 int main(int argc, char** argv){
   ros::init(argc, argv, "apriltag_destination");
 
@@ -47,28 +50,20 @@ int main(int argc, char** argv){
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener listener(tfBuffer);
 
-  ros::Publisher ts_location_pub = node.advertise<geometry_msgs::PoseArray>("/ts_location_estimates", 10);
+  ros::Publisher ts_location_pub = node.advertise<geometry_msgs::Pose>("/ts_location_estimates", 10);
 
   ros::Rate rate(20.0);
 
   while (node.ok()){
-
-  	geometry_msgs::PoseArray poseArray;
-
-	for (int i = 1; i < 7; ++i) {
-		try{
-			geometry_msgs::TransformStamped map_ts;
-			map_ts = tfBuffer.lookupTransform("map", "ts_estimate " + to_string(i), ros::Time(0));
-			geometry_msgs::Pose map_ts_pose = transformToPose(map_ts.transform);
-			poseArray.poses.push_back(map_ts_pose);
-		}
-		catch (tf2::TransformException & ex){
-		  	continue;
-		}
+  	geometry_msgs::Pose pose;
+	try{
+		geometry_msgs::TransformStamped baselinkToPartnerTransform = tfBuffer.lookupTransform("base_link", "partner", ros::Time(0));
+		pose = transformToPose(baselinkToPartnerTransform.transform);
 	}
-
-	ts_location_pub.publish(poseArray);
-
+	catch (tf2::TransformException & ex){
+		continue;
+	}
+	ts_location_pub.publish(pose);
     rate.sleep();
   }
   return 0;
