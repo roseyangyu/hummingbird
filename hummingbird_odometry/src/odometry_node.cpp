@@ -3,7 +3,7 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <apriltags2_msgs/AprilTagDetectionPoseArray.h>
+#include <apriltags2_msgs/AprilTagDetectionArray.h>
 #include <string>
 #include <iostream>
 #include <tf2_ros/transform_broadcaster.h>
@@ -28,7 +28,7 @@ void poseCallback(const nav_msgs::OdometryConstPtr& msg) {
 	br.sendTransform(transformStamped);
 }
 
-void cameraLocationCallback(const apriltags2_msgs::AprilTagDetectionPoseArrayConstPtr& msg) {
+void cameraLocationCallback(const apriltags2_msgs::AprilTagDetectionArrayConstPtr& msg) {
 	static tf2_ros::TransformBroadcaster br;
 	geometry_msgs::TransformStamped cameraOrientation;
 
