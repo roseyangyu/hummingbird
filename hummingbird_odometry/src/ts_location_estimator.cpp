@@ -14,6 +14,29 @@
 
 using namespace std;
 
+string me_frame_id = "base_link";
+string partner_frame_id = "partner";
+const int NUM_TAGS = 6; 
+tf2::Matrix3x3 correctionMatricies[NUM_TAGS] = {
+    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
+    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
+    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
+    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
+    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
+    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
+};
+double tagOffsets[NUM_TAGS][3] = {
+    {0.14, -0.157, -0.02},
+    {-0.14, -0.157, -0.02},
+    {-0.14, -0.157, -0.02},
+    {0.14, -0.157, -0.02},
+    {-0.054, -0.182, -0.02},
+    {0.054, -0.182, -0.02}
+};
+
+geometry_msgs::TransformStamped currentPartnerEstimate;
+bool estimateValid = false; 
+
 geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_name) {
     double x, y, z, rx, ry, rz, rw;
     nh.param<double>("odometry/" + transform_name + "/calib/translation/x", x, 0.0);
@@ -37,29 +60,6 @@ geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_
 
     return transform;
 }
-
-string me_frame_id = "base_link";
-string partner_frame_id = "partner";
-const int NUM_TAGS = 6; 
-tf2::Matrix3x3 correctionMatricies[NUM_TAGS] = {
-    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
-    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
-    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
-    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
-    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
-    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
-};
-double tagOffsets[NUM_TAGS][3] = {
-    {0.14, -0.157, -0.02},
-    {-0.14, -0.157, -0.02},
-    {-0.14, -0.157, -0.02},
-    {0.14, -0.157, -0.02},
-    {-0.054, -0.182, -0.02},
-    {0.054, -0.182, -0.02}
-};
-
-geometry_msgs::TransformStamped currentPartnerEstimate;
-bool estimateValid = false; 
 
 // Updates the estimated partner transformation
 // Returns true if the estimate was updated
