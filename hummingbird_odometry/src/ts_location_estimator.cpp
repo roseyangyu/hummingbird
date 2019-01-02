@@ -125,8 +125,6 @@ int main(int argc, char** argv){
             tagTransforms[i].transform.rotation.w = qTag.w();
 
             // Account for the fact that the tag is not at the origin
-            //R.setRotation(qTag); // TODO: How to do direct mult of quat with vector?
-            //origin = origin - R*tagOffsets[i];
             origin = origin - tagOffsets[i].rotate(qTag.getAxis(), qTag.getAngle());
             tagTransforms[i].transform.translation.x = origin.m_floats[0];
             tagTransforms[i].transform.translation.y = origin.m_floats[1];
