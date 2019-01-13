@@ -10,10 +10,29 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
-#include <tf/LinearMath/Matrix3x3.h>
+
+#include <Eigen/Dense>
+#include <kalman/ExtendedKalmanFilter.hpp>
+#include <kalman/Types.hpp>
+#include "SystemModel.hpp"
+#include "PositionMeasurementModel.hpp"
+#include "OrientationMeasurementModel.hpp"
 
 using namespace std;
+using namespace KalmanExamples;
+using namespace Eigen;
 
+/* Typedefs */
+typedef float T;
+typedef Robot1::State<T> State;
+typedef Robot1::Control<T> Control;
+typedef Robot1::SystemModel<T> SystemModel;
+typedef Robot1::PositionMeasurement<T> PositionMeasurement;
+typedef Robot1::OrientationMeasurement<T> OrientationMeasurement;
+typedef Robot1::PositionMeasurementModel<T> PositionModel;
+typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
+
+/* Global constants */
 string me_frame_id = "base_link";
 string partner_frame_id = "partner";
 const int NUM_TAGS = 6; 
@@ -34,7 +53,20 @@ tf2::Vector3 tagOffsets[NUM_TAGS] = {
     tf2::Vector3(-0.02, 0.054, 0.382), //-0.02 0.054 0.382
 };
 
+Matrix3f positionMeasurementVariance1m = (Eigen::Matrix3f() << 0.0001,0,0,
+                                                               0,0.0001,0,
+                                                               0,0,0.0001).finished();
+Matrix3f orientationMeasurementVariance1m = (Eigen::Matrix3f() << 0.0001,0,0,
+                                                                  0,0.0001,0,
+                                                                  0,0,0.0001).finished();
+Matrix<float, 6, 6> modelVariance = (Eigen::Matrix<float, 6, 6>() << 1, 0, 0, 0, 0, 0,
+                                                                     0, 1, 0, 0, 0, 0,
+                                                                     0, 0, 1, 0, 0, 0,
+                                                                     0, 0, 0, 1, 0, 0,
+                                                                     0, 0, 0, 0, 1, 0,
+                                                                     0, 0, 0, 0, 0, 1).finished();
 geometry_msgs::TransformStamped currentPartnerEstimate;
+State x2;
 bool estimateValid = false; 
 
 geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_name) {
@@ -61,16 +93,67 @@ geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_
     return transform;
 }
 
+Vector3f toEulerAngle(const Quaternionf q)
+{
+    float roll, pitch, yaw;
+	// roll (x-axis rotation)
+	double sinr_cosp = +2.0 * (q.w() * q.x() + q.y() * q.z());
+	double cosr_cosp = +1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y());
+	roll = atan2(sinr_cosp, cosr_cosp);
+
+	// pitch (y-axis rotation)
+	double sinp = +2.0 * (q.w() * q.y() - q.z() * q.x());
+	if (fabs(sinp) >= 1)
+		pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	else
+		pitch = asin(sinp);
+
+	// yaw (z-axis rotation)
+	double siny_cosp = +2.0 * (q.w() * q.z() + q.x() * q.y());
+	double cosy_cosp = +1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z());  
+	yaw = atan2(siny_cosp, cosy_cosp);
+    return Vector3f(roll, pitch, yaw);
+}
+
 // Updates the estimated partner transformation
 // Returns true if the estimate was updated
 // Tag number is [1, TAG_NUMBER]
 bool estimatePartnerPosition(geometry_msgs::TransformStamped tagTransform,
-                             int tagNumber) {
+                             int tagNumber, 
+                             SystemModel sys,
+                             Kalman::ExtendedKalmanFilter<State>& predictor,
+                             PositionModel pm,
+                             OrientationModel om) {
     currentPartnerEstimate.header.stamp = ros::Time::now();
     currentPartnerEstimate.header.frame_id = me_frame_id;
     currentPartnerEstimate.child_frame_id = partner_frame_id;
     if (tagNumber == 3) {
-        currentPartnerEstimate.transform = tagTransform.transform;
+        PositionMeasurement positionMeasurement;
+        positionMeasurement(0) = tagTransform.transform.translation.x;
+        positionMeasurement(1) = tagTransform.transform.translation.y;
+        positionMeasurement(2) = tagTransform.transform.translation.z;
+        Quaternionf q(tagTransform.transform.rotation.w,
+                      tagTransform.transform.rotation.x,
+                      tagTransform.transform.rotation.y,
+                      tagTransform.transform.rotation.z);
+        OrientationMeasurement orientationMeasurement;
+        orientationMeasurement = toEulerAngle(q);
+        pm.setCovariance(positionMeasurementVariance1m);
+        om.setCovariance(orientationMeasurementVariance1m);
+        predictor.predict(sys);
+        predictor.update(pm, positionMeasurement);
+        auto x_ekf = predictor.update(om, orientationMeasurement);
+        currentPartnerEstimate.transform.translation.x = x_ekf(0);
+        currentPartnerEstimate.transform.translation.y = x_ekf(1);
+        currentPartnerEstimate.transform.translation.z = x_ekf(2);
+        Quaternionf q2;
+        q2 = AngleAxisf(x_ekf(3), Vector3f::UnitX()) 
+             * AngleAxisf(x_ekf(4), Vector3f::UnitY())
+             * AngleAxisf(x_ekf(5), Vector3f::UnitZ());
+        currentPartnerEstimate.transform.rotation.x = q2.x();
+        currentPartnerEstimate.transform.rotation.y = q2.y();
+        currentPartnerEstimate.transform.rotation.z = q2.z();
+        currentPartnerEstimate.transform.rotation.w = q2.w();
         return true; // Estimate position of partner as the position of the 3rd tag for now.
     }
     return false;
@@ -91,6 +174,19 @@ int main(int argc, char** argv){
     tf2_ros::TransformBroadcaster br;
 
     ros::Rate rate(60.0);
+
+    PositionModel pm;
+    OrientationModel om;
+    x2.setZero();
+    x2(1) = 1;
+    Control u;
+    u.setZero();
+
+    SystemModel sys;
+    sys.setCovariance(modelVariance);
+
+    Kalman::ExtendedKalmanFilter<State> predictor;
+    predictor.init(x2);
 
     while (node.ok()){
         geometry_msgs::TransformStamped tagTransforms[NUM_TAGS];
@@ -134,7 +230,7 @@ int main(int argc, char** argv){
             tagTransforms[i].header.stamp = ros::Time::now();
             tagTransforms[i].child_frame_id = tag_frame_id + "_corrected";
             br.sendTransform(tagTransforms[i]);
-            if (estimatePartnerPosition(tagTransforms[i], i+1)) {
+            if (estimatePartnerPosition(tagTransforms[i], i+1, sys, predictor, pm, om)) {
                 br.sendTransform(currentPartnerEstimate);
             }
         }
