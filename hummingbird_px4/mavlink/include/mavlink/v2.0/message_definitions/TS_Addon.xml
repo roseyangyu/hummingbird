@@ -1,0 +1,17 @@
+﻿<?xml version='1.0'?>
+<mavlink>
+<messages>
+  <message id="300" name="ESC_RADS">
+    <description>Motor Rotation Speed 1-4 (Read from ESC Sync Signals)</description> 
+    <field type="float" name="motor0_fil">Motor 0 RADS Filtered</field>
+    <field type="float" name="motor1_fil">Motor 1 RADS Filtered</field>
+    <field type="float" name="motor2_fil">Motor 2 RADS Filtered</field>
+    <field type="float" name="motor3_fil">Motor 3 RADS Filtered</field>
+    <field type="float" name="motor0_raw">Motor 0 RADS Raw</field>
+    <field type="float" name="motor1_raw">Motor 1 RADS Raw</field>
+    <field type="float" name="motor2_raw">Motor 2 RADS Raw</field>
+    <field type="float" name="motor3_raw">Motor 3 RADS Raw</field>
+  </message>
+</messages>
+
+</mavlink>

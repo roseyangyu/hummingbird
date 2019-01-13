@@ -1,6 +1,6 @@
 [submodule "vicon_bridge"]
 	path = vicon_bridge
 	url = https://github.com/ethz-asl/vicon_bridge
-[submodule "apriltags2_ros"]
-	path = apriltags2_ros
-	url = https://github.com/RahmanQureshi/apriltags2_ros
+[submodule "hummingbird_firmware/BLHeli"]
+	path = hummingbird_firmware/BLHeli
+	url = https://github.com/utiasSTARS/BLHeli
