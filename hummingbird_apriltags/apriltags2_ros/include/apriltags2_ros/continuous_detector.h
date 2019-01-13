@@ -27,39 +27,55 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of the California Institute of
  * Technology.
- */
+ *
+ ** continuous_detector.h ******************************************************
+ *
+ * Wrapper class of TagDetector class which calls TagDetector::detectTags on
+ * each newly arrived image published by a camera.
+ *
+ * $Revision: 1.0 $
+ * $Date: 2017/12/17 13:25:52 $
+ * $Author: dmalyuta $
+ *
+ * Originator:        Danylo Malyuta, JPL
+ ******************************************************************************/
 
-#include <apriltags2_ros/continuous_detector.h>
+#ifndef APRILTAGS2_ROS_CONTINUOUS_DETECTOR_H
+#define APRILTAGS2_ROS_CONTINUOUS_DETECTOR_H
+
+#include "apriltag.h"
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+#include "standalone_tag_description.h"
+#include "tag_bundle_member.h"
+#include "tag_detector.h"
+
+#include <apriltags2_ros/tag_bundle_description.h>
+#include <apriltags2_msgs/AprilTagDetection.h>
+#include <apriltags2_msgs/AprilTagDetectionArray.h>
 
 namespace apriltags2_ros {
 
-	ContinuousDetector::ContinuousDetector(ros::NodeHandle& nh) :
-		TagDetector(nh), it(nh) {
+class ContinuousDetector : public TagDetector {
+private:
+	bool draw_tag_detections_image;
 
-		nh.param<bool>("publish_tag_detections_image", draw_tag_detections_image, false);
+	image_transport::ImageTransport it;
+	image_transport::CameraSubscriber camera_image_subscriber;
+	ros::Publisher tag_detections_poses_publisher;
 
-		// Subscribers
-		camera_image_subscriber = it.subscribeCamera("image_rect", 2, &ContinuousDetector::imageCallback, this);
+public:
+	ContinuousDetector(ros::NodeHandle& nh);
 
-		// Publishers
-		tag_detections_poses_publisher = nh.advertise<AprilTagDetectionArray>("tag_detections", 5);
-	}
+	void imageCallback(const sensor_msgs::ImageConstPtr& image_rect, const sensor_msgs::CameraInfoConstPtr& camera_info);
+};
 
-	void ContinuousDetector::imageCallback( const sensor_msgs::ImageConstPtr& image_rect, const sensor_msgs::CameraInfoConstPtr& camera_info) {
-		// Convert ROS's sensor_msgs::Image to cv_bridge::CvImagePtr in order to run
-		// AprilTags 2 on the iamge
-		try {
-			this->cv_image = cv_bridge::toCvShare(image_rect, sensor_msgs::image_encodings::BGR8);
-			this->camera_info = camera_info;
+} // namespace hummingbird_apriltags
 
-            AprilTagDetectionArray detectionArray;
-            detectTags(detectionArray, image_rect, camera_info);
-            tag_detections_poses_publisher.publish(detectionArray);
-
-		} catch (cv_bridge::Exception& e) {
-			ROS_ERROR("cv_bridge exception: %s", e.what());
-			return;
-		}
-	}
-
-} // namespace apriltags2_ros
+#endif // APRILTAGS2_ROS_CONTINUOUS_DETECTOR_H

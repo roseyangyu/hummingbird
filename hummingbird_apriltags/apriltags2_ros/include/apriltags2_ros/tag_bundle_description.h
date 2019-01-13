@@ -115,6 +115,6 @@ public:
 	}
 };
 
-} // namespace apriltags2_ros
+} // namespace hummingbird_apriltags
 
 #endif // APRILTAGS2_ROS_TAG_BUNDLE_DESCRIPTION_H

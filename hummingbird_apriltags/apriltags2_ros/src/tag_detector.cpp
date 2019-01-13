@@ -480,4 +480,4 @@ namespace apriltags2_ros {
         }
     }
 
-} // namespace apriltags2_ros
+} // namespace hummingbird_apriltags
