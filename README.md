@@ -1,5 +1,72 @@
-## Hummingbird ROS Repository - For software running on the Odroid
+# Hummingbird
+ [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+Copyright &copy;2018 [STARS Lab](http://www.starslab.ca/)
+
+<img src="http://www.starslab.ca/wp-content/themes/stars-lab/images/stars-logo.png" width="500">
+<br><br>
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Components
+
+#### Mechanical Components
+######(hummingbird_design/CAD Files)
+An overall mechanical CAD design document, 3D-print-ready model files, and a BOM (Bill of Material) required to assemble Hummingbird is provided under `Hummingbird-MCAD`. For details, refer to the README of the submodule repo.
+
+#### SITL Simulation
+######(hummingbird_px4/Tools/sitl_gazebo)
+A set of Gazebo Plug-ins required for Hummingbird SITL simulation is provided under `Hummingbird-sitl_gazebo`. This submodule contains a gazebo model description file for the complete Hummingbird model as well as a calibrated aerodynamic model for the vehicle.
+
+#### MATLAB Simulink Model for Tailsitter Dynamics and Motion Control
+######(hummingbird_design/Dynamics and Motion Controller)
+A high-fidelity MATLAB simulink model is released for easy, quick and accurate simulation of the dynamics and motion control of Hummingbird. The models can be found under `Hummingbird-Simulink`.
+
+#### BLHeli ESC Firmware
+###### (hummingbird_px4)
+Our modified BLHeli firmware released under `BLHeli` allows DYS-SN20A ESCs to send synchronous pulses at phase commutations to the flight computer which processes the timestamps of these signals to infer motor speeds. Please refer to the README of the repo for compiling and flashing ESC firmware. 
+
+#### PX4 Microcontroller Firmware
+###### (hummingbird_firmware/BLHeli)
+This repo (`PX4-Hummingbird`) contains all of the flight code (controller, state estimator, state machine, drivers, communication software) running onboard the flight computer. One may use QGroundControl (the default PX4 GCS), or any MAVlink-enabled clients such as MAVROS to communicate with the onboard computer to receive telemtry and send commands.
+
+## Contact
+Yilun Wu  <yl.wu@robotics.utias.utoronto.ca>
+
+Jason Wang <jiashen.wang@robotics.utias.utoronto.ca>
+
+Rahman Qureshi <rahman.qureshi@robotics.utias.utoronto.ca>
+  
+## Citation
+If you use any of the resources in academic work, please cite the [relevant publication](TBA): 
+
+```bibtex
+@conference{hummingbird,
+	Author = {Yilun Wu and Xintong Du and Rikky Duivenvoorden and Jonathan Kelly},
+  Title = {Hummingbird: An Open-Source Dual-Rotor Tail-Sitter Platform for Research and Education},
+	Booktitle = {2019 International Conference on Robotics and Automation (ICRA)},
+	Note = {Submitted, Under review},
+	Year = {2019}}
+```
+
+## Documentation
+
+#### ROS Software Code Instructions
 Welcome to the software repository, to start working on the robot, follow the instructions to install ros
 
 http://wiki.ros.org/ROS/Installation
@@ -15,12 +82,6 @@ IDE recommended
 - Rename jetbrains-clion.desktop to clion.desktop. This way Jetbrains toolbox doesn't override the file when you restart.
 
 First you need to clone the microcontroller firmware and matlab scripts used in the repository
-```bash
-cd ~
-git clone --recurse-submodules https://github.com/RahmanQureshi/Hummingbird #  To clone the repository
-cd Hummingbird/PX4-Humminngbird
-make posix_sitl_tailsitter
-```
 
 ```bash
 cd ~/catkin_ws/src
@@ -60,3 +121,13 @@ For simulation you can just run this
 ```bash
 roslaunch hummingbird hummingbird_simulation.launch
 ```
+#### PX4 Firmware Code instructions
+
+```bash
+cd ~
+git clone --recurse-submodules https://github.com/RahmanQureshi/Hummingbird #  To clone the repository
+cd Hummingbird/PX4-Humminngbird
+make posix_sitl_tailsitter
+```
+
+#### Matlab Code instructions
