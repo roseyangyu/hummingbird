@@ -112,7 +112,7 @@ Gazebo will now launch when typing 'gazebo' on the shell:
 
 ```bash
 . /usr/share/gazebo/setup.sh
-. /usr/share/mavlink_sitl_gazebo/setup.sh
+. /usr/share/hummingbird_sitl_gazebo/setup.sh
 gazebo worlds/iris.world
 ```
 

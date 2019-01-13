@@ -7,7 +7,9 @@
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>hummingbird_px4</depend>
   <depend>hummingbird_odometry</depend>
+  <depend>mavlink_sitl_gazebo</depend>
   <depend>realsense_gazebo_plugin</depend>
   <depend>geographiclib</depend>
   <depend>geographiclib-tools</depend>
@@ -15,7 +17,7 @@
   <depend>vicon_bridge</depend>
   <depend>libogre-dev</depend>
   <depend>mavros</depend>
-gi  <depend>mavlink</depend>
+  <depend>mavlink</depend>
   <depend>protobuf-dev</depend>
 
 </package>

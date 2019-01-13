@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.3)
 cmake_policy(SET CMP0042 NEW)
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0054 NEW)
@@ -9,7 +9,7 @@ endif()
 
 message(STATUS "install-prefix: ${CMAKE_INSTALL_PREFIX}")
 
-project(mavlink_sitl_gazebo VERSION 1.0.0)
+project(hummingbird_sitl_gazebo)
 include(GNUInstallDirs)
 
 #######################
@@ -36,8 +36,8 @@ set( OpticalFlow_LIBS "OpticalFlow" )
 
 # see if catkin was invoked to build this
 if (CATKIN_DEVEL_PREFIX)
-  message(STATUS "catkin ENABLED")
   find_package(catkin REQUIRED)
+  message(STATUS "catkin ENABLED")
   if (catkin_FOUND)
     catkin_package()
   else()
