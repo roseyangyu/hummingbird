@@ -1,8 +1,8 @@
 <launch>
 
 <group ns="px4_example">
-	<node pkg="px4" name="subscriber" type="subscriber"/>
-	<node pkg="px4" name="publisher" type="publisher"/>
+	<node pkg="hummingbird_px4" name="subscriber" type="subscriber"/>
+	<node pkg="hummingbird_px4" name="publisher" type="publisher"/>
 </group>
 
 </launch>

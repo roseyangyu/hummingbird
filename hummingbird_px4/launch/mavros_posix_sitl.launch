@@ -14,7 +14,7 @@
     <arg name="world" default="$(find hummingbird_sitl_gazebo)/worlds/empty.world"/>
     <arg name="sdf" default="$(find hummingbird_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
 
-    <arg name="rcS" default="$(find px4)/posix-configs/SITL/init/$(arg est)/$(arg vehicle)"/>
+    <arg name="rcS" default="$(find hummingbird_px4)/posix-configs/SITL/init/$(arg est)/$(arg vehicle)"/>
 
     <arg name="headless" default="false"/>
     <arg name="gui" default="true"/>
@@ -28,7 +28,7 @@
     <arg name="pluginlists_yaml" default="$(find mavros)/launch/px4_pluginlists.yaml" />
     <arg name="config_yaml" default="$(find mavros)/launch/px4_config.yaml" />
 
-    <include file="$(find px4)/launch/posix_sitl.launch">
+    <include file="$(find hummingbird_px4)/launch/posix_sitl.launch">
         <arg name="x" value="$(arg x)"/>
         <arg name="y" value="$(arg y)"/>
         <arg name="z" value="$(arg z)"/>
@@ -47,7 +47,7 @@
         <arg name="paused" value="$(arg paused)"/>
     </include>
 
-    <include file="$(find px4)/launch/mavros.launch">
+    <include file="$(find hummingbird_px4)/launch/mavros.launch">
         <arg name="ns" value="$(arg ns)"/>
         <arg name="gcs_url" value=""/> <!-- GCS link is provided by SITL -->
         <arg name="fcu_url" value="$(arg fcu_url)"/>

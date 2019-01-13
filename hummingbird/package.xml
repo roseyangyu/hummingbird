@@ -8,6 +8,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>hummingbird_px4</depend>
+  <depend>hummingbird_sitl_gazebo</depend>
   <depend>hummingbird_odometry</depend>
   <depend>mavlink_sitl_gazebo</depend>
   <depend>realsense_gazebo_plugin</depend>

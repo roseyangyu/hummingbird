@@ -29,7 +29,7 @@
         <arg name="fcu_url" value="$(arg fcu_url)" />
       </include>
    </group>
-   <include file="$(find px4)/launch/iris.launch">
+   <include file="$(find hummingbird_px4)/launch/iris.launch">
      <arg name="ns" value="iris"/>
    </include>   
       
@@ -47,7 +47,7 @@
         <arg name="fcu_url" value="$(arg fcu_url)" />
       </include>
    </group>
-   <include file="$(find px4)/launch/ardrone.launch">
+   <include file="$(find hummingbird_px4)/launch/ardrone.launch">
 	<arg name="ns" value="ardrone"/>
 	<arg name="mavlink_fcu_url" value="udp://localhost:14575@localhost:14570"/>
    </include>

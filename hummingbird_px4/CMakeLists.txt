@@ -302,7 +302,6 @@ px4_add_git_submodule(TARGET git_nuttx PATH "NuttX")
 px4_add_git_submodule(TARGET git_driverframework PATH "src/lib/DriverFramework")
 px4_add_git_submodule(TARGET git_ecl PATH "src/lib/ecl")
 px4_add_git_submodule(TARGET git_jmavsim PATH "Tools/jMAVSim")
-px4_add_git_submodule(TARGET git_gazebo PATH "Tools/sitl_gazebo")
 px4_add_git_submodule(TARGET git_matrix PATH "src/lib/matrix")
 px4_add_git_submodule(TARGET git_cmake_hexagon PATH "cmake/cmake_hexagon")
 

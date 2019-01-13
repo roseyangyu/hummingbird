@@ -14,7 +14,7 @@
         <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
         <arg name="log_file" value="$(arg log_file)"/>
     </include>
-    <include file="$(find px4)/launch/ardrone.launch">
+    <include file="$(find hummingbird_px4)/launch/ardrone.launch">
 	<arg name="ns" value="$(arg ns)"/>
     </include>
 
