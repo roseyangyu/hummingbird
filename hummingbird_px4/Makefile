@@ -35,9 +35,6 @@
 #
 # We depend on our submodules, so we have to prevent attempts to
 # compile without it being present.
-ifeq ($(wildcard .git),)
-    $(error YOU HAVE TO USE GIT TO DOWNLOAD THIS REPOSITORY. ABORTING.)
-endif
 
 # Help
 # --------------------------------------------------------------------
@@ -307,12 +304,7 @@ clean:
 	@rm -rf build_*/
 	-@$(MAKE) -C NuttX/nuttx clean
 
-submodulesclean:
-	@git submodule sync --recursive
-	@git submodule deinit -f .
-	@git submodule update --init --recursive --force
-
-distclean: submodulesclean
+distclean:
 	@git clean -ff -x -d -e ".project" -e ".cproject" -e ".idea"
 
 # All other targets are handled by PX4_MAKE. Add a rule here to avoid printing an error.

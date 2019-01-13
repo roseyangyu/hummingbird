@@ -10,8 +10,8 @@
     <arg name="est" default="lpe"/>
     <arg name="vehicle" default="hummingbird"/>
     <arg name="world" default="$(find hummingbird_sitl_gazebo)/worlds/empty.world"/>
-    <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
-    <arg name="rcS" default="$(find px4)/posix-configs/SITL/init/$(arg est)/$(arg vehicle)"/>
+    <arg name="sdf" default="$(find hummingbird_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
+    <arg name="rcS" default="$(find hummingbird_px4)/posix-configs/SITL/init/$(arg est)/$(arg vehicle)"/>
 
     <arg name="headless" default="false"/>
     <arg name="gui" default="true"/>
@@ -21,8 +21,8 @@
     <arg name="verbose" default="false"/>
     <arg name="paused" default="false"/>
 
-    <node name="sitl" pkg="px4" type="px4" output="screen"
-        args="$(find px4) $(arg rcS)">
+    <node name="sitl" pkg="hummingbird_px4" type="px4" output="screen"
+        args="$(find hummingbird_px4) $(arg rcS)">
     </node>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
