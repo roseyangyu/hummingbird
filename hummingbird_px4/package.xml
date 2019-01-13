@@ -5,11 +5,16 @@
   <description>The PX4 Flight Stack package</description>
 
   <maintainer email="jiashen.wang@robotics.utias.utoronto.ca">Jason Wang</maintainer>
-  <maintainer email="rahman.qureshi@robotics.utias.utoronto.ca">Rahman Qureshi</maintainer>
 
   <license>MIT</license>
+  <url type="website">http://px4.io/ros</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
@@ -18,7 +23,5 @@
   <depend>tf</depend>
   <depend>rostest</depend>
   <depend>mav_msgs</depend>
-  <depend>message_generation</depend>
-  <depend>message_runtime</depend>
 
 </package>
