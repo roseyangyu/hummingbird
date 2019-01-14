@@ -53,18 +53,12 @@ tf2::Vector3 tagOffsets[NUM_TAGS] = {
     tf2::Vector3(-0.02, 0.054, 0.382), //-0.02 0.054 0.382
 };
 
-Matrix3f positionMeasurementVariance1m = (Eigen::Matrix3f() << 0.0001,0,0,
-                                                               0,0.0001,0,
-                                                               0,0,0.0001).finished();
-Matrix3f orientationMeasurementVariance1m = (Eigen::Matrix3f() << 0.0001,0,0,
-                                                                  0,0.0001,0,
-                                                                  0,0,0.0001).finished();
-Matrix<float, 6, 6> modelVariance = (Eigen::Matrix<float, 6, 6>() << 1, 0, 0, 0, 0, 0,
-                                                                     0, 1, 0, 0, 0, 0,
-                                                                     0, 0, 1, 0, 0, 0,
-                                                                     0, 0, 0, 1, 0, 0,
-                                                                     0, 0, 0, 0, 1, 0,
-                                                                     0, 0, 0, 0, 0, 1).finished();
+Matrix3f positionMeasurementVariance1m = (Eigen::Matrix3f() << 0.01,0,0,
+                                                               0,0.01,0,
+                                                               0,0,0.01).finished();
+Matrix3f orientationMeasurementVariance1m = (Eigen::Matrix3f() << 0.02,0,0,
+                                                                  0,0.02,0,
+                                                                  0,0,0.02).finished();
 geometry_msgs::TransformStamped currentPartnerEstimate;
 State x2;
 bool estimateValid = false; 
@@ -123,7 +117,8 @@ bool estimatePartnerPosition(geometry_msgs::TransformStamped tagTransform,
                              SystemModel sys,
                              Kalman::ExtendedKalmanFilter<State>& predictor,
                              PositionModel pm,
-                             OrientationModel om) {
+                             OrientationModel om,
+                             float dt) {
     currentPartnerEstimate.header.stamp = ros::Time::now();
     currentPartnerEstimate.header.frame_id = me_frame_id;
     currentPartnerEstimate.child_frame_id = partner_frame_id;
@@ -140,7 +135,7 @@ bool estimatePartnerPosition(geometry_msgs::TransformStamped tagTransform,
         orientationMeasurement = toEulerAngle(q);
         pm.setCovariance(positionMeasurementVariance1m);
         om.setCovariance(orientationMeasurementVariance1m);
-        predictor.predict(sys);
+        predictor.predict(sys, dt);
         predictor.update(pm, positionMeasurement);
         auto x_ekf = predictor.update(om, orientationMeasurement);
         currentPartnerEstimate.transform.translation.x = x_ekf(0);
@@ -183,15 +178,18 @@ int main(int argc, char** argv){
     u.setZero();
 
     SystemModel sys;
-    sys.setCovariance(modelVariance);
 
     Kalman::ExtendedKalmanFilter<State> predictor;
     predictor.init(x2);
 
+    ros::Time previous = ros::Time::now();
+
     while (node.ok()){
         geometry_msgs::TransformStamped tagTransforms[NUM_TAGS];
         tf2::Quaternion qCorrect;
-
+        ros::Time now = ros::Time::now();
+        ros::Duration dt = now - previous;
+        previous = now;
         for (int i = 0; i < NUM_TAGS; ++i) {
             string tag_frame_id = "tag" + to_string(i+1);
             // Lookup transform from base_link to ith tag
@@ -227,10 +225,10 @@ int main(int argc, char** argv){
             tagTransforms[i].transform.translation.z = origin.m_floats[2];
 
             // Set header and publish
-            tagTransforms[i].header.stamp = ros::Time::now();
+            tagTransforms[i].header.stamp = now;
             tagTransforms[i].child_frame_id = tag_frame_id + "_corrected";
             br.sendTransform(tagTransforms[i]);
-            if (estimatePartnerPosition(tagTransforms[i], i+1, sys, predictor, pm, om)) {
+            if (estimatePartnerPosition(tagTransforms[i], i+1, sys, predictor, pm, om, dt.toSec())) {
                 br.sendTransform(currentPartnerEstimate);
             }
         }

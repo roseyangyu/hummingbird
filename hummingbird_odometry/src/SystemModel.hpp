@@ -71,7 +71,7 @@ public:
      * @param [in] u The control vector input
      * @returns The (predicted) system state in the next time-step
      */
-    S f(const S& x, const C& u) const
+    S f(const S& x, const C& u, float dt) const
     {
         //! Predicted state vector after transition
         S x_;
@@ -95,10 +95,11 @@ protected:
      * @param x The current system state around which to linearize
      * @param u The current system control input
      */
-    void updateJacobians( const S& x, const C& u )
+    void updateJacobians( const S& x, const C& u, float dt)
     {
         this->F.setIdentity(); // i.e. xdot = 0
-        // this->W.setIdentity(); TODO(rqureshi): set covariance matrix of system model in this file
+        this->W.setIdentity();
+        this->W = dt*(this->W);
     }
 };
 

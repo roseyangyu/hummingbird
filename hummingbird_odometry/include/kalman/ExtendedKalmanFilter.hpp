@@ -89,12 +89,12 @@ namespace Kalman {
          * @return The updated state estimate
          */
         template<class Control, template<class> class CovarianceBase>
-        const State& predict( SystemModelType<Control, CovarianceBase>& s )
+        const State& predict( SystemModelType<Control, CovarianceBase>& s, float dt )
         {
             // predict state (without control)
             Control u;
             u.setZero();
-            return predict( s, u );
+            return predict( s, u, dt );
         }
         
         /**
@@ -105,12 +105,12 @@ namespace Kalman {
          * @return The updated state estimate
          */
         template<class Control, template<class> class CovarianceBase>
-        const State& predict( SystemModelType<Control, CovarianceBase>& s, const Control& u )
+        const State& predict( SystemModelType<Control, CovarianceBase>& s, const Control& u, float dt )
         {
-            s.updateJacobians( x, u );
+            s.updateJacobians( x, u, dt );
             
             // predict state
-            x = s.f(x, u);
+            x = s.f(x, u, dt);
             
             // predict covariance
             P  = ( s.F * P * s.F.transpose() ) + ( s.W * s.getCovariance() * s.W.transpose() );
@@ -143,7 +143,6 @@ namespace Kalman {
             // UPDATE STATE ESTIMATE AND COVARIANCE
             // Update state using computed kalman gain and innovation
             x += K * ( z - m.h( x ) );
-            std::cout << "Gain: " << K << std::endl;
             
             // Update covariance
             P -= K * m.H * P;
