@@ -67,7 +67,7 @@ If you use any of the resources in academic work, please cite the [relevant publ
 ## Documentation
 
 #### Getting Started
-Welcome to the software repository, to start working on the robot, use the [PX4 Setup Script] (https://github.com/PX4/Devguide/blob/master/build_scripts/ubuntu_sim_ros_gazebo.sh) to install
+Welcome to the software repository, to start working on the robot, use the [PX4 Setup Script](https://github.com/PX4/Devguide/blob/master/build_scripts/ubuntu_sim_ros_gazebo.sh) to install
 ROS Kinetic and gazebo, as well as setup a catkin workspace with mavros and mavlink inside it. 
 
 Next, clone this repository into catkin_ws/src and build the code using the following instructions.
