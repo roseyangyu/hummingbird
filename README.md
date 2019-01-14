@@ -66,51 +66,34 @@ If you use any of the resources in academic work, please cite the [relevant publ
 
 ## Documentation
 
-#### ROS Software Code Instructions
-Welcome to the software repository, to start working on the robot, follow the instructions to install ros
+#### Getting Started
+Welcome to the software repository, to start working on the robot, use the [PX4 Setup Script] (https://github.com/PX4/Devguide/blob/master/build_scripts/ubuntu_sim_ros_gazebo.sh) to install
+ROS Kinetic and gazebo, as well as setup a catkin workspace with mavros and mavlink inside it. 
 
-http://wiki.ros.org/ROS/Installation
-
-Debian packages needed for robots (sudo apt-get install)
-- git
-- git-gui
-- python-catkin-tools
-
-IDE recommended
-- Use Jetbrains installer (https://www.jetbrains.com/toolbox/app/)
-- CLion Setup https://github.com/ethz-asl/programming_guidelines/wiki/CLion
-- Rename jetbrains-clion.desktop to clion.desktop. This way Jetbrains toolbox doesn't override the file when you restart.
-
-First you need to clone the microcontroller firmware and matlab scripts used in the repository
+Next, clone this repository into catkin_ws/src and build the code using the following instructions.
 
 ```bash
 cd ~/catkin_ws/src
-git clone --recurse-submodules https://github.com/RahmanQureshi/Hummingbird-ROS #  To clone the repository
-cd soccer_ws
-git checkout initials_branchname
+git clone --recurse-submodules https://github.com/RahmanQureshi/hummingbird_ws #  To clone the repository
 cd ~/catkin_ws
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y # To install all dependencies
-sudo ./src/Hummingbird-ROS/hummingbird/scripts/install_geographiclib_datasets.sh # For MAVROS to work
-catkin build soccerbot
+catkin build
 source devel/setup.bash # Needs to be done everytime you finish building
 ```
 
-Edit your .bashrc, it should look like this, but you have to run ifconfig to see the correct interface for your Wifi. Replace wlp110s0 with your wifi interface name
+Append the following to your .basrc, but you have to run ifconfig to see the correct interface for your Wifi. Replace wlp110s0 with your wifi interface name
 
 ```bash
 source /opt/ros/kinetic/setup.bash
 source ~/catkin_ws/devel/setup.bash
-source ~/Hummingbird/PX4-Humminngbird/Tools/setup_gazebo.bash ~/Hummingbird/PX4-Humminngbird ~/Hummingbird/PX4-Humminngbird/build_posix_sitl_tailsitter
+source ~/catkin_ws/src/hummingbird_ws/hummingbird_px4/Tools/setup_gazebo.bash ~/catkin_ws/src/hummingbird_ws/hummingbird_px4 ~/catkin_ws/build/hummingbird_px4 
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/catkin_ws/src
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/Hummingbird/PX4-Humminngbird/
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/Hummingbird/PX4-Humminngbird/Tools/sitl_gazebo
-MY_IP=$(ifconfig wlp110s0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+MY_IP=$(ifconfig wlp59s0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
 export ROS_IP=$MY_IP
 export ROS_MASTER_URI=http://$ROS_IP:11311
+
 ```
 
-You should be ready to go now. Before running, setup your CLion IDE (above),  To run the robot:
+Source your bashrc. You should be ready to go now. To run the robot:
 
 ```bash
 roslaunch hummingbird hummingbird.launch
@@ -121,41 +104,7 @@ For simulation you can just run this
 ```bash
 roslaunch hummingbird hummingbird_simulation.launch
 ```
-#### PX4 Firmware Code instructions
-
-```bash
-cd ~
-git clone --recurse-submodules https://github.com/RahmanQureshi/Hummingbird #  To clone the repository
-cd Hummingbird/PX4-Humminngbird
-make posix_sitl_tailsitter
-```
 
 #### Matlab Code instructions
 
-1. Clone the hummingbird_ws in the Odroid computer or the main computer code you are using
-2. Copy paste this into your .bashrc. This will enable your ros to be able to connect the simulator
-```sh
-# Connect ROS with simulator
-source /home/vuwij/hummingbird_ws/devel/setup.bash
-source ~/PX4-FlightX/Tools/setup_gazebo.bash ~/PX4-FlightX ~/PX4-FlightX/build_posix_sitl_tailsitter
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/hummingbird_ws/src
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-FlightX
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-FlightX/Tools/sitl_gazebo
-
-# Connect Matlab with ROS
-MY_IP=$(ifconfig wlp4s0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-export ROS_IP=$MY_IP
-export ROS_MASTER_URI="http://"$ROS_IP":11311"
-```
-3. Run by typing
-```sh
-roslaunch px4 mavros_posix_sitl.launch
-```
-4. On the Matlab computer clone the hummingbird_matlab folder. In the loadRobot.m file change the following information
-```matlab
-gazeboIp = '192.168.2.21'; # The IP address of the Odroid
-localIp = '192.168.2.14'; # Your local computer IP address (matlab)
-```
-5. Run the auto_takeoff.m file to take off directly from matlab
-
-6. Open hummingbird.slx and click run to start tracking the apriltag
+See `hummingbird_ws/hummingbird_design/Docking Simulink' for useful scripts.
