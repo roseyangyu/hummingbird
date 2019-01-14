@@ -107,4 +107,4 @@ roslaunch hummingbird hummingbird_simulation.launch
 
 #### Matlab Code instructions
 
-See `hummingbird_ws/hummingbird_design/Docking Simulink' for useful scripts.
+See `hummingbird_ws/hummingbird_design/Docking Simulink` for useful scripts.
