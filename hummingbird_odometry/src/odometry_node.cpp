@@ -37,8 +37,8 @@ void cameraLocationCallback(const apriltags2_msgs::AprilTagDetectionArrayConstPt
 	cameraOrientation.child_frame_id = "camera";
 
 	cameraOrientation.transform.translation.x = 0;
-	cameraOrientation.transform.translation.y = -0.006;
-	cameraOrientation.transform.translation.z = 0.222;
+	cameraOrientation.transform.translation.y = 0;
+	cameraOrientation.transform.translation.z = 0.38;
 	
 	tf2::Matrix3x3 m(0,0,1,-1,0,0,0,-1,0);
 	tf2::Quaternion q;

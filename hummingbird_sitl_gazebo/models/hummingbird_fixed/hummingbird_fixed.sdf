@@ -509,23 +509,6 @@
       <child>tag5</child>
       <pose frame=''>0 0 0 0 -0 0</pose>
     </joint>
-    <joint name='hummingbird_realsense' type='fixed'>
-      <parent>base_link</parent>
-      <child>realsense_camera::link</child>
-      <pose frame=''>0 0 0 0 -0 0</pose>
-      <physics>
-        <ode>
-          <limit>
-            <cfm>0</cfm>
-            <erp>0.2</erp>
-          </limit>
-          <suspension>
-            <cfm>0</cfm>
-            <erp>0.2</erp>
-          </suspension>
-        </ode>
-      </physics>
-    </joint>
     <joint name='left_elevon_joint' type='revolute'>
       <parent>base_link</parent>
       <child>left_elevon</child>
