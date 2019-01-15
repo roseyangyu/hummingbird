@@ -38,11 +38,11 @@ A set of Gazebo Plug-ins required for Hummingbird SITL simulation is provided un
 A high-fidelity MATLAB simulink model is released for easy, quick and accurate simulation of the dynamics and motion control of Hummingbird. The models can be found under `Hummingbird-Simulink`.
 
 #### BLHeli ESC Firmware
-###### (hummingbird_px4)
+######(hummingbird_px4)
 Our modified BLHeli firmware released under `BLHeli` allows DYS-SN20A ESCs to send synchronous pulses at phase commutations to the flight computer which processes the timestamps of these signals to infer motor speeds. Please refer to the README of the repo for compiling and flashing ESC firmware. 
 
 #### PX4 Microcontroller Firmware
-###### (hummingbird_firmware/BLHeli)
+######(hummingbird_firmware/BLHeli)
 This repo (`PX4-Hummingbird`) contains all of the flight code (controller, state estimator, state machine, drivers, communication software) running onboard the flight computer. One may use QGroundControl (the default PX4 GCS), or any MAVlink-enabled clients such as MAVROS to communicate with the onboard computer to receive telemtry and send commands.
 
 ## Contact
