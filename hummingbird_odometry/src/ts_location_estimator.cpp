@@ -38,32 +38,27 @@ typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
 string me_frame_id = "base_link";
 string partner_frame_id = "partner";
 const int NUM_TAGS = 6; 
-tf2::Matrix3x3 correctionMatricies[NUM_TAGS] = {
-    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
-    tf2::Matrix3x3(0,1,0,0,0,1,1,0,0),
-    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
-    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
-    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
-    tf2::Matrix3x3(0,-1,0,0,0,1,-1,0,0),
+
+Matrix3f correctionMatrices[NUM_TAGS] = {
+    (Matrix3f() << 0,1,0,0,0,1,1,0,0).finished(),
+    (Matrix3f() << 0,1,0,0,0,1,1,0,0).finished(),
+    (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(),
+    (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(),
+    (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(),
+    (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(), 
 };
-tf2::Vector3 tagOffsets[NUM_TAGS] = {
-    tf2::Vector3(0.02, -0.14, 0.357), // tag0 pose: 0.02 -0.14 0.357
-    tf2::Vector3(0.02, 0.14, 0.357), // 0.02 0.14 0.357
-    tf2::Vector3(-0.02, -0.14, 0.357), // -0.02 -0.14 0.357
-    tf2::Vector3(-0.02, 0.14, 0.357), // -0.02 0.14 0.357
-    tf2::Vector3(-0.02, -0.054, 0.382), // -0.02 -0.054 0.382
-    tf2::Vector3(-0.02, 0.054, 0.382), //-0.02 0.054 0.382
+Vector3f tagOffsets[NUM_TAGS] = {
+    (Vector3f() << 0.02, -0.14, 0.357).finished(),
+    (Vector3f() << 0.02, 0.14, 0.357).finished(),
+    (Vector3f() << -0.02, -0.14, 0.357).finished(),
+    (Vector3f() << -0.02, 0.14, 0.357).finished(),
+    (Vector3f() << -0.02, -0.054, 0.382).finished(),
+    (Vector3f() << -0.02, 0.054, 0.382).finished(), 
 };
 
-Matrix3f positionMeasurementVariance1m = (Eigen::Matrix3f() << 0.01,0,0,
-                                                               0,0.01,0,
-                                                               0,0,0.01).finished();
-Matrix3f orientationMeasurementVariance1m = (Eigen::Matrix3f() << 0.02,0,0,
-                                                                  0,0.02,0,
-                                                                  0,0,0.02).finished();
 geometry_msgs::TransformStamped currentPartnerEstimate;
-State x2;
-bool estimateValid = false; 
+State x;
+Control u;
 
 geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_name) {
     double x, y, z, rx, ry, rz, rw;
@@ -89,32 +84,11 @@ geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_
     return transform;
 }
 
-Vector3f toEulerAngle(const Quaternionf q)
-{
-    float roll, pitch, yaw;
-	// roll (x-axis rotation)
-	double sinr_cosp = +2.0 * (q.w() * q.x() + q.y() * q.z());
-	double cosr_cosp = +1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y());
-	roll = atan2(sinr_cosp, cosr_cosp);
-
-	// pitch (y-axis rotation)
-	double sinp = +2.0 * (q.w() * q.y() - q.z() * q.x());
-	if (fabs(sinp) >= 1)
-		pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-	else
-		pitch = asin(sinp);
-
-	// yaw (z-axis rotation)
-	double siny_cosp = +2.0 * (q.w() * q.z() + q.x() * q.y());
-	double cosy_cosp = +1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z());  
-	yaw = atan2(siny_cosp, cosy_cosp);
-    return Vector3f(roll, pitch, yaw);
-}
-
 // Updates the estimated partner transformation
 // Returns true if the estimate was updated
 // Tag number is [1, TAG_NUMBER]
-bool estimatePartnerPosition(geometry_msgs::TransformStamped tagTransform,
+bool estimatePartnerPosition(PositionMeasurement positionMeasurement,
+                             OrientationMeasurement orientationMeasurement,
                              int tagNumber, 
                              SystemModel sys,
                              Kalman::ExtendedKalmanFilter<State>& predictor,
@@ -125,30 +99,19 @@ bool estimatePartnerPosition(geometry_msgs::TransformStamped tagTransform,
     currentPartnerEstimate.header.frame_id = me_frame_id;
     currentPartnerEstimate.child_frame_id = partner_frame_id;
     if (tagNumber == 3) {
-        PositionMeasurement positionMeasurement;
-        positionMeasurement(0) = tagTransform.transform.translation.x;
-        positionMeasurement(1) = tagTransform.transform.translation.y;
-        positionMeasurement(2) = tagTransform.transform.translation.z;
-        Quaternionf q(tagTransform.transform.rotation.w,
-                      tagTransform.transform.rotation.x,
-                      tagTransform.transform.rotation.y,
-                      tagTransform.transform.rotation.z);
-        OrientationMeasurement orientationMeasurement;
-        orientationMeasurement = toEulerAngle(q);
         predictor.predict(sys, dt);
         predictor.update(pm, positionMeasurement);
         auto x_ekf = predictor.update(om, orientationMeasurement);
         currentPartnerEstimate.transform.translation.x = x_ekf(0);
         currentPartnerEstimate.transform.translation.y = x_ekf(1);
         currentPartnerEstimate.transform.translation.z = x_ekf(2);
-        Quaternionf q2;
-        q2 = AngleAxisf(x_ekf(3), Vector3f::UnitX()) 
-             * AngleAxisf(x_ekf(4), Vector3f::UnitY())
-             * AngleAxisf(x_ekf(5), Vector3f::UnitZ());
-        currentPartnerEstimate.transform.rotation.x = q2.x();
-        currentPartnerEstimate.transform.rotation.y = q2.y();
-        currentPartnerEstimate.transform.rotation.z = q2.z();
-        currentPartnerEstimate.transform.rotation.w = q2.w();
+        // Why inverse?
+        // the state is defined as the rotation from partner_frame (modelled as inertial) to base_link frame
+        Quaternionf q = eulerToQuaternion(x_ekf(6), x_ekf(7), x_ekf(8)).inverse();
+        currentPartnerEstimate.transform.rotation.x = q.x();
+        currentPartnerEstimate.transform.rotation.y = q.y();
+        currentPartnerEstimate.transform.rotation.z = q.z();
+        currentPartnerEstimate.transform.rotation.w = q.w();
         return true; // Estimate position of partner as the position of the 3rd tag for now.
     }
     return false;
@@ -178,15 +141,15 @@ int main(int argc, char** argv){
 
     PositionModel pm;
     OrientationModel om;
-    x2.setZero();
-    x2(1) = 1;
-    Control u;
+    PositionMeasurement pMeasurement;
+    OrientationMeasurement oMeasurement;
+    x.setZero();
     u.setZero();
 
     SystemModel sys;
 
     Kalman::ExtendedKalmanFilter<State> predictor;
-    predictor.init(x2);
+    predictor.init(x);
 
     ros::Time previous = ros::Time::now();
 
@@ -205,37 +168,42 @@ int main(int argc, char** argv){
                 //ROS_WARN("%s",ex.what());
                 continue;
             }
-            // Unpack the data into tf2 variables from geometry_msgs.
-            tf2::Vector3 origin(tagTransforms[i].transform.translation.x,
-                                tagTransforms[i].transform.translation.y,
-                                tagTransforms[i].transform.translation.z);
-            tf2::Quaternion qTag(tagTransforms[i].transform.rotation.x, 
-                                 tagTransforms[i].transform.rotation.y,
-                                 tagTransforms[i].transform.rotation.z,
-                                 tagTransforms[i].transform.rotation.w);
+            // Unpack the data into eigen variables from geometry_msgs.
+            // TODO: maybe put this in an external function?
+            Vector3f origin(tagTransforms[i].transform.translation.x,
+                            tagTransforms[i].transform.translation.y,
+                            tagTransforms[i].transform.translation.z);
+            Quaternionf qTag(tagTransforms[i].transform.rotation.w, 
+                             tagTransforms[i].transform.rotation.x,
+                             tagTransforms[i].transform.rotation.y,
+                             tagTransforms[i].transform.rotation.z);
 
-            // Find the orientation of the tag such that x faces towards us
-            // TODO: change this to initialize quaternions from the start instead of computing again and again
-            correctionMatricies[i].getRotation(qCorrect);
+            Quaternionf qCorrect(correctionMatrices[i]);
             qTag = qTag*qCorrect;
+
+            // Correct the origin
+            origin = origin - qTag*tagOffsets[i];
+
+            // Repack and broadcast as corrected tag
+            tagTransforms[i].header.stamp = now;
+            tagTransforms[i].child_frame_id = tag_frame_id + "_corrected";
             tagTransforms[i].transform.rotation.x = qTag.x();
             tagTransforms[i].transform.rotation.y = qTag.y();
             tagTransforms[i].transform.rotation.z = qTag.z();
             tagTransforms[i].transform.rotation.w = qTag.w();
-
-            // Account for the fact that the tag is not at the origin
-            origin = origin - tagOffsets[i].rotate(qTag.getAxis(), qTag.getAngle());
-            tagTransforms[i].transform.translation.x = origin.m_floats[0];
-            tagTransforms[i].transform.translation.y = origin.m_floats[1];
-            tagTransforms[i].transform.translation.z = origin.m_floats[2];
-
-            // Set header and publish
-            tagTransforms[i].header.stamp = now;
-            tagTransforms[i].child_frame_id = tag_frame_id + "_corrected";
+            tagTransforms[i].transform.translation.x = origin(0);
+            tagTransforms[i].transform.translation.y = origin(1);
+            tagTransforms[i].transform.translation.z = origin(2);
             br.sendTransform(tagTransforms[i]);
-            if (estimatePartnerPosition(tagTransforms[i], i+1, sys, predictor, pm, om, dt.toSec())) {
+
+            /*
+            // Estimate based on measurements of tag_corrected
+            pMeasurement = origin;
+            oMeasurement = quaterniontoEulerAngle(qTag);
+            if (estimatePartnerPosition(pMeasurement, oMeasurement, i+1, sys, predictor, pm, om, dt.toSec())) {
                 br.sendTransform(currentPartnerEstimate);
             }
+            */
         }
         rate.sleep();
     }
