@@ -196,14 +196,12 @@ int main(int argc, char** argv){
             tagTransforms[i].transform.translation.z = origin(2);
             br.sendTransform(tagTransforms[i]);
 
-            /*
             // Estimate based on measurements of tag_corrected
             pMeasurement = origin;
-            oMeasurement = quaterniontoEulerAngle(qTag);
+            oMeasurement = quaterniontoEulerAngle(qTag.inverse()); // inverse because state is rpy from partner to base_link
             if (estimatePartnerPosition(pMeasurement, oMeasurement, i+1, sys, predictor, pm, om, dt.toSec())) {
                 br.sendTransform(currentPartnerEstimate);
             }
-            */
         }
         rate.sleep();
     }
