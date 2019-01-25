@@ -1,6 +1,46 @@
 [submodule "vicon_bridge"]
 	path = vicon_bridge
 	url = https://github.com/ethz-asl/vicon_bridge
-[submodule "apriltags2_ros"]
-	path = apriltags2_ros
-	url = https://github.com/RahmanQureshi/apriltags2_ros
+[submodule "hummingbird_firmware/BLHeli"]
+	path = hummingbird_firmware/BLHeli
+	url = https://github.com/utiasSTARS/BLHeli
+[submodule "hummingbird_px4/mavlink/include/mavlink/v1.0"]
+	path = hummingbird_px4/mavlink/include/mavlink/v1.0
+	url = https://github.com/yilun-wu/c_library_v1.git
+[submodule "hummingbird_px4/mavlink/include/mavlink/v2.0"]
+	path = hummingbird_px4/mavlink/include/mavlink/v2.0
+	url = https://github.com/yilun-wu/c_library_v2.git
+[submodule "hummingbird_px4/src/modules/uavcan/libuavcan"]
+	path = hummingbird_px4/src/modules/uavcan/libuavcan
+	url = https://github.com/UAVCAN/libuavcan.git
+[submodule "hummingbird_px4/Tools/genmsg"]
+	path = hummingbird_px4/Tools/genmsg
+	url = https://github.com/ros/genmsg.git
+[submodule "hummingbird_px4/Tools/gencpp"]
+	path = hummingbird_px4/Tools/gencpp
+	url = https://github.com/ros/gencpp.git
+[submodule "hummingbird_px4/Tools/jMAVSim"]
+	path = hummingbird_px4/Tools/jMAVSim
+	url = https://github.com/PX4/jMAVSim.git
+[submodule "hummingbird_px4/unittests/googletest"]
+	path = hummingbird_px4/unittests/googletest
+	url = https://github.com/google/googletest.git
+	ignore = untracked
+[submodule "hummingbird_px4/src/lib/matrix"]
+	path = hummingbird_px4/src/lib/matrix
+	url = https://github.com/PX4/Matrix.git
+[submodule "hummingbird_px4/src/lib/DriverFramework"]
+	path = hummingbird_px4/src/lib/DriverFramework
+	url = https://github.com/PX4/DriverFramework.git
+[submodule "hummingbird_px4/src/lib/ecl"]
+	path = hummingbird_px4/src/lib/ecl
+	url = https://github.com/PX4/ecl.git
+[submodule "hummingbird_px4/cmake/cmake_hexagon"]
+	path = hummingbird_px4/cmake/cmake_hexagon
+	url = https://github.com/ATLFlight/cmake_hexagon
+[submodule "hummingbird_px4/src/drivers/gps/devices"]
+	path = hummingbird_px4/src/drivers/gps/devices
+	url = https://github.com/PX4/GpsDrivers.git
+[submodule "NuttX"]
+	path = hummingbird_px4/NuttX
+	url = https://github.com/PX4/PX4NuttX.git

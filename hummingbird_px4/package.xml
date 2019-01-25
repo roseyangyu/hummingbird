@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>hummingbird_px4</name>
+  <version>1.0.0</version>
+  <description>The PX4 Flight Stack package</description>
+
+  <maintainer email="jiashen.wang@robotics.utias.utoronto.ca">Jason Wang</maintainer>
+
+  <license>MIT</license>
+  <url type="website">http://px4.io/ros</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>eigen</depend>
+  <depend>libmavconn</depend>
+  <depend>tf</depend>
+  <depend>rostest</depend>
+  <depend>mav_msgs</depend>
+
+</package>

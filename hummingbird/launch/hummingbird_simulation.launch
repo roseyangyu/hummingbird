@@ -14,7 +14,7 @@
     <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
 
     <!-- Launches the simulation -->
-    <include file="$(find px4)/launch/mavros_posix_sitl.launch">
+    <include file="$(find hummingbird_px4)/launch/mavros_posix_sitl.launch">
         <arg name="gui" value="$(arg gui)"/>
     </include>
 

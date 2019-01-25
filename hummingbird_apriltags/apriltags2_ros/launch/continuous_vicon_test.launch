@@ -1,0 +1,36 @@
+<launch>
+    <include file="$(find realsense_camera)/launch/r200_nodelet_modify_params.launch">
+        <arg name="color_width"         default="640" />
+        <arg name="color_height"        default="480" />
+        <arg name="color_fps"           default="60" />
+        <arg name="depth_fps"           default="60" />
+    </include>
+    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection_accelerated.launch" />
+
+    <include file="$(find odometry)/launch/odometry.launch" />
+
+    <param name="vicon/STARS_R200/STARS_R200/zero_pose/position/x" value="0.012174255069" type="double" />
+    <param name="vicon/STARS_R200/STARS_R200/zero_pose/position/y" value="-0.0117458090489" type="double" />
+    <param name="vicon/STARS_R200/STARS_R200/zero_pose/position/z" value="0.0301594991772" type="double" />
+    <param name="vicon/STARS_R200/STARS_R200/zero_pose/orientation/x" value="0.50707371113" type="double"/>
+    <param name="vicon/STARS_R200/STARS_R200/zero_pose/orientation/y" value="-0.497497849687" type="double"/>
+    <param name="vicon/STARS_R200/STARS_R200/zero_pose/orientation/z" value="0.490242368628" type="double"/>
+    <param name="vicon/STARS_R200/STARS_R200/zero_pose/orientation/w" value="0.505009466287" type="double"/>
+
+    <param name="vicon/STARS_TS_Test/STARS_TS_Test/zero_pose/position/x" value="0.07764647876" type="double" /> <!-- 0.0976464787673 -->
+    <param name="vicon/STARS_TS_Test/STARS_TS_Test/zero_pose/position/y" value="0.0143636263457" type="double" />
+    <param name="vicon/STARS_TS_Test/STARS_TS_Test/zero_pose/position/z" value="0.223291866786" type="double" />
+    <param name="vicon/STARS_TS_Test/STARS_TS_Test/zero_pose/orientation/x" value="0.784933957997" type="double"/>
+    <param name="vicon/STARS_TS_Test/STARS_TS_Test/zero_pose/orientation/y" value="-0.0911343965645" type="double"/>
+    <param name="vicon/STARS_TS_Test/STARS_TS_Test/zero_pose/orientation/z" value="0.112775424393" type="double"/>
+    <param name="vicon/STARS_TS_Test/STARS_TS_Test/zero_pose/orientation/w" value="0.602374391055" type="double"/>
+
+
+    <node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
+        <param name="stream_mode" value="ClientPull" type="str" />
+        <param name="datastream_hostport" value="192.168.2.102:801" type="str" />
+        <param name="tf_ref_frame_id" value="/world" type="str" />
+    </node>
+
+    <node pkg="rviz" type="rviz" name="rviz"/>
+</launch>

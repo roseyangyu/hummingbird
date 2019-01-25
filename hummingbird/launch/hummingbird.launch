@@ -11,7 +11,7 @@
     <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
 
     <!-- Launches the connection to mavros -->
-    <include file="$(find px4)/launch/mavros.launch">
+    <include file="$(find hummingbird_px4)/launch/mavros.launch">
         <arg name="ns" default="/"/>
         <arg name="fcu_url" default="$(arg fcu_url)"/>
         <arg name="gcs_url" default="$(arg gcs_url)"/>

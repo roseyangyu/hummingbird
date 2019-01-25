@@ -80,7 +80,7 @@ Visualization Manager:
       Displays:
         - Class: rviz/Image
           Enabled: true
-          Image Topic: /apriltags2_ros/tag_detections_image
+          Image Topic: /hummingbird_apriltags/tag_detections_image
           Max Value: 1
           Median window: 5
           Min Value: 0

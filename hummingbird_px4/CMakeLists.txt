@@ -1,0 +1,378 @@
+if("${CMAKE_VERSION}" VERSION_LESS 2.8.0)
+	message("Not a valid CMake version")
+	message("On Ubuntu 16.04, install or upgrade via:")
+	message("	sudo apt-get install cmake")
+	message("")
+	message("Official website:")
+	message("	wget https://cmake.org/files/v3.4/cmake-3.4.3-Linux-x86_64.sh")
+	message("	chmod +x cmake-3.4.3-Linux-x86_64.sh")
+	message("	sudo mkdir /opt/cmake-3.4.3")
+	message("	sudo ./cmake-3.4.3-Linux-x86_64.sh --prefix=/opt/cmake-3.4.3 --exclude-subdir")
+	message("	export PATH=/opt/cmake-3.4.3/bin:$$PATH")
+endif()
+
+# Warning: Changing this modifies CMake's internal workings
+# and leads to wrong toolchain detection
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+set(PX4_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+set(PX4_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
+execute_process(
+	COMMAND Tools/check_submodules.sh
+	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+	)
+
+#=============================================================================
+# parameters
+#
+set(CMAKE_GENERATOR "Ninja")
+set(CMAKE_BUILD_TYPE "" CACHE STRING "build type")
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
+	STRINGS ";Debug;Release;RelWithDebInfo;MinSizeRel")
+set(CONFIG "posix_sitl_tailsitter" CACHE STRING "desired configuration")
+file(GLOB_RECURSE configs RELATIVE cmake/configs "cmake/configs/*.cmake")
+set_property(CACHE CONFIG PROPERTY STRINGS ${configs})
+set(THREADS "4" CACHE STRING
+	"number of threads to use for external build processes")
+set(DEBUG_PORT "/dev/ttyACM0" CACHE STRING "debugging port")
+set(EXTERNAL_MODULES_LOCATION "" CACHE STRING "External modules source location")
+
+#=============================================================================
+# configuration
+#
+# must come before project to set toolchain
+
+string(REPLACE "_" ";" config_args ${CONFIG})
+list(GET config_args 0 OS)
+list(GET config_args 1 BOARD)
+list(GET config_args 2 LABEL)
+set(target_name "${OS}-${BOARD}-${LABEL}")
+
+message(STATUS "${target_name}")
+
+#  The Url for the elf file for crash logging
+
+if (DEFINED ENV{BUILD_URI})
+	set (BUILD_URI $ENV{BUILD_URI})
+else()
+	set (BUILD_URI "localhost")
+endif()
+
+add_definitions(-DBUILD_URI=${BUILD_URI})
+
+# Define GNU standard installation directories
+include(GNUInstallDirs)
+
+# Add support for external project building
+include(ExternalProject)
+
+# Setup install paths
+if(NOT CMAKE_INSTALL_PREFIX)
+	if (${OS} STREQUAL "posix")
+		set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install path prefix" FORCE)
+	endif()
+endif()
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+
+list(APPEND CMAKE_MODULE_PATH "${PX4_SOURCE_DIR}/cmake")
+message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
+set(config_module "configs/${CONFIG}")
+include(${config_module})
+
+# cmake modules
+include(ExternalProject)
+
+# require px4 module interface
+set(px4_required_interface
+	px4_os_prebuild_targets
+	px4_os_add_flags
+	)
+foreach(cmd ${px4_required_interface})
+	if(NOT COMMAND ${cmd})
+		message(FATAL_ERROR "${config_module} must implement ${cmd}")
+	endif()
+endforeach()
+set(px4_required_config
+	config_module_list
+	)
+foreach(conf ${px4_required_config})
+	if(NOT DEFINED ${conf})
+		message(FATAL_ERROR "cmake/${config_module} must define ${conf}")
+	endif()
+endforeach()
+
+# List the DriverFramework drivers
+if(DEFINED config_df_driver_list)
+	message("DF Drivers: ${config_df_driver_list}")
+endif()
+
+# force static lib build
+set(BUILD_SHARED_LIBS OFF)
+
+#=============================================================================
+# project definition
+#
+project(hummingbird_px4 CXX C ASM)
+if (NOT ${CMAKE_VERSION} VERSION_LESS 3.0.0)
+	cmake_policy(SET CMP0045 NEW) # error on non-existent target in get prop
+	cmake_policy(SET CMP0046 NEW) # no non-existent targets as dependencies
+	cmake_policy(SET CMP0025 OLD) # still report AppleClang as Clang
+endif()
+if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1.0)
+	cmake_policy(SET CMP0054 NEW) # don't dereference quoted variables
+endif()
+
+set(version_major 1)
+set(version_minor 5)
+set(version_patch 0)
+set(version "${version_major}.${version_minor}.${version_patch}")
+set(package-contact "px4users@googlegroups.com")
+
+#=============================================================================
+# find programs and packages
+#
+
+# see if catkin was invoked to build this
+if (CATKIN_DEVEL_PREFIX)
+	message(STATUS "catkin ENABLED")
+	find_package(catkin REQUIRED)
+	if (catkin_FOUND)
+		catkin_package()
+	else()
+		message(FATAL_ERROR "catkin not found")
+	endif()
+else()
+	#message(STATUS "catkin DISABLED")
+endif()
+
+find_package(PythonInterp REQUIRED)
+
+#=============================================================================
+# cmake modules
+#
+enable_testing()
+include(CTest)
+
+#=============================================================================
+# generate compile command database
+#
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+#=============================================================================
+# check required toolchain variables
+#
+set(required_variables
+	CMAKE_C_COMPILER_ID
+	)
+foreach(var ${required_variables})
+	if (NOT ${var})
+		message(FATAL_ERROR "Toolchain/config must define ${var}")
+	endif()
+endforeach()
+
+#=============================================================================
+# git
+#
+px4_add_git_submodule(TARGET git_genmsg PATH "Tools/genmsg")
+px4_add_git_submodule(TARGET git_gencpp PATH "Tools/gencpp")
+px4_add_git_submodule(TARGET git_mavlink PATH "mavlink/include/mavlink/v1.0")
+px4_add_git_submodule(TARGET git_gtest PATH "unittests/gtest")
+px4_add_git_submodule(TARGET git_uavcan PATH "src/modules/uavcan/libuavcan")
+px4_add_git_submodule(TARGET git_nuttx PATH "NuttX")
+px4_add_git_submodule(TARGET git_driverframework PATH "src/lib/DriverFramework")
+px4_add_git_submodule(TARGET git_ecl PATH "src/lib/ecl")
+px4_add_git_submodule(TARGET git_jmavsim PATH "Tools/jMAVSim")
+px4_add_git_submodule(TARGET git_matrix PATH "src/lib/matrix")
+px4_add_git_submodule(TARGET git_cmake_hexagon PATH "cmake/cmake_hexagon")
+
+add_custom_target(submodule_clean
+	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+	COMMAND git submodule deinit -f .
+	COMMAND rm -rf .git/modules/*
+	)
+
+#=============================================================================
+# misc targets
+#
+add_custom_target(check_format
+	COMMAND Tools/check_code_style.sh
+	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+	)
+
+add_custom_target(config
+	COMMAND cmake-gui .
+	WORKING_DIRECTORY ${PX4_BINARY_DIR}
+	)
+
+#=============================================================================
+# external libraries
+#
+px4_os_prebuild_targets(OUT prebuild_targets
+	BOARD ${BOARD}
+	THREADS ${THREADS})
+
+#=============================================================================
+# build flags
+#
+px4_os_add_flags(
+	BOARD ${BOARD}
+	C_FLAGS c_flags
+	CXX_FLAGS cxx_flags
+	OPTIMIZATION_FLAGS optimization_flags
+	EXE_LINKER_FLAGS exe_linker_flags
+	INCLUDE_DIRS include_dirs
+	LINK_DIRS link_dirs
+	DEFINITIONS definitions)
+
+px4_join(OUT CMAKE_EXE_LINKER_FLAGS LIST "${exe_linker_flags}" GLUE " ")
+px4_join(OUT CMAKE_C_FLAGS LIST "${c_flags};${optimization_flags}" GLUE " ")
+px4_join(OUT CMAKE_CXX_FLAGS LIST "${cxx_flags};${optimization_flags}" GLUE " ")
+
+include_directories(${include_dirs})
+#message("INCLUDE_DIRS=${include_dirs}")
+link_directories(${link_dirs})
+add_definitions(${definitions})
+
+#=============================================================================
+# source code generation
+#
+
+add_subdirectory(msg)
+px4_generate_messages(TARGET msg_gen
+	MSG_FILES ${msg_files}
+	OS ${OS}
+	DEPENDS git_genmsg git_gencpp prebuild_targets
+	)
+px4_generate_parameters_xml(OUT parameters.xml 
+                            BOARD ${BOARD}
+                            SCOPE ${PX4_SOURCE_DIR}/cmake/configs/${OS}_${BOARD}_${LABEL}.cmake)
+px4_generate_airframes_xml(OUT airframes.xml BOARD ${BOARD})
+add_custom_target(xml_gen
+	DEPENDS parameters.xml airframes.xml)
+
+#=============================================================================
+# external projects
+#
+
+set(ep_base ${PX4_BINARY_DIR}/external)
+set_property(DIRECTORY PROPERTY EP_BASE ${ep_base})
+
+# add external project install folders to build
+link_directories(${ep_base}/Install/lib)
+include_directories(${ep_base}/Install/include)
+# add the directories so cmake won't warn
+execute_process(COMMAND cmake -E make_directory ${ep_base}/Install/lib)
+execute_process(COMMAND cmake -E make_directory ${ep_base}/Install/include)
+
+#=============================================================================
+# DriverFramework Drivers
+#
+set(df_driver_libs)
+foreach(driver ${config_df_driver_list})
+	add_subdirectory(src/lib/DriverFramework/drivers/${driver})
+	list(APPEND df_driver_libs df_${driver})
+	message("Adding DF driver: ${driver}")
+endforeach()
+
+#=============================================================================
+# external modules
+#
+if(NOT EXTERNAL_MODULES_LOCATION STREQUAL "")
+	message(STATUS "External modules: ${EXTERNAL_MODULES_LOCATION}")
+	add_subdirectory("${EXTERNAL_MODULES_LOCATION}/src" external_modules_src)
+
+	set(config_module_list_external_expanded)
+	foreach(external_module ${config_module_list_external})
+		list(APPEND config_module_list_external_expanded
+			${EXTERNAL_MODULES_LOCATION}/src/${external_module})
+	endforeach()
+	set(config_module_list
+		${config_module_list}
+		${config_module_list_external_expanded}
+		)
+endif()
+
+#=============================================================================
+# subdirectories
+#
+set(module_libraries)
+foreach(module ${config_module_list})
+	string(REGEX MATCH "^[./]" external_module ${module})
+	if(external_module)
+		STRING(REGEX REPLACE "//" "/" EXT_MODULE ${module})
+		STRING(REGEX REPLACE "/" "__" EXT_MODULE_PREFIX ${EXT_MODULE})
+		add_subdirectory(${module} ${PX4_BINARY_DIR}/${EXT_MODULE_PREFIX})
+	else()
+		add_subdirectory(src/${module})
+	endif()
+	px4_mangle_name(${module} mangled_name)
+	list(APPEND module_libraries ${mangled_name})
+	#message(STATUS "adding module: ${module}")
+endforeach()
+
+# Keep track of external shared libs required for modules
+set(module_external_libraries "${module_external_libraries}" CACHE INTERNAL "module_external_libraries")
+
+add_subdirectory(src/firmware/${OS})
+
+#add_dependencies(df_driver_framework nuttx_export_${CONFIG})
+if (NOT "${OS}" STREQUAL "nuttx")
+endif()
+
+if (config_io_board)
+	add_subdirectory(src/modules/px4iofirmware)
+endif()
+
+#=============================================================================
+# generate custom target to print for all executable and module cmake targets
+#
+if(all_posix_cmake_targets)
+	list(SORT all_posix_cmake_targets)
+	px4_join(OUT posix_cmake_target_list LIST ${all_posix_cmake_targets} GLUE "\\n")
+	add_custom_target(list_cmake_targets
+		COMMAND sh -c "printf \"${posix_cmake_target_list}\\n\""
+		COMMENT "List of cmake targets that can be matched by PX4_NO_OPTIMIZATION:"
+		VERBATIM
+		)
+endif()
+
+#=============================================================================
+# generate git version
+#
+px4_create_git_hash_header(OUT ${PX4_BINARY_DIR}/build_git_version.h)
+
+#=============================================================================
+# packaging
+#
+# Important to having packaging at end of cmake file.
+#
+execute_process(
+	COMMAND git describe --always --tags
+	OUTPUT_VARIABLE git_tag
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+	)
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME}-${CONFIG})
+set(CPACK_PACKAGE_VERSION ${version})
+set(CPACK_PACKAGE_CONTACT ${package-contact})
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(short-description "The px4 autopilot.")
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${short-description})
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CONFIG}-${git_tag}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${version}")
+set(CPACK_SOURCE_GENERATOR "ZIP;TBZ2")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+set(CPACK_SET_DESTDIR "OFF")
+if ("${CMAKE_SYSTEM}" MATCHES "Linux")
+	find_program(DPKG_PROGRAM dpkg)
+	if (EXISTS ${DPKG_PROGRAM})
+		list (APPEND CPACK_GENERATOR "DEB")
+	endif()
+endif()
+include(CPack)
+
+# vim: set noet fenc=utf-8 ff=unix ft=cmake :
