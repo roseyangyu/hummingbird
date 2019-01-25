@@ -98,7 +98,7 @@ bool estimatePartnerPosition(PositionMeasurement positionMeasurement,
     currentPartnerEstimate.header.stamp = ros::Time::now();
     currentPartnerEstimate.header.frame_id = me_frame_id;
     currentPartnerEstimate.child_frame_id = partner_frame_id;
-    if (tagNumber == 3) {
+    if (tagNumber == 4) {
         predictor.predict(sys, dt);
         predictor.update(pm, positionMeasurement);
         auto x_ekf = predictor.update(om, orientationMeasurement);

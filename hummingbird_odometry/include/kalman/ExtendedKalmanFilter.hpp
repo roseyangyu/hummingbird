@@ -27,6 +27,23 @@
 #include "LinearizedSystemModel.hpp"
 #include "LinearizedMeasurementModel.hpp"
 
+#include <SystemModel.hpp>
+#include <PositionMeasurementModel.hpp>
+#include <OrientationMeasurementModel.hpp>
+#include <typeinfo>
+#include <iostream>
+
+using namespace KalmanExamples;
+
+typedef float T;
+typedef Robot1::State<T> State;
+typedef Robot1::Control<T> Control;
+typedef Robot1::SystemModel<T> SystemModel;
+typedef Robot1::PositionMeasurement<T> PositionMeasurement;
+typedef Robot1::OrientationMeasurement<T> OrientationMeasurement;
+typedef Robot1::PositionMeasurementModel<T> PositionModel;
+typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
+
 namespace Kalman {
     
     /**
@@ -129,15 +146,40 @@ namespace Kalman {
         const State& update( MeasurementModelType<Measurement, CovarianceBase>& m, const Measurement& z )
         {
             m.updateJacobians( x );
-            
+
+            try { 
+                PositionModel pm = dynamic_cast<PositionModel&>(m);
+                // check 3 sigmas
+                if ( ( z(0) < x(0)-3*P(0,0) || z(0) > x(0)+3*P(0,0) ) || 
+                    ( z(1) < x(1)-3*P(1,1) || z(1) > x(1)+3*P(1,1) ) ||
+                    ( z(2) < x(2)-3*P(2,2) || z(2) > x(2)+3*P(2,2) )) {
+                    std::cout << "rejecting position" << std::endl;
+                    std::cout << "variance: " << P(0,0) << "," << P(1,1) << "," << P(2,2) << std::endl;
+                    std::cout << "expected: " << x(0) << "," << x(1) << "," << x(2) << std::endl; 
+                    std::cout << "measured: " << z(0) << "," << z(1) << "," << z(2) << std::endl; 
+                    return x;
+               } 
+            } catch (std::bad_cast) {
+                // Do nothing
+            }
+            try {
+                OrientationModel pm = dynamic_cast<OrientationModel&>(m);
+               // Check 3 sigmas
+                if ( ( z(0) < x(6)-3*P(6,6) || z(0) > x(6)+3*P(6,6) ) || 
+                    ( z(1) < x(7)-3*P(7,7) || z(1) > x(7)+3*P(7,7) ) ||
+                    ( z(2) < x(8)-3*P(8,8) || z(2) > x(8)+3*P(8,8) )) {
+                    std::cout << "rejecting orientation" << std::endl;
+                    return x;
+               }
+            } catch (std::bad_cast) {
+                // Do nothing
+            }
+
             // COMPUTE KALMAN GAIN
             // compute innovation covariance
-            // H = 3x6, P = 6x6, m.getCovariance = 3x3, m.V = 3x3
-            // Therefore S = 3x3
             Covariance<Measurement> S = ( m.H * P * m.H.transpose() ) + ( m.V * m.getCovariance() * m.V.transpose() );
             
             // compute kalman gain
-            // K = 6x6 * 6*3 * 3x3 = 6x3
             KalmanGain<Measurement> K = P * m.H.transpose() * S.inverse();
             
             // UPDATE STATE ESTIMATE AND COVARIANCE
