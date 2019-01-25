@@ -119,6 +119,12 @@ bool estimatePartnerPosition(PositionMeasurement positionMeasurement,
 
 void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
+    u(0) = msg->linear_acceleration.x;
+    u(1) = msg->linear_acceleration.y;
+    u(2) = msg->linear_acceleration.z;
+    u(3) = msg->angular_velocity.x;
+    u(4) = msg->angular_velocity.y;
+    u(5) = msg->angular_velocity.z;
 }
 
 /*
