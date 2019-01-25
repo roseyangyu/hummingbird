@@ -18,6 +18,8 @@
 #include "PositionMeasurementModel.hpp"
 #include "OrientationMeasurementModel.hpp"
 
+#include <sensor_msgs/Imu.h>
+
 using namespace std;
 using namespace KalmanExamples;
 using namespace Eigen;
@@ -133,8 +135,6 @@ bool estimatePartnerPosition(geometry_msgs::TransformStamped tagTransform,
                       tagTransform.transform.rotation.z);
         OrientationMeasurement orientationMeasurement;
         orientationMeasurement = toEulerAngle(q);
-        pm.setCovariance(positionMeasurementVariance1m);
-        om.setCovariance(orientationMeasurementVariance1m);
         predictor.predict(sys, dt);
         predictor.update(pm, positionMeasurement);
         auto x_ekf = predictor.update(om, orientationMeasurement);
@@ -154,6 +154,10 @@ bool estimatePartnerPosition(geometry_msgs::TransformStamped tagTransform,
     return false;
 }
 
+void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
+{
+}
+
 /*
  * This node attempts to determine the location of the partner tailsitter relative to itself.
  * It does this by looking up the transformations from itself to the apriltags, adding a correction to orientate
@@ -167,6 +171,8 @@ int main(int argc, char** argv){
     tf2_ros::Buffer tfBuffer;
     tf2_ros::TransformListener listener(tfBuffer);
     tf2_ros::TransformBroadcaster br;
+
+    ros::Subscriber imu_sub = node.subscribe<sensor_msgs::Imu>("/mavros/imu/data", 1000, imuCallback);
 
     ros::Rate rate(60.0);
 
@@ -199,7 +205,6 @@ int main(int argc, char** argv){
                 //ROS_WARN("%s",ex.what());
                 continue;
             }
-
             // Unpack the data into tf2 variables from geometry_msgs.
             tf2::Vector3 origin(tagTransforms[i].transform.translation.x,
                                 tagTransforms[i].transform.translation.y,
