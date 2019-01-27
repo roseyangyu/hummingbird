@@ -1,4 +1,6 @@
 #include <ros/ros.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include <turtlesim/Pose.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseArray.h>
@@ -22,7 +24,7 @@ void poseCallback(const nav_msgs::OdometryConstPtr& msg) {
 	
 	transformStamped.transform.translation.x = msg->pose.pose.position.x;
 	transformStamped.transform.translation.y = msg->pose.pose.position.y;
-	transformStamped.transform.translation.z = msg->pose.pose.position.z;
+	transformStamped.transform.translation.z = msg->pose.pose.position.z -0.17; // temporary correction because TS starts at -0.17
 	transformStamped.transform.rotation = msg->pose.pose.orientation;
 
 	br.sendTransform(transformStamped);
@@ -86,6 +88,20 @@ int main(int argc, char** argv) {
 										 &stars_realsense_callback);
 	ros::Subscriber sub3 = node.subscribe("/tag_detections", 10,
 			&cameraLocationCallback);
-	ros::spin();
+
+	geometry_msgs::TransformStamped transform;
+    tf2_ros::Buffer tfBuffer;
+    tf2_ros::TransformListener listener(tfBuffer);
+    tf2_ros::TransformBroadcaster br;
+	ros::Rate rate(60.0);
+	while (node.ok()) { // broadcast map->partner as well
+		try {
+			transform = tfBuffer.lookupTransform("map", "partner", ros::Time(0));
+			br.sendTransform(transform);
+		} catch (tf2::TransformException & ex){
+		}
+		ros::spinOnce();
+		rate.sleep();
+	}
 	return 0;
 }

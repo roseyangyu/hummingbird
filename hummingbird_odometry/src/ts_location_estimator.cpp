@@ -209,6 +209,7 @@ int main(int argc, char** argv){
                 br.sendTransform(currentPartnerEstimate);
             }
         }
+        ros::spinOnce();
         rate.sleep();
     }
     return 0;
