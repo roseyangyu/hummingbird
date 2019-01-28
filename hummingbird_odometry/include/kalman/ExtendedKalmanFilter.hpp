@@ -97,6 +97,7 @@ namespace Kalman {
         {
             // Setup state and covariance
             P.setIdentity();
+            this->P = 10*this->P; // No knowledge of initial state
         }
         
         /**
@@ -146,14 +147,12 @@ namespace Kalman {
         const State& update( MeasurementModelType<Measurement, CovarianceBase>& m, const Measurement& z )
         {
             m.updateJacobians( x );
-
             try { 
                 PositionModel pm = dynamic_cast<PositionModel&>(m);
                 // check 3 sigmas
                 if ( ( z(0) < x(0)-3*P(0,0) || z(0) > x(0)+3*P(0,0) ) || 
                     ( z(1) < x(1)-3*P(1,1) || z(1) > x(1)+3*P(1,1) ) ||
                     ( z(2) < x(2)-3*P(2,2) || z(2) > x(2)+3*P(2,2) )) {
-                    std::cout << "rejecting position" << std::endl;
                     return x;
                } 
             } catch (std::bad_cast) {
@@ -165,7 +164,6 @@ namespace Kalman {
                 if ( ( z(0) < x(6)-3*P(6,6) || z(0) > x(6)+3*P(6,6) ) || 
                     ( z(1) < x(7)-3*P(7,7) || z(1) > x(7)+3*P(7,7) ) ||
                     ( z(2) < x(8)-3*P(8,8) || z(2) > x(8)+3*P(8,8) )) {
-                    std::cout << "rejecting orientation" << std::endl;
                     return x;
                }
             } catch (std::bad_cast) {
