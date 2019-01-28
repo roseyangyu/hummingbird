@@ -38,6 +38,9 @@ typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
 string me_frame_id = "base_link";
 string partner_frame_id = "partner";
 const int NUM_TAGS = 6; 
+SystemModel sys;
+Kalman::ExtendedKalmanFilter<State> predictor;
+float g = 9.81;
 
 Matrix3f correctionMatrices[NUM_TAGS] = {
     (Matrix3f() << 0,1,0,0,0,1,1,0,0).finished(),
@@ -55,6 +58,7 @@ Vector3f tagOffsets[NUM_TAGS] = {
     (Vector3f() << -0.02, -0.054, 0.382).finished(),
     (Vector3f() << -0.02, 0.054, 0.382).finished(), 
 };
+ros::Time previous;
 
 geometry_msgs::TransformStamped currentPartnerEstimate;
 State x;
@@ -87,19 +91,17 @@ geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_
 // Updates the estimated partner transformation
 // Returns true if the estimate was updated
 // Tag number is [1, TAG_NUMBER]
-bool estimatePartnerPosition(PositionMeasurement positionMeasurement,
+bool updatePartnerPosition(PositionMeasurement positionMeasurement,
                              OrientationMeasurement orientationMeasurement,
                              int tagNumber, 
                              SystemModel sys,
                              Kalman::ExtendedKalmanFilter<State>& predictor,
                              PositionModel pm,
-                             OrientationModel om,
-                             float dt) {
+                             OrientationModel om) {
     currentPartnerEstimate.header.stamp = ros::Time::now();
     currentPartnerEstimate.header.frame_id = me_frame_id;
     currentPartnerEstimate.child_frame_id = partner_frame_id;
     if (tagNumber == 4) {
-        predictor.predict(sys, dt);
         predictor.update(pm, positionMeasurement);
         auto x_ekf = predictor.update(om, orientationMeasurement);
         currentPartnerEstimate.transform.translation.x = x_ekf(0);
@@ -117,11 +119,25 @@ bool estimatePartnerPosition(PositionMeasurement positionMeasurement,
     return false;
 }
 
+void predictPartnerPosition(Kalman::ExtendedKalmanFilter<State>& predictor, SystemModel sys, float dt) {
+    predictor.predict(sys, dt);
+}
+
+ros::Duration computeDt()
+{
+    ros::Time now = ros::Time::now();
+    ros::Duration dt = now - previous;
+    previous = now;
+    return dt;
+}
+
 void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
+    ros::Duration dt = computeDt();
+    predictPartnerPosition(predictor, sys, dt.toSec());
     u(0) = msg->linear_acceleration.x;
     u(1) = msg->linear_acceleration.y;
-    u(2) = msg->linear_acceleration.z;
+    u(2) = msg->linear_acceleration.z - g;
     u(3) = msg->angular_velocity.x;
     u(4) = msg->angular_velocity.y;
     u(5) = msg->angular_velocity.z;
@@ -141,6 +157,8 @@ int main(int argc, char** argv){
     tf2_ros::TransformListener listener(tfBuffer);
     tf2_ros::TransformBroadcaster br;
 
+    previous = ros::Time::now();
+
     ros::Subscriber imu_sub = node.subscribe<sensor_msgs::Imu>("/mavros/imu/data", 1000, imuCallback);
 
     ros::Rate rate(60.0);
@@ -149,22 +167,20 @@ int main(int argc, char** argv){
     OrientationModel om;
     PositionMeasurement pMeasurement;
     OrientationMeasurement oMeasurement;
+
     x.setZero();
     u.setZero();
-
-    SystemModel sys;
-
-    Kalman::ExtendedKalmanFilter<State> predictor;
     predictor.init(x);
 
-    ros::Time previous = ros::Time::now();
+    geometry_msgs::TransformStamped tagTransforms[NUM_TAGS];
+    float lastUsedTimes[NUM_TAGS] = {0,0,0,0,0,0};
 
+    // TODO: change tag lookup to a subscription?
     while (node.ok()){
         geometry_msgs::TransformStamped tagTransforms[NUM_TAGS];
         tf2::Quaternion qCorrect;
-        ros::Time now = ros::Time::now();
-        ros::Duration dt = now - previous;
-        previous = now;
+        ros::Duration dt = computeDt();
+        predictPartnerPosition(predictor, sys, dt.toSec());
         for (int i = 0; i < NUM_TAGS; ++i) {
             string tag_frame_id = "tag" + to_string(i+1);
             // Lookup transform from base_link to ith tag
@@ -174,6 +190,14 @@ int main(int argc, char** argv){
                 //ROS_WARN("%s",ex.what());
                 continue;
             }
+            float tagTime = tagTransforms[i].header.stamp.sec + tagTransforms[i].header.stamp.nsec/1000000000.0;
+            // Check if we've already used this tag via timestamp comparison
+            if (tagTime == lastUsedTimes[i]) {
+                continue;
+            } else {
+                lastUsedTimes[i] = tagTime;
+            }
+
             // Unpack the data into eigen variables from geometry_msgs.
             // TODO: maybe put this in an external function?
             Vector3f origin(tagTransforms[i].transform.translation.x,
@@ -191,7 +215,7 @@ int main(int argc, char** argv){
             origin = origin - qTag*tagOffsets[i];
 
             // Repack and broadcast as corrected tag
-            tagTransforms[i].header.stamp = now;
+            tagTransforms[i].header.stamp = ros::Time::now();
             tagTransforms[i].child_frame_id = tag_frame_id + "_corrected";
             tagTransforms[i].transform.rotation.x = qTag.x();
             tagTransforms[i].transform.rotation.y = qTag.y();
@@ -205,7 +229,7 @@ int main(int argc, char** argv){
             // Estimate based on measurements of tag_corrected
             pMeasurement = origin;
             oMeasurement = quaterniontoEulerAngle(qTag.inverse()); // inverse because state is rpy from partner to base_link
-            if (estimatePartnerPosition(pMeasurement, oMeasurement, i+1, sys, predictor, pm, om, dt.toSec())) {
+            if (updatePartnerPosition(pMeasurement, oMeasurement, i+1, sys, predictor, pm, om)) {
                 br.sendTransform(currentPartnerEstimate);
             }
         }

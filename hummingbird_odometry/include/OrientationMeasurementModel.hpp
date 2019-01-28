@@ -50,7 +50,7 @@ public:
         this->H(0, 6) = 1;
         this->H(1, 7) = 1;
         this->H(2, 8) = 1;
-        // Set noise as identity
+        // Set noise
         this->V.setIdentity();
     }
     

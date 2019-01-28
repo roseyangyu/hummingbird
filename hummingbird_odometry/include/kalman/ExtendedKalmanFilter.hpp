@@ -154,9 +154,6 @@ namespace Kalman {
                     ( z(1) < x(1)-3*P(1,1) || z(1) > x(1)+3*P(1,1) ) ||
                     ( z(2) < x(2)-3*P(2,2) || z(2) > x(2)+3*P(2,2) )) {
                     std::cout << "rejecting position" << std::endl;
-                    std::cout << "variance: " << P(0,0) << "," << P(1,1) << "," << P(2,2) << std::endl;
-                    std::cout << "expected: " << x(0) << "," << x(1) << "," << x(2) << std::endl; 
-                    std::cout << "measured: " << z(0) << "," << z(1) << "," << z(2) << std::endl; 
                     return x;
                } 
             } catch (std::bad_cast) {
