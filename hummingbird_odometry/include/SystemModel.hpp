@@ -68,6 +68,18 @@ public:
     //! Control type shortcut definition
     typedef KalmanExamples::Robot1::Control<T> C;
 
+    Matrix<float, 6, 6> inputCovariance;
+
+    SystemModel() {
+        inputCovariance.setZero();
+        inputCovariance(0,0) = 0.01; // acc
+        inputCovariance(1,1) = 0.01;
+        inputCovariance(2,2) = 0.01;
+        inputCovariance(3,3) = 0.00001; // gyro
+        inputCovariance(4,4) = 0.00001;
+        inputCovariance(5,5) = 0.00001;
+    } 
+
     /**
      * @brief Definition of (non-linear) state transition function
      *
@@ -140,9 +152,37 @@ protected:
         this->F(8,8) = 0;
         // df_hat/dx = I + df/dx
         this->F = MatrixXf::Identity(9, 9) + dt*this->F;
+
         // Model noise
         this->W.setIdentity();
-        this->W = dt*(this->W);
+
+        Matrix<float, 9, 6> dfdu;
+        dfdu.setZero();
+        // acceleration wrt acceleration
+        dfdu.block<3,0>(3,3) = MatrixXf::Identity(3,3);
+        // position wrt u,v,w
+        Vector3f xyz = x.segment(0,3);
+        dfdu(0,4) = -xyz(2);
+        dfdu(0,5) = xyz(1);
+        dfdu(1,3) = xyz(2);
+        dfdu(1,5) = -xyz(0);
+        dfdu(2,3) = -xyz(1);
+        dfdu(2,4) = -xyz(0);
+        // roll_dot wrt u,v,w
+        dfdu(6,3) = 1;
+        dfdu(6,4) = sin(rpy(1))*sin(rpy(0))/cos(rpy(1));
+        dfdu(6,5) = cos(rpy(0))*sin(rpy(1))/cos(rpy(1));
+        // pitch_dot wrt u,v,w
+        dfdu(7,4) = 0;
+        dfdu(7,5) = cos(rpy(0));
+        dfdu(7,6) = -sin(rpy(0));
+        // yaw_dot wrt u,v,w
+        dfdu(8,4) = 0;
+        dfdu(8,5) = sin(rpy(0))/cos(rpy(1));
+        dfdu(8,6) = cos(rpy(0))/cos(rpy(1));
+        dfdu = dfdu*dt;
+
+        this->W = dfdu*inputCovariance*dfdu.transpose() + dt*(this->W);
     }
 };
 

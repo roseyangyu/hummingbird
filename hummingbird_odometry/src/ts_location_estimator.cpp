@@ -40,7 +40,7 @@ string partner_frame_id = "partner";
 const int NUM_TAGS = 6; 
 SystemModel sys;
 Kalman::ExtendedKalmanFilter<State> predictor;
-float g = 9.81;
+float g = 9.7; // aproximate mean seen in simulation
 
 Matrix3f correctionMatrices[NUM_TAGS] = {
     (Matrix3f() << 0,1,0,0,0,1,1,0,0).finished(),
@@ -63,6 +63,8 @@ ros::Time previous;
 geometry_msgs::TransformStamped currentPartnerEstimate;
 State x;
 Control u;
+
+bool start = false;
 
 geometry_msgs::Transform load_calibration(ros::NodeHandle& nh, string transform_name) {
     double x, y, z, rx, ry, rz, rw;
@@ -98,9 +100,6 @@ bool updatePartnerPosition(PositionMeasurement positionMeasurement,
                              Kalman::ExtendedKalmanFilter<State>& predictor,
                              PositionModel pm,
                              OrientationModel om) {
-    currentPartnerEstimate.header.stamp = ros::Time::now();
-    currentPartnerEstimate.header.frame_id = me_frame_id;
-    currentPartnerEstimate.child_frame_id = partner_frame_id;
     if (tagNumber == 4) {
         predictor.update(pm, positionMeasurement);
         auto x_ekf = predictor.update(om, orientationMeasurement);
@@ -120,7 +119,7 @@ bool updatePartnerPosition(PositionMeasurement positionMeasurement,
 }
 
 void predictPartnerPosition(Kalman::ExtendedKalmanFilter<State>& predictor, SystemModel sys, float dt) {
-    predictor.predict(sys, dt);
+    predictor.predict(sys, u, dt);
 }
 
 ros::Duration computeDt()
@@ -135,6 +134,7 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
     ros::Duration dt = computeDt();
     predictPartnerPosition(predictor, sys, dt.toSec());
+
     u(0) = msg->linear_acceleration.x;
     u(1) = msg->linear_acceleration.y;
     u(2) = msg->linear_acceleration.z - g;
@@ -153,6 +153,9 @@ int main(int argc, char** argv){
 
     ros::NodeHandle node;
 
+    currentPartnerEstimate.header.frame_id = me_frame_id;
+    currentPartnerEstimate.child_frame_id = partner_frame_id;
+   
     tf2_ros::Buffer tfBuffer;
     tf2_ros::TransformListener listener(tfBuffer);
     tf2_ros::TransformBroadcaster br;
@@ -230,8 +233,15 @@ int main(int argc, char** argv){
             pMeasurement = origin;
             oMeasurement = quaterniontoEulerAngle(qTag.inverse()); // inverse because state is rpy from partner to base_link
             if (updatePartnerPosition(pMeasurement, oMeasurement, i+1, sys, predictor, pm, om)) {
-                br.sendTransform(currentPartnerEstimate);
+                start = true; // first estimate successful, begin outputting
             }
+        }
+        currentPartnerEstimate.header.stamp = ros::Time::now();
+        // TODO: Need to change message type to output covariance as well.
+        // PoseWithCovariance
+        if (start) {
+            currentPartnerEstimate.header.stamp = ros::Time::now();
+            br.sendTransform(currentPartnerEstimate);
         }
         ros::spinOnce();
         rate.sleep();
