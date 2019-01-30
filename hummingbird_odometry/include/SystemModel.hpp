@@ -159,7 +159,7 @@ protected:
         Matrix<float, 9, 6> dfdu;
         dfdu.setZero();
         // acceleration wrt acceleration
-        dfdu.block<3,0>(3,3) = MatrixXf::Identity(3,3);
+        dfdu.block<3,3>(3,0) = MatrixXf::Identity(3,3);
         // position wrt u,v,w
         Vector3f xyz = x.segment(0,3);
         dfdu(0,4) = -xyz(2);
@@ -173,13 +173,13 @@ protected:
         dfdu(6,4) = sin(rpy(1))*sin(rpy(0))/cos(rpy(1));
         dfdu(6,5) = cos(rpy(0))*sin(rpy(1))/cos(rpy(1));
         // pitch_dot wrt u,v,w
-        dfdu(7,4) = 0;
-        dfdu(7,5) = cos(rpy(0));
-        dfdu(7,6) = -sin(rpy(0));
+        dfdu(7,3) = 0;
+        dfdu(7,4) = cos(rpy(0));
+        dfdu(7,5) = -sin(rpy(0));
         // yaw_dot wrt u,v,w
-        dfdu(8,4) = 0;
-        dfdu(8,5) = sin(rpy(0))/cos(rpy(1));
-        dfdu(8,6) = cos(rpy(0))/cos(rpy(1));
+        dfdu(8,3) = 0;
+        dfdu(8,4) = sin(rpy(0))/cos(rpy(1));
+        dfdu(8,5) = cos(rpy(0))/cos(rpy(1));
         dfdu = dfdu*dt;
 
         this->W = dfdu*inputCovariance*dfdu.transpose() + dt*(this->W);
