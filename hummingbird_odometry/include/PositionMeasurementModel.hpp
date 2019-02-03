@@ -55,6 +55,7 @@ public:
         this->H(2,2) = 1;
         // Set noise
         this->V.setIdentity();
+        this->V = 0.2*this->V;
     }
     
     /**

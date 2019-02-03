@@ -118,7 +118,7 @@ bool updatePartnerPosition(PositionMeasurement positionMeasurement,
     return false;
 }
 
-void predictPartnerPosition(Kalman::ExtendedKalmanFilter<State>& predictor, SystemModel sys, float dt) {
+void predictPartnerPosition(Kalman::ExtendedKalmanFilter<State>& predictor, SystemModel sys, Control u, float dt) {
     predictor.predict(sys, u, dt);
 }
 
@@ -133,7 +133,7 @@ ros::Duration computeDt()
 void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
     ros::Duration dt = computeDt();
-    predictPartnerPosition(predictor, sys, dt.toSec());
+    predictPartnerPosition(predictor, sys, u, dt.toSec());
 
     u(0) = msg->linear_acceleration.x;
     u(1) = msg->linear_acceleration.y;
@@ -183,7 +183,7 @@ int main(int argc, char** argv){
         geometry_msgs::TransformStamped tagTransforms[NUM_TAGS];
         tf2::Quaternion qCorrect;
         ros::Duration dt = computeDt();
-        predictPartnerPosition(predictor, sys, dt.toSec());
+        predictPartnerPosition(predictor, sys, u, dt.toSec());
         for (int i = 0; i < NUM_TAGS; ++i) {
             string tag_frame_id = "tag" + to_string(i+1);
             // Lookup transform from base_link to ith tag

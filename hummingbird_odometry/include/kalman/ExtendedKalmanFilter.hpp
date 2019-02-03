@@ -126,7 +126,7 @@ namespace Kalman {
         const State& predict( SystemModelType<Control, CovarianceBase>& s, const Control& u, float dt )
         {
             s.updateJacobians( x, u, dt );
-            
+
             // predict state
             x = s.f(x, u, dt);
             
@@ -147,6 +147,8 @@ namespace Kalman {
         const State& update( MeasurementModelType<Measurement, CovarianceBase>& m, const Measurement& z )
         {
             m.updateJacobians( x );
+
+            /*
             try { 
                 PositionModel pm = dynamic_cast<PositionModel&>(m);
                 // check 3 sigmas
@@ -169,6 +171,7 @@ namespace Kalman {
             } catch (std::bad_cast) {
                 // Do nothing
             }
+            */
 
             // COMPUTE KALMAN GAIN
             // compute innovation covariance

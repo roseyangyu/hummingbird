@@ -72,9 +72,9 @@ public:
 
     SystemModel() {
         inputCovariance.setZero();
-        inputCovariance(0,0) = 0.01; // acc
-        inputCovariance(1,1) = 0.01;
-        inputCovariance(2,2) = 0.01;
+        inputCovariance(0,0) = 1; // acc
+        inputCovariance(1,1) = 1;
+        inputCovariance(2,2) = 1;
         inputCovariance(3,3) = 0.00001; // gyro
         inputCovariance(4,4) = 0.00001;
         inputCovariance(5,5) = 0.00001;
@@ -108,6 +108,7 @@ public:
         x_dot(7) = w(1)*cos(rpy(0))-w(2)*sin(rpy(0));
         // YAW_DOT
         x_dot(8) = (w(2)*cos(rpy(0))+w(1)*sin(rpy(0)))/cos(rpy(1));
+
         return x + x_dot*dt;
     }
 
