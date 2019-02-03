@@ -102,24 +102,27 @@ bool updatePartnerPosition(PositionMeasurement positionMeasurement,
                              OrientationModel om) {
     if (tagNumber == 4) {
         predictor.update(pm, positionMeasurement);
-        auto x_ekf = predictor.update(om, orientationMeasurement);
-        currentPartnerEstimate.transform.translation.x = x_ekf(0);
-        currentPartnerEstimate.transform.translation.y = x_ekf(1);
-        currentPartnerEstimate.transform.translation.z = x_ekf(2);
-        // Why inverse?
-        // the state is defined as the rotation from partner_frame (modelled as inertial) to base_link frame
-        Quaternionf q = eulerToQuaternion(x_ekf(6), x_ekf(7), x_ekf(8)).inverse();
-        currentPartnerEstimate.transform.rotation.x = q.x();
-        currentPartnerEstimate.transform.rotation.y = q.y();
-        currentPartnerEstimate.transform.rotation.z = q.z();
-        currentPartnerEstimate.transform.rotation.w = q.w();
+        x = predictor.update(om, orientationMeasurement);
         return true; // Estimate position of partner as the position of the 3rd tag for now.
     }
     return false;
 }
 
+void packState() {
+    currentPartnerEstimate.transform.translation.x = x(0);
+    currentPartnerEstimate.transform.translation.y = x(1);
+    currentPartnerEstimate.transform.translation.z = x(2);   
+    // Why inverse?
+    // the state is defined as the rotation from partner_frame (modelled as inertial) to base_link frame
+    Quaternionf q = eulerToQuaternion(x(6), x(7), x(8)).inverse();
+    currentPartnerEstimate.transform.rotation.x = q.x();
+    currentPartnerEstimate.transform.rotation.y = q.y();
+    currentPartnerEstimate.transform.rotation.z = q.z();
+    currentPartnerEstimate.transform.rotation.w = q.w();
+}
+
 void predictPartnerPosition(Kalman::ExtendedKalmanFilter<State>& predictor, SystemModel sys, Control u, float dt) {
-    predictor.predict(sys, u, dt);
+    x = predictor.predict(sys, u, dt);
 }
 
 ros::Duration computeDt()
@@ -236,11 +239,11 @@ int main(int argc, char** argv){
                 start = true; // first estimate successful, begin outputting
             }
         }
-        currentPartnerEstimate.header.stamp = ros::Time::now();
         // TODO: Need to change message type to output covariance as well.
         // PoseWithCovariance
         if (start) {
             currentPartnerEstimate.header.stamp = ros::Time::now();
+            packState();
             br.sendTransform(currentPartnerEstimate);
         }
         ros::spinOnce();
