@@ -360,7 +360,10 @@ TailsitterPathPlanner::poll_subscriptions()
 		// direction.normalize();
 		_waypoint.direction = direction;
 		_waypoint.yaw = _pos_sp_triplet_step.current.yaw;
-		math::Vector<3> velocity = direction * _params.cruise_speed;
+		math::Vector<3> velocity;
+		velocity(0) = _pos_sp_triplet_step.current.vx;
+		velocity(1) = _pos_sp_triplet_step.current.vy;
+		velocity(2) = _pos_sp_triplet_step.current.vz;
 
 		// Saturate the maximum velocity in all directions
 		for (int i=0; i<3; i++){
