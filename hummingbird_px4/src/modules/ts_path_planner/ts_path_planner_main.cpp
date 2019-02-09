@@ -364,6 +364,9 @@ TailsitterPathPlanner::poll_subscriptions()
 		velocity(0) = _pos_sp_triplet_step.current.vx;
 		velocity(1) = _pos_sp_triplet_step.current.vy;
 		velocity(2) = _pos_sp_triplet_step.current.vz;
+		if (velocity.length() < 1e-6f ) { // If effectively no velocity
+			velocity = direction * _params.cruise_speed;
+		}
 
 		// Saturate the maximum velocity in all directions
 		for (int i=0; i<3; i++){
