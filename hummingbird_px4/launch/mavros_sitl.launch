@@ -1,4 +1,4 @@
-<launch>
+:<launch>
 <!-- MAVROS launch script for deprecated multiplatform SITL -->
 
 <arg name="ns" default="/" />
@@ -8,7 +8,7 @@
 <arg name="tgt_component" default="50" />
 
 <group ns="$(arg ns)">
-	<include file="$(find mavros)/launch/node.launch">
+	<include file="$(find hummingbird_px4)/launch/mavros.launch">
 		<arg name="pluginlists_yaml" value="$(find mavros)/launch/px4_pluginlists.yaml" />
 		<arg name="config_yaml" value="$(find mavros)/launch/px4_config.yaml" />
 

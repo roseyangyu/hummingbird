@@ -1,0 +1,26 @@
+<robot name="elevon" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="elevon" params="name parent *origin">
+
+        <joint name='${name}_joint' type='revolute'>
+            <parent link="${parent}" />
+            <child link="${name}" />
+            <xacro:insert_block name="origin"/>
+            <axis xyz="0 1 0" />
+            <dynamics damping="1.0" />
+            <limit lower="${-PI/6}" upper="${PI/6}" />
+        </joint>
+
+        <link name="${name}">
+            <inertial>
+                <mass>0.00000001</mass>
+                <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+            </inertial>
+            <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <box size="0.015 0.22 0.07347" />
+                </geometry>
+            </visual>
+        </link>
+    </xacro:macro>
+</robot>

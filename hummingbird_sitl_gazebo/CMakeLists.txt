@@ -31,8 +31,6 @@ find_package(Boost REQUIRED COMPONENTS system thread timer)
 if (BUILD_GSTREAMER_PLUGIN)
   find_package(GStreamer)
 endif()
-add_subdirectory( external/OpticalFlow OpticalFlow )
-set( OpticalFlow_LIBS "OpticalFlow" )
 
 # see if catkin was invoked to build this
 if (CATKIN_DEVEL_PREFIX)
@@ -108,7 +106,6 @@ endforeach()
 
 include_directories(
   include
-  ${OpticalFlow_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
   ${GAZEBO_MSG_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
@@ -151,17 +148,6 @@ set(enable_wind "false")
 set(rotors_description_dir "${CMAKE_CURRENT_SOURCE_DIR}/models/rotors_description")
 set(scripts_dir "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMAND rm -f ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
-  COMMAND python ${scripts_dir}/xacro.py -o  ${rotors_description_dir}/urdf/iris_base.urdf  ${rotors_description_dir}/urdf/iris_base.xacro enable_mavlink_interface:=${enable_mavlink_interface} enable_ground_truth:=${enable_ground_truth} enable_wind:=${enable_wind} enable_logging:=${enable_logging} rotors_description_dir:=${rotors_description_dir}
-  COMMAND gz sdf -p  ${rotors_description_dir}/urdf/iris_base.urdf >> ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
-  COMMAND rm -f ${rotors_description_dir}/urdf/iris_base.urdf
-  DEPENDS ${rotors_description_dir}/urdf/iris.xacro
-  DEPENDS ${rotors_description_dir}/urdf/iris_base.xacro
-  DEPENDS ${rotors_description_dir}/urdf/component_snippets.xacro
-  )
-add_custom_target(sdf ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf)
 
 #--------------------#
 # Message Generation #
@@ -170,7 +156,6 @@ add_custom_target(sdf ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.s
 set (msgs
   msgs/Float.proto
   msgs/SensorImu.proto
-  msgs/opticalFlow.proto
   msgs/lidar.proto
   msgs/CommandMotorSpeed.proto
   msgs/MotorSpeed.proto
@@ -197,11 +182,8 @@ add_library(rotors_gazebo_controller_interface SHARED src/gazebo_controller_inte
 add_library(rotors_gazebo_motor_model SHARED src/gazebo_motor_model.cpp)
 add_library(rotors_gazebo_multirotor_base_plugin SHARED src/gazebo_multirotor_base_plugin.cpp)
 add_library(rotors_gazebo_imu_plugin SHARED src/gazebo_imu_plugin.cpp)
-add_library(gazebo_opticalFlow_plugin SHARED src/gazebo_opticalFlow_plugin.cpp)
-target_link_libraries(gazebo_opticalFlow_plugin ${OpticalFlow_LIBS})
 add_library(gazebo_lidar_plugin SHARED src/gazebo_lidar_plugin.cpp)
 add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
-#add_library(rotors_gazebo_wind_plugin SHARED src/gazebo_wind_plugin.cpp)
 add_library(gazebo_geotagged_images_plugin SHARED src/gazebo_geotagged_images_plugin.cpp)
 add_library(gazebo_sonar_plugin SHARED src/gazebo_sonar_plugin.cpp)
 add_library(gazebo_ts_aerodynamic_plugin SHARED src/gazebo_ts_aerodynamic_plugin.cpp)
@@ -211,7 +193,6 @@ set(plugins
   rotors_gazebo_motor_model
   rotors_gazebo_multirotor_base_plugin
   rotors_gazebo_imu_plugin
-  gazebo_opticalFlow_plugin
   gazebo_lidar_plugin
   rotors_gazebo_mavlink_interface
   #rotors_gazebo_wind_plugin

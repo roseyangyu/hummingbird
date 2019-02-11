@@ -1,0 +1,42 @@
+<robot name="tag" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="tag" params="name parent tagnum *origin *box">
+
+        <joint name='${name}_joint' type='revolute'>
+            <parent link="${parent}" />
+            <child link="${name}" />
+            <xacro:insert_block name="origin"/>
+            <axis xyz="0 1 0" />
+            <dynamics damping="1.0" />
+            <limit lower="-1.05" upper="1.05" />
+        </joint>
+
+        <link name="${name}">
+            <inertial>
+                <mass>1e-9</mass>
+                <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+            </inertial>
+            <collision>
+                <geometry>
+                    <xacro:insert_block name="box"/>
+                </geometry>
+            </collision>
+            <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <xacro:insert_block name="box"/>
+                </geometry>
+            </visual>
+        </link>
+
+        <gazebo reference="${name}">
+            <material>
+                <script>
+                    <uri>model://Tag${tagnum}/materials/scripts</uri>
+                    <uri>model://Tag${tagnum}/materials/textures</uri>
+                    <name>vrc/Tag${tagnum}</name>
+                </script>
+            </material>
+        </gazebo>
+
+    </xacro:macro>
+</robot>

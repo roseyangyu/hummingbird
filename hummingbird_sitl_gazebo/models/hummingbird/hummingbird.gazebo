@@ -1,0 +1,123 @@
+<?xml version="1.0" ?>
+<robot>
+    <gazebo>
+        <plugin name="left_wing" filename="libgazebo_ts_aerodynamic_plugin.so">
+            <k_lift>0.00000348</k_lift>
+            <k_drag>0.00000175</k_drag>
+            <k_pitch>-0.000000344</k_pitch>
+            <cp>0 0.195 0.036</cp>
+            <forward>0 0 1</forward>
+            <upward>1 0 0</upward>
+            <link_name>base_link</link_name>
+            <motor_joint_name>rotor_left_joint</motor_joint_name>
+            <control_joint_name>left_elevon_joint</control_joint_name>
+        </plugin>
+        <plugin name="right_wing" filename="libgazebo_ts_aerodynamic_plugin.so">
+            <k_lift>0.00000348</k_lift>
+            <k_drag>0.00000175</k_drag>
+            <k_pitch>-0.000000344</k_pitch>
+            <cp>0 -0.195 0.036</cp>
+            <forward>0 0 1</forward>
+            <upward>1 0 0</upward>
+            <link_name>base_link</link_name>
+            <motor_joint_name>rotor_right_joint</motor_joint_name>
+            <control_joint_name>right_elevon_joint</control_joint_name>
+        </plugin>
+        <plugin name='front_left_motor_model' filename='librotors_gazebo_motor_model.so'>
+            <robotNamespace></robotNamespace>
+            <jointName>rotor_left_joint</jointName>
+            <linkName>rotor_left</linkName>
+            <turningDirection>cw</turningDirection>
+            <timeConstantUp>0.016</timeConstantUp>
+            <timeConstantDown>0.020</timeConstantDown>
+            <maxRotVelocity>800</maxRotVelocity>
+            <motorConstant>7.864e-06</motorConstant>
+            <momentConstant>0.023</momentConstant>
+            <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+            <motorNumber>1</motorNumber>
+            <rotorDragCoefficient>0</rotorDragCoefficient>
+            <rollingMomentCoefficient>0</rollingMomentCoefficient>
+            <motorSpeedPubTopic>/motor_speed/1</motorSpeedPubTopic>
+            <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        </plugin>
+        <plugin name='front_right_motor_model' filename='librotors_gazebo_motor_model.so'>
+            <robotNamespace></robotNamespace>
+            <jointName>rotor_right_joint</jointName>
+            <linkName>rotor_right</linkName>
+            <turningDirection>ccw</turningDirection>
+            <timeConstantUp>0.016</timeConstantUp>
+            <timeConstantDown>0.020</timeConstantDown>
+            <maxRotVelocity>800</maxRotVelocity>
+            <motorConstant>7.864e-06</motorConstant>
+            <momentConstant>0.023</momentConstant>
+            <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+            <motorNumber>0</motorNumber>
+            <rotorDragCoefficient>0</rotorDragCoefficient>
+            <rollingMomentCoefficient>0</rollingMomentCoefficient>
+            <motorSpeedPubTopic>/motor_speed/0</motorSpeedPubTopic>
+            <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        </plugin>
+        <plugin name='rotors_gazebo_imu_plugin' filename='librotors_gazebo_imu_plugin.so'>
+            <robotNamespace></robotNamespace>
+            <linkName>imu_link</linkName>
+            <imuTopic>/imu</imuTopic>
+            <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
+            <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
+            <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
+            <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma>
+            <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity>
+            <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
+            <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
+            <accelerometerTurnOnBiasSigma>0.000</accelerometerTurnOnBiasSigma>
+        </plugin>
+        <plugin name='mavlink_interface' filename='librotors_gazebo_mavlink_interface.so'>
+            <robotNamespace></robotNamespace>
+            <imuSubTopic>/imu</imuSubTopic>
+            <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
+            <control_channels>
+                <channel name="rotor_right">
+                    <input_index>0</input_index>
+                    <input_offset>0</input_offset>
+                    <input_scaling>800</input_scaling>
+                    <zero_position_disarmed>0</zero_position_disarmed>
+                    <zero_position_armed>0</zero_position_armed>
+                    <joint_control_type>velocity</joint_control_type>
+                    <joint_name>rotor_right_joint</joint_name>
+                </channel>
+                <channel name="rotor_left">
+                    <input_index>1</input_index>
+                    <input_offset>0</input_offset>
+                    <input_scaling>800</input_scaling>
+                    <zero_position_disarmed>0</zero_position_disarmed>
+                    <zero_position_armed>0</zero_position_armed>
+                    <joint_control_type>velocity</joint_control_type>
+                    <joint_name>rotor_left_joint</joint_name>
+                </channel>
+                <channel name="right_elevon">
+                    <input_index>4</input_index>
+                    <input_offset>0</input_offset>
+                    <input_scaling>-0.017444</input_scaling>
+                    <zero_position_disarmed>0</zero_position_disarmed>
+                    <zero_position_armed>0</zero_position_armed>
+                    <joint_control_type>position_kinematic</joint_control_type>
+                    <joint_name>right_elevon_joint</joint_name>
+                </channel>
+                <channel name="left_elevon">
+                    <input_index>5</input_index>
+                    <input_offset>0</input_offset>
+                    <input_scaling>-0.017444</input_scaling>
+                    <zero_position_disarmed>0</zero_position_disarmed>
+                    <zero_position_armed>0</zero_position_armed>
+                    <joint_control_type>position_kinematic</joint_control_type>
+                    <joint_name>left_elevon_joint</joint_name>
+                </channel>
+            </control_channels>
+            <left_elevon_joint>
+                left_elevon_joint
+            </left_elevon_joint>
+            <right_elevon_joint>
+                right_elevon_joint
+            </right_elevon_joint>
+        </plugin>
+    </gazebo>
+</robot>
