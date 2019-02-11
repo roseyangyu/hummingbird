@@ -2,49 +2,12 @@
 
     <xacro:property name="PI" value="3.1415926535897931"/>
 
-    <!--<xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/hummingbird.gazebo" />-->
+    <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/hummingbird_body.xacro"/>
 
-    <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/components/elevon.xacro"/>
-    <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/components/rotor.xacro"/>
+    <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/hummingbird.gazebo" />
+
     <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/components/imu.xacro"/>
     <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/components/camera.xacro"/>
-
-
-    <link name='base_link'>
-        <inertial>
-            <mass value="0.5" />
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <inertia ixx="0.0147563" ixy="0.000" ixz="0.000" iyy="0.00638929" iyz="0.000" izz="0.0177"/>
-        </inertial>
-        <collision>
-            <origin rpy="0 0 0" xyz="0 0 0" />
-            <geometry>
-                <box size="0.2 0.6 0.06" />
-            </geometry>
-        </collision>
-        <visual>
-            <origin rpy="0 0 0.27" xyz="0 -1.57075 0"></origin>
-            <geometry>
-                <mesh filename="model://hummingbird/meshes/pacflyer_s100_mockup.dae" scale="0.0006 0.0007 0.0007"/>
-            </geometry>
-        </visual>
-    </link>
-
-    <rotor parent="base_link" name="rotor_left">
-        <origin xyz="0.0 -0.195 0.4685" rpy="0 0 0"/>
-    </rotor>
-
-    <rotor parent="base_link" name="rotor_right">
-        <origin xyz="0.0 0.195 0.4685" rpy="0 0 0"/>
-    </rotor>
-
-    <elevon parent="base_link" name="left_elevon">
-        <origin xyz="0 0.195 0.2365" rpy="0 0 0"/>
-    </elevon>
-
-    <elevon parent="base_link" name="right_elevon">
-        <origin xyz="0 -0.195 0.2365" rpy="0 0 0"/>
-    </elevon>
 
     <imu parent="base_link" name="imu_link">
         <origin xyz="0 0 0.357" rpy="0 0 0"/>
@@ -53,35 +16,5 @@
     <camera parent="base_link" name="camera_link">
         <origin xyz="0 0 0.38" rpy="0 0 0"/>
     </camera>
-
-    <tag parent="base_link" name="front_left" tagnum="0">
-        <origin xyz="0.02 -0.14 0.357" rpy="0 0 ${PI/2}" />
-        <box size="0.1 0.001 0.1" />
-    </tag>
-
-    <tag parent="base_link" name="front_right" tagnum="1">
-        <origin xyz="0.02 0.14 0.357" rpy="0 0 ${PI/2}" />
-        <box size="0.1 0.001 0.1" />
-    </tag>
-
-    <tag parent="base_link" name="back_left" tagnum="2">
-        <origin xyz="-0.02 -0.14 0.357" rpy="0 0 ${PI/2}" />
-        <box size="0.1 0.001 0.1" />
-    </tag>
-
-    <tag parent="base_link" name="back_right" tagnum="3">
-        <origin xyz="-0.02 0.14 0.357" rpy="0 0 ${PI/2}" />
-        <box size="0.1 0.001 0.1" />
-    </tag>
-
-    <tag parent="base_link" name="front_left_small" tagnum="4">
-        <origin xyz="-0.02 -0.054 0.382" rpy="0 0 ${PI/2}" />
-        <box size=".05 0.001 .05" />
-    </tag>
-
-    <tag parent="base_link" name="front_right_small" tagnum="5">
-        <origin xyz="-0.02 0.054 0.382" rpy="0 0 ${PI/2}" />
-        <box size=".05 0.001 .05" />
-    </tag>
 
 </robot>

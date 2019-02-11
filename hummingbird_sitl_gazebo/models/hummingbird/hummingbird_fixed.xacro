@@ -1,0 +1,13 @@
+<robot name="sootball" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="PI" value="3.1415926535897931"/>
+
+    <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/hummingbird_body.xacro"/>
+
+    <xacro:include filename="$(find hummingbird_sitl_gazebo)/models/hummingbird/hummingbird.gazebo" />
+
+    <link>
+
+    </link>
+
+</robot>
