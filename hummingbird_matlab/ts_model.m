@@ -36,7 +36,8 @@ syms d1 d2
 syms l m
 syms ax ay az
 syms alphax alphay alphaz
-g = 0
+syms g
+g = 0;
 syms yaw pitch roll
 syms yaw_dot pitch_dot roll_dot
 syms t
@@ -51,15 +52,17 @@ g_body = R'*[0;0;g];
 
 Force = [kl*(d1*w1^2 + d2*w2^2);...
           0;...
-         - kt*(w1^2+w2^2)] + m*g_body;
+          kd*(d1^2*w1^2+d2^2*w2^2) - kt*(w1^2+w2^2)] + m*g_body;
 Torque = [kt*l*(w1^2-w2^2);...
           km*(d1*w1^2+d2*w2^2);...
           km*(w1^2-w2^2)];
       
-equations = [Force == m*a; Torque == I*alpha;]
+equations = [Force == m*a; Torque == I*alpha;];
+equations = equations(3:end)
 unknowns = [w1;w2;d1;d2];
-
-%%
+%% 
+% Used this section to compute derivative of rpy wrt time as a function
+% of the body angular rates (given by the gyro)
 syms yaw pitch roll
 syms yaw_dot pitch_dot roll_dot
 syms u v w
