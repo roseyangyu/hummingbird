@@ -3,7 +3,7 @@
 %   m - map frame
 %   p - partner frame
 %   b - base_link frame
-filename = '2019-01-30-19-43-43.bag';
+filename = '2019-02-27-13-27-28.bag';
 bag = rosbag(filename);
 tf_select = select(bag, 'Topic', '/tf');
 tf_msgs = readMessages(tf_select);
@@ -126,6 +126,17 @@ plot(tbp, Rbp(:,3))
 plot(tag4c_time, tag4c_rpy(:,3))
 legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag4')
 title('base\_link to partner yaw')
+xlabel('time (s)')
+ylabel('rads')
+
+
+figure
+hold on
+plot(tmb, Rbp_true(:,2))
+plot(tbp, Rbp(:,2))
+plot(tag4c_time, tag4c_rpy(:,2))
+legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag4')
+title('base\_link to partner pitch')
 xlabel('time (s)')
 ylabel('rads')
 %% Extract imu data

@@ -1,14 +1,10 @@
 % Initialize section
 % Puts TS in starting location
-
-addpath('./message_publishers')
-createPublishers
-
 numSecsPerRev = 20;
 omega = 2*pi/numSecsPerRev;
 numRevs = 1;
-zOffset = 3;
-radius = 2;
+zOffset = 1.5;
+radius = 0.5;
 tend = posixtime(datetime('now')) + 2*pi*numRevs/omega;
 yaw = 0;
 
