@@ -43,7 +43,7 @@ string meFrameId = "base_link";
 string partnerFrameId = "partner";
 SystemModel sys;
 Kalman::ExtendedKalmanFilter<State> predictor;
-float g = 9.7; // aproximate mean seen in simulation
+Vector3f g(0, 0, -9.82); // gravity in Toronto, Canada
 
 vector<string> tagFrames = {"bundle1"};
 const int NUM_TAGS = 1; 
@@ -84,7 +84,8 @@ void packState() {
     currentPartnerEstimate.transform.translation.y = x(1);
     currentPartnerEstimate.transform.translation.z = x(2);   
     // Why inverse?
-    // the state is defined as the rotation from partner_frame (modelled as inertial) to base_link frame
+    // the state is defined as the rotation that transforms the partner frame (modelled as inertial)
+    // to the base_link frame. 
     Quaternionf q = eulerToQuaternion(x(6), x(7), x(8)).inverse();
     currentPartnerEstimate.transform.rotation.x = q.x();
     currentPartnerEstimate.transform.rotation.y = q.y();
@@ -111,10 +112,14 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 
     u(0) = msg->linear_acceleration.x;
     u(1) = msg->linear_acceleration.y;
-    u(2) = msg->linear_acceleration.z - g;
+    u(2) = msg->linear_acceleration.z;
     u(3) = msg->angular_velocity.x;
     u(4) = msg->angular_velocity.y;
     u(5) = msg->angular_velocity.z;
+
+    Quaternionf q = eulerToQuaternion(x(6), x(7), x(8)).inverse();
+    // we assume that gravity is pointed downward in partner's frame (e.g. partner is level)
+    u.segment(0,3) = u.segment(0,3) + q*g;
 }
 
 /*
@@ -176,8 +181,6 @@ int main(int argc, char** argv){
                 lastUsedTimes[i] = tagTime;
             }
 
-            // Unpack the data into eigen variables from geometry_msgs.
-            // TODO: maybe put this in an external function?
             Vector3f origin(tagTransforms[i].transform.translation.x,
                             tagTransforms[i].transform.translation.y,
                             tagTransforms[i].transform.translation.z);
