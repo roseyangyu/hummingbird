@@ -14,20 +14,21 @@ using namespace Eigen;
 /**
  * @brief System state vector-type.
  * 
- * Vector is (X,Y,Z,VX,VY,VZ,ROLL,PITCH,YAW)
+ * Vector is (X,Y,Z,VX,VY,VZ,ROLL,PITCH,YAW,bax,bay,baz)
  * 
- * X,Y,Z is partner position in base_link frame
- * VX,VY,VZ is base_link velocity in base_link frame
+ * X,Y,Z is partner position in base_link frame.
+ * VX,VY,VZ is base_link velocity in base_link frame.
  * ROLL,PITCH,YAW is rotation from partner frame (modelled as an inertial frame) to base_link frame.
+ * bax,bay,baz is accelerometer bias estimates.
  *
  *
  * @param T Numeric scalar type
  */
 template<typename T>
-class State : public Kalman::Vector<T, 9>
+class State : public Kalman::Vector<T, 12>
 {
 public:
-    KALMAN_VECTOR(State, T, 9)
+    KALMAN_VECTOR(State, T, 12)
 };
 
 /**
@@ -70,6 +71,8 @@ public:
 
     Matrix<float, 6, 6> inputCovariance;
 
+    Matrix<float, 12, 12> stateCovariance;
+
     SystemModel() {
         inputCovariance.setZero();
         inputCovariance(0,0) = 1; // acc
@@ -78,6 +81,19 @@ public:
         inputCovariance(3,3) = 0.00001; // gyro
         inputCovariance(4,4) = 0.00001;
         inputCovariance(5,5) = 0.00001;
+
+        stateCovariance(0,0) = 0.1; // position covariance
+        stateCovariance(1,1) = 0.1;
+        stateCovariance(2,2) = 0.1;
+        stateCovariance(3,3) = 0.1; // velocity covariance
+        stateCovariance(4,4) = 0.1;
+        stateCovariance(5,5) = 0.1;
+        stateCovariance(6,6) = 0.1; // roll, pitch, yaw covariance
+        stateCovariance(7,7) = 0.1;
+        stateCovariance(8,8) = 0.1;
+        stateCovariance(9,9) = 0.1; // bias variance
+        stateCovariance(10,10) = 0.1;
+        stateCovariance(11,11) = 0.1; 
     } 
 
     /**
@@ -99,8 +115,11 @@ public:
         Vector3f w = u.segment(3,3);
         Matrix3f S = vectorToCrossMatrix(w);
         x_dot.segment(0,3) = -S*x.segment(0,3) - x.segment(3,3);
+
         Vector3f a = u.segment(0,3);
-        x_dot.segment(3,3) = a;
+        Vector3f bias = x.segment(9, 3);
+        x_dot.segment(3,3) = a - bias;
+
         Vector3f rpy = x.segment(6,3);
         // ROLL_DOT
         x_dot(6) = (w(0)*cos(rpy(1))+w(2)*cos(rpy(0))*sin(rpy(1))+w(1)*sin(rpy(1))*sin(rpy(0)))/cos(rpy(1));
@@ -108,6 +127,11 @@ public:
         x_dot(7) = w(1)*cos(rpy(0))-w(2)*sin(rpy(0));
         // YAW_DOT
         x_dot(8) = (w(2)*cos(rpy(0))+w(1)*sin(rpy(0)))/cos(rpy(1));
+        
+        // bias dot
+        x_dot(9) = 0;
+        x_dot(10) = 0;
+        x_dot(11) = 0;
 
         return x + x_dot*dt;
     }
@@ -133,10 +157,12 @@ protected:
         this->F.setZero();
         Vector3f w = u.segment(3,3);
         Matrix3f S = vectorToCrossMatrix(w);
-        // parter position wrt partner position
+        // parter position wrt partner position, partner position wrt velocity
         this->F.block(0,0,3,3) = -1*S;
-        // partner position wrt velocity
         this->F.block(0,3,3,3) = -1*MatrixXf::Identity(3, 3);
+
+        // velocity wrt bias
+        this->F.block(3,9,3,3) = -1*MatrixXf::Identity(3,3);
 
         Vector3f rpy = x.segment(6,3);
         // roll_dot wrt roll, pitch, yaw
@@ -151,13 +177,14 @@ protected:
         this->F(8,6) = (w(1)*cos(rpy(0))-w(2)*sin(rpy(0)))/cos(rpy(1));
         this->F(8,7) = (w(2)*cos(rpy(0))+w(1)*sin(rpy(0)))*sin(rpy(1)) / (cos(rpy(1))*cos(rpy(1)));
         this->F(8,8) = 0;
+
+        // accelerometer bias dot is 0.
+
         // df_hat/dx = I + df/dx
-        this->F = MatrixXf::Identity(9, 9) + dt*this->F;
+        this->F = MatrixXf::Identity(12, 12) + dt*this->F;
 
         // Model noise
-        this->W.setIdentity();
-
-        Matrix<float, 9, 6> dfdu;
+        Matrix<float, 12, 6> dfdu;
         dfdu.setZero();
         // acceleration wrt acceleration
         dfdu.block<3,3>(3,0) = MatrixXf::Identity(3,3);
@@ -181,9 +208,11 @@ protected:
         dfdu(8,3) = 0;
         dfdu(8,4) = sin(rpy(0))/cos(rpy(1));
         dfdu(8,5) = cos(rpy(0))/cos(rpy(1));
-        dfdu = dfdu*dt;
+        dfdu = dfdu;
 
-        this->W = dfdu*inputCovariance*dfdu.transpose() + dt*(this->W);
+        Matrix<float, 12, 12> dfdw;
+        dfdw.setIdentity();
+        this->Q = dfdu*inputCovariance*dt*dfdu.transpose() + dfdw*stateCovariance*dfdw.transpose();
     }
 };
 

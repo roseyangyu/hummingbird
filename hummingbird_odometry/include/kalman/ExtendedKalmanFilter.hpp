@@ -131,7 +131,7 @@ namespace Kalman {
             x = s.f(x, u, dt);
             
             // predict covariance
-            P  = ( s.F * P * s.F.transpose() ) + ( s.W * s.getCovariance() * s.W.transpose() );
+            P  = ( s.F * P * s.F.transpose() ) + ( s.Q );
             // return state prediction
             return x;
         }
@@ -186,6 +186,9 @@ namespace Kalman {
             
             // Update covariance
             P -= K * m.H * P;
+
+            printf("state: \n");
+            std::cout << x << std::endl;
 
             // return updated state estimate
             return x;
