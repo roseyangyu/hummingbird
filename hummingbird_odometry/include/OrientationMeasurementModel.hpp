@@ -50,9 +50,11 @@ public:
         this->H(0, 6) = 1;
         this->H(1, 7) = 1;
         this->H(2, 8) = 1;
-        // Set noise
+        // dh/dw 
         this->V.setIdentity();
-        this->V = 0.3*this->V;
+        // noise vector covariance
+        this->P.setIdentity();
+        this->P = 0.2*this->P;
     }
     
     /**

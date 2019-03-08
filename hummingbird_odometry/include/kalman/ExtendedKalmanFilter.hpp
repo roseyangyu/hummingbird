@@ -187,9 +187,6 @@ namespace Kalman {
             // Update covariance
             P -= K * m.H * P;
 
-            printf("state: \n");
-            std::cout << x << std::endl;
-
             // return updated state estimate
             return x;
         }
