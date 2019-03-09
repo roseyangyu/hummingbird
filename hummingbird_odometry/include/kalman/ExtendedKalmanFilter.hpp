@@ -179,6 +179,8 @@ namespace Kalman {
             
             // compute kalman gain
             KalmanGain<Measurement> K = P * m.H.transpose() * S.inverse();
+            //std::cout << "Kalman gain: " << std::endl;
+            //std::cout << K << std::endl;
             
             // UPDATE STATE ESTIMATE AND COVARIANCE
             // Update state using computed kalman gain and innovation

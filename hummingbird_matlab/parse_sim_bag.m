@@ -3,7 +3,7 @@
 %   m - map frame
 %   p - partner frame
 %   b - base_link frame
-filename = '2019-02-27-13-27-28.bag';
+filename = '2019-03-09-17-00-04.bag';
 bag = rosbag(filename);
 tf_select = select(bag, 'Topic', '/tf');
 tf_msgs = readMessages(tf_select);
@@ -42,18 +42,16 @@ for i=1:length(mb)
     Rbp_true = [Rbp_true; rotm2eul(eul2rotm(Rmb(i,:), 'XYZ')'*eul2rotm(Rmp_true', 'XYZ'), 'XYZ')];
 end
 
-tag3c_transforms = get_transforms(tf_msgs, 'base_link', 'tag3_corrected');
-[tag3c_time tag3c_pos tag3c_rpy] = processTransforms(tag3c_transforms);
+bundle1_transforms = get_transforms(tf_msgs, 'base_link', 'bundle1_corrected');
+[bundle1_time bundle1_pos bundle1_rpy] = processTransforms(bundle1_transforms);
                        
-tag4c_transforms = get_transforms(tf_msgs, 'base_link', 'tag4_corrected');
-[tag4c_time tag4c_pos tag4c_rpy] = processTransforms(tag4c_transforms);
 
 %% Plot above
 hold on
 plot(tmb, obp_true(:,1))
-plot(tbp, obp(:,1))
-plot(tag4c_time, tag4c_pos(:,1))
-legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag4')
+plot(tbp, obp(:,1)-0.06)
+plot(bundle1_time, bundle1_pos(:,1)-0.06)
+legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner X offset')
 xlabel('time (s)')
 ylabel('m')
@@ -62,8 +60,8 @@ figure
 hold on
 plot(tmb, obp_true(:,2))
 plot(tbp, obp(:,2))
-plot(tag4c_time, tag4c_pos(:,2))
-legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag4')
+plot(bundle1_time, bundle1_pos(:,2))
+legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner Y offset')
 xlabel('time (s)')
 ylabel('m')
@@ -72,8 +70,8 @@ figure
 hold on
 plot(tmb, obp_true(:,3))
 plot(tbp, obp(:,3))
-plot(tag4c_time, tag4c_pos(:,3))
-legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag4')
+plot(bundle1_time, bundle1_pos(:,3))
+legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner Z offset')
 xlabel('time (s)')
 ylabel('m')
@@ -82,8 +80,8 @@ figure
 hold on
 plot(tmb, Rbp_true(:,1))
 plot(tbp, Rbp(:,1))
-plot(tag4c_time, tag4c_rpy(:,1))
-legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag4')
+plot(bundle1_time, bundle1_rpy(:,1))
+legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner roll')
 xlabel('time (s)')
 ylabel('rads')

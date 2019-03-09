@@ -73,25 +73,28 @@ public:
 
     Matrix<float, 12, 12> stateCovariance;
 
+    int g = -9.82;
+
     SystemModel() {
         inputCovariance.setZero();
-        inputCovariance(0,0) = 1; // acc
-        inputCovariance(1,1) = 1;
-        inputCovariance(2,2) = 1;
+        inputCovariance(0,0) = 0.1; // acc
+        inputCovariance(1,1) = 0.1;
+        inputCovariance(2,2) = 0.1;
         inputCovariance(3,3) = 0.00001; // gyro
         inputCovariance(4,4) = 0.00001;
         inputCovariance(5,5) = 0.00001;
 
+        stateCovariance.setZero();
         stateCovariance(0,0) = 0.1; // position covariance
         stateCovariance(1,1) = 0.1;
         stateCovariance(2,2) = 0.1;
         stateCovariance(3,3) = 0.1; // velocity covariance
         stateCovariance(4,4) = 0.1;
         stateCovariance(5,5) = 0.1;
-        stateCovariance(6,6) = 0.1; // roll, pitch, yaw covariance
-        stateCovariance(7,7) = 0.1;
-        stateCovariance(8,8) = 0.1;
-        stateCovariance(9,9) = 0.1; // bias variance
+        stateCovariance(6,6) = 0.05; // roll, pitch, yaw covariance
+        stateCovariance(7,7) = 0.05;
+        stateCovariance(8,8) = 0.05;
+        stateCovariance(9,9) = 0.05; // bias variance
         stateCovariance(10,10) = 0.1;
         stateCovariance(11,11) = 0.1; 
     } 
@@ -155,16 +158,26 @@ protected:
     void updateJacobians( const S& x, const C& u, float dt)
     {
         this->F.setZero();
+        Vector3f rpy = x.segment(6,3);
         Vector3f w = u.segment(3,3);
         Matrix3f S = vectorToCrossMatrix(w);
         // parter position wrt partner position, partner position wrt velocity
         this->F.block(0,0,3,3) = -1*S;
         this->F.block(0,3,3,3) = -1*MatrixXf::Identity(3, 3);
 
+        // acceleration wrt roll
+        this->F(3, 6) = 0;
+        this->F(4, 6) = g*cos(rpy(0))*cos(rpy(1));
+        this->F(5, 6) = -1*g*sin(rpy(0))*cos(rpy(1));
+        
+        // acceleration wrt pitch
+        this->F(3, 7) = -1*g*cos(rpy(1));
+        this->F(4, 7) = -1*sin(rpy(0))*sin(rpy(0));
+        this->F(5, 7) = -1*cos(rpy(0))*sin(rpy(1)); 
+
         // velocity wrt bias
         this->F.block(3,9,3,3) = -1*MatrixXf::Identity(3,3);
 
-        Vector3f rpy = x.segment(6,3);
         // roll_dot wrt roll, pitch, yaw
         this->F(6, 6) =  (w(1)*cos(rpy(0))-w(2)*sin(rpy(0)))*sin(rpy(1))/cos(rpy(1));
         this->F(6,7) = (w(2)*cos(rpy(0))+w(1)*sin(rpy(0)))/(cos(rpy(1))*cos(rpy(1)));
@@ -212,7 +225,7 @@ protected:
 
         Matrix<float, 12, 12> dfdw;
         dfdw.setIdentity();
-        this->Q = dfdu*inputCovariance*dt*dfdu.transpose() + dfdw*stateCovariance*dfdw.transpose();
+        this->Q = dt*dfdu*inputCovariance*dfdu.transpose() + dt*dfdw*stateCovariance*dfdw.transpose();
     }
 };
 
