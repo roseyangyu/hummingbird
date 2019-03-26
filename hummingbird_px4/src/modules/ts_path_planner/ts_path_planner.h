@@ -31,6 +31,7 @@ public:
 	void update_control_mode(int argc, char* argv[]);
 
 private:
+	bool raw_mode = false;
 	bool _task_should_exit;
 	int  _planner_task;
 	bool _setpoint_updated;

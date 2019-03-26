@@ -128,48 +128,67 @@ TailsitterPathPlanner::task_main()
 	_position_setpoint_step_sub = orb_subscribe(ORB_ID(position_setpoint_triplet_step));
 	_local_pos_sub = orb_subscribe(ORB_ID(vehicle_local_position));
 	work_queue(HPWORK, &_work, (worker_t)&TailsitterPathPlanner::publish_control_mode_trampoline, this, 0);
+
+	// If in 'raw' mode, we poll the setpoint and publish upon receive
+	px4_pollfd_struct_t fds[] = {
+		{ .fd = _position_setpoint_step_sub,   .events = POLLIN },
+	};
+
 	while(!_task_should_exit){
-		_looptimer.wait();
-		poll_subscriptions();
+		
+		if (this->raw_mode) {
+			// wait for event for up to 1s
+			int poll_ret = px4_poll(fds, 1, 1000);
+			if (poll_ret > 0 && fds[0].revents & POLLIN) { 
+				poll_subscriptions();
+			}
+		} else {
+			_looptimer.wait();
+			poll_subscriptions();
+		}
 
 		// Update the set point
 		if (_setpoint_updated){
 
+			math::Vector<3> next_point;
+
+			if (this->raw_mode) {
+				next_point = _waypoint.end_point;
+			} else {
 				float dt = (hrt_absolute_time() - _waypoint.start_time)/1e6f;
-				math::Vector<3> next_point = _waypoint.start_point + _waypoint.direction * dt * _waypoint.speed;
-				math::Vector<3> velocity = _waypoint.velocity;
-				float yaw = _waypoint.yaw;
+				next_point = _waypoint.start_point + _waypoint.direction * dt * _waypoint.speed;
+			}
 
-				if((next_point - _waypoint.end_point).length() < 0.05f){
-					_setpoint_updated = false;
-					next_point = _waypoint.end_point;
-					velocity.zero();
-				}
+			math::Vector<3> velocity = _waypoint.velocity;
 
-				_pos_sp_triplet.previous = _pos_sp_triplet.current;
-				_pos_sp_triplet.current.valid = true;
-				_pos_sp_triplet.current.position_valid = true;
-				_pos_sp_triplet.current.velocity_valid = true;
-				_pos_sp_triplet.current.velocity_frame = position_setpoint_s::VELOCITY_FRAME_LOCAL_NED;
-				_pos_sp_triplet.current.type = position_setpoint_s::SETPOINT_TYPE_OFFBOARD;
-				_pos_sp_triplet.current.alt_valid = false;
-				_pos_sp_triplet.current.yawspeed_valid = false;
-//				velocity.zero();
-//				velocity.normalize();
-//				velocity = velocity * 0.3f;
-				_pos_sp_triplet.current.acceleration_valid =  false;
-				_pos_sp_triplet.current.yaw_valid = true;
-				_pos_sp_triplet.current.x = next_point(0);
-				_pos_sp_triplet.current.y = next_point(1);
-				_pos_sp_triplet.current.z = next_point(2);
-				_pos_sp_triplet.current.vx = velocity(0);
-				_pos_sp_triplet.current.vy = velocity(1);
-				_pos_sp_triplet.current.vz = velocity(2);
-				_pos_sp_triplet.current.yaw = yaw;
-				_pos_sp_triplet.current.timestamp = hrt_absolute_time();
-//				printf("Next point %f, %f, %f\n", (double) next_point(0),(double) next_point(1),(double) next_point(2));
-//				printf("Velocity %f, %f, %f\n", (double) velocity(0),(double) velocity(1),(double) velocity(2));
+			if(!(this->raw_mode) && (next_point - _waypoint.end_point).length() < 0.05f){
+				_setpoint_updated = false;
+				next_point = _waypoint.end_point;
+				velocity.zero();
+			} else if (this->raw_mode) {
+				_setpoint_updated = false;
+			}
 
+			_pos_sp_triplet.previous = _pos_sp_triplet.current;
+			_pos_sp_triplet.current.valid = true;
+			_pos_sp_triplet.current.position_valid = true;
+			_pos_sp_triplet.current.velocity_valid = true;
+			_pos_sp_triplet.current.velocity_frame = position_setpoint_s::VELOCITY_FRAME_LOCAL_NED;
+			_pos_sp_triplet.current.type = position_setpoint_s::SETPOINT_TYPE_OFFBOARD;
+			_pos_sp_triplet.current.alt_valid = false;
+			_pos_sp_triplet.current.yawspeed_valid = false;
+			_pos_sp_triplet.current.acceleration_valid =  false;
+			_pos_sp_triplet.current.yaw_valid = true;
+			_pos_sp_triplet.current.x = next_point(0);
+			_pos_sp_triplet.current.y = next_point(1);
+			_pos_sp_triplet.current.z = next_point(2);
+			_pos_sp_triplet.current.vx = velocity(0);
+			_pos_sp_triplet.current.vy = velocity(1);
+			_pos_sp_triplet.current.vz = velocity(2);
+			_pos_sp_triplet.current.yaw = _waypoint.yaw;
+			_pos_sp_triplet.current.timestamp = hrt_absolute_time();
+//			printf("Next point %f, %f, %f\n", (double) next_point(0),(double) next_point(1),(double) next_point(2));
+//			printf("Velocity %f, %f, %f\n", (double) velocity(0),(double) velocity(1),(double) velocity(2));
 
 			publish_setpoint();
 		}
@@ -180,6 +199,7 @@ TailsitterPathPlanner::task_main()
 void
 TailsitterPathPlanner::publish_setpoint()
 {
+	
 	if (_position_setpoint_pub != nullptr) {
 		orb_publish(ORB_ID(position_setpoint_triplet), _position_setpoint_pub, &_pos_sp_triplet);
 
@@ -269,10 +289,19 @@ void
 TailsitterPathPlanner::update_control_mode(int argc, char* argv[])
 {
 	reset_control_mode();
-	if(!strcmp(argv[0], "acc"))
+	if(!strcmp(argv[0], "acc")) {
+		this->raw_mode = false;
 		_control_mode.ignore_acceleration_force = false;
-	if(!strcmp(argv[0], "pos"))
+	}
+	if(!strcmp(argv[0], "pos")) {
+		this->raw_mode = false;
 		_control_mode.ignore_position = false;
+	}
+	if(!strcmp(argv[0], "raw")) {
+		// raw mode will publish the setpoint as provided only once.
+		this->raw_mode = true;
+		PX4_INFO("Entering raw mode");
+	}
 }
 
 
@@ -370,6 +399,9 @@ TailsitterPathPlanner::poll_subscriptions()
 	}
 }
 
+
+
+
 int ts_path_planner_main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -434,7 +466,6 @@ int ts_path_planner_main(int argc, char *argv[])
 		else{
 			ts_path_planner::g_planner->update_pos_setpoint(argc-2, argv+2);
 		}
-
 		return 0;
 	}
 
