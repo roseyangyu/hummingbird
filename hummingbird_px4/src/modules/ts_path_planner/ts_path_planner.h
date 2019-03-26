@@ -81,6 +81,7 @@ private:
 	void reset_control_mode();
 	void params_update(bool force_update);
 	void poll_subscriptions();
+	void set_waypoint(math::Vector<3> endpoint, math::Vector<3> velocity, float yaw);
 };
 
 

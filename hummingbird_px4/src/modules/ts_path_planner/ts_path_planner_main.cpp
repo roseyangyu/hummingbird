@@ -249,38 +249,17 @@ TailsitterPathPlanner::update_pos_setpoint(int argc, char*argv[]){
 		}
 
 		if(!strcmp(argv[0], "pos")){
-			if (_control_mode.ignore_position){
-
-				_control_mode.ignore_position = false;
-				_control_mode.ignore_acceleration_force = true;
-			}
-
-			_waypoint.start_point(0) = _local_pos.x;
-			_waypoint.start_point(1) = _local_pos.y;
-			_waypoint.start_point(2) = _local_pos.z;
-			_waypoint.end_point(0) = strtof(argv[1], 0);
-			_waypoint.end_point(1) = strtof(argv[2], 0);
-			_waypoint.end_point(2) = strtof(argv[3], 0);
-			math::Vector<3> direction = _waypoint.end_point - _waypoint.start_point;
-			direction.normalize();
-			_waypoint.direction = direction;
-			_waypoint.yaw = strtof(argv[4], 0) / 180.f * 3.1415926f;
-			math::Vector<3> velocity = direction * _params.cruise_speed;
-
-			for (int i=0; i<3; i++){
-				if (velocity(i) > _params.cruise_speed_max(i) || velocity(i) < -_params.cruise_speed_max(i)){
-					float scale = _params.cruise_speed_max(i) / velocity(i);
-					scale = scale > 0 ? scale:-scale;
-					velocity = velocity * scale;
-				}
-			}
-			_waypoint.speed = velocity.length();
-			_waypoint.velocity = velocity;
-
-			usleep(1e6);
-			_waypoint.start_time = hrt_absolute_time();
-			_setpoint_updated = true;
-
+			math::Vector<3> end_point;
+			math::Vector<3> velocity;
+			float yaw;
+			end_point(0) = strtof(argv[1], 0);
+			end_point(1) = strtof(argv[2], 0);
+			end_point(2) = strtof(argv[3], 0);
+			velocity(0) = 0;
+			velocity(1) = 0;
+			velocity(2) = 0;
+			yaw = strtof(argv[4], 0) / 180.f * 3.1415926f;
+			set_waypoint(end_point, velocity, yaw);
 		}
 	}
 }
@@ -333,6 +312,39 @@ TailsitterPathPlanner::params_update(bool force)
 }
 
 void
+TailsitterPathPlanner::set_waypoint(math::Vector<3> end_point, math::Vector<3> velocity, float yaw)
+{
+	if (_control_mode.ignore_position) {
+		_control_mode.ignore_position = false;
+		_control_mode.ignore_acceleration_force = true;
+	}
+	_waypoint.start_point(0) = _local_pos.x;
+	_waypoint.start_point(1) = _local_pos.y;
+	_waypoint.start_point(2) = _local_pos.z;
+	_waypoint.end_point = end_point;
+	_waypoint.direction =  _waypoint.end_point - _waypoint.start_point;
+	_waypoint.direction.normalize();
+	_waypoint.yaw = yaw;
+	// Saturate the maximum velocity in all directions
+	for (int i=0; i<3; i++){
+		if (velocity(i) > _params.cruise_speed_max(i) || velocity(i) < -_params.cruise_speed_max(i)){
+			PX4_INFO("Clipping velocity while setting waypoint");
+			float scale = _params.cruise_speed_max(i) / velocity(i);
+			scale = scale > 0 ? scale:-scale;
+			velocity = velocity * scale;
+		}
+	}
+	if (velocity.length() < 1e-6f ) { // If effectively no velocity
+		PX4_INFO("Published setpoint has effectively no velocity. Setting based on default cruise speed.");
+		velocity = _waypoint.direction * _params.cruise_speed;
+	}
+	_waypoint.velocity = velocity;
+	_waypoint.speed = velocity.length();
+	_waypoint.start_time = hrt_absolute_time();
+	_setpoint_updated = true;
+}
+
+void
 TailsitterPathPlanner::poll_subscriptions()
 {
 	bool updated;
@@ -345,44 +357,16 @@ TailsitterPathPlanner::poll_subscriptions()
 	orb_check(_position_setpoint_step_sub, &updated);
 	if (updated) {
 		orb_copy(ORB_ID(position_setpoint_triplet_step), _position_setpoint_step_sub, &_pos_sp_triplet_step);
-
-		if (_control_mode.ignore_position) {
-			_control_mode.ignore_position = false;
-			_control_mode.ignore_acceleration_force = true;
-		}
-
-		_waypoint.start_point(0) = _local_pos.x;
-		_waypoint.start_point(1) = _local_pos.y;
-		_waypoint.start_point(2) = _local_pos.z;
-		_waypoint.end_point(0) = _pos_sp_triplet_step.current.x;
-		_waypoint.end_point(1) = _pos_sp_triplet_step.current.y;
-		_waypoint.end_point(2) = _pos_sp_triplet_step.current.z;
-		math::Vector<3> direction = _waypoint.end_point - _waypoint.start_point;
-		// direction.normalize();
-		_waypoint.direction = direction;
-		_waypoint.yaw = _pos_sp_triplet_step.current.yaw;
 		math::Vector<3> velocity;
 		velocity(0) = _pos_sp_triplet_step.current.vx;
 		velocity(1) = _pos_sp_triplet_step.current.vy;
 		velocity(2) = _pos_sp_triplet_step.current.vz;
-		if (velocity.length() < 1e-6f ) { // If effectively no velocity
-			velocity = direction * _params.cruise_speed;
-		}
-
-		// Saturate the maximum velocity in all directions
-		for (int i=0; i<3; i++){
-			if (velocity(i) > _params.cruise_speed_max(i) || velocity(i) < -_params.cruise_speed_max(i)){
-				float scale = _params.cruise_speed_max(i) / velocity(i);
-				scale = scale > 0 ? scale:-scale;
-				velocity = velocity * scale;
-			}
-		}
-		_waypoint.speed = velocity.length();
-		_waypoint.velocity = velocity;
-
-		usleep(1e6);
-		_waypoint.start_time = hrt_absolute_time();
-		_setpoint_updated = true;
+		math::Vector<3> end_point;
+		end_point(0) = _pos_sp_triplet_step.current.x;
+		end_point(1) = _pos_sp_triplet_step.current.y;
+		end_point(2) = _pos_sp_triplet_step.current.z;
+		float yaw = _pos_sp_triplet_step.current.yaw;
+		set_waypoint(end_point, velocity, yaw);
 	}
 }
 
