@@ -138,6 +138,7 @@ TailsitterPathPlanner::task_main()
 				float dt = (hrt_absolute_time() - _waypoint.start_time)/1e6f;
 				math::Vector<3> next_point = _waypoint.start_point + _waypoint.direction * dt * _waypoint.speed;
 				math::Vector<3> velocity = _waypoint.velocity;
+				float yaw = _waypoint.yaw;
 
 				if((next_point - _waypoint.end_point).length() < 0.05f){
 					_setpoint_updated = false;
@@ -164,7 +165,7 @@ TailsitterPathPlanner::task_main()
 				_pos_sp_triplet.current.vx = velocity(0);
 				_pos_sp_triplet.current.vy = velocity(1);
 				_pos_sp_triplet.current.vz = velocity(2);
-				_pos_sp_triplet.current.yaw = _waypoint.yaw;
+				_pos_sp_triplet.current.yaw = yaw;
 				_pos_sp_triplet.current.timestamp = hrt_absolute_time();
 //				printf("Next point %f, %f, %f\n", (double) next_point(0),(double) next_point(1),(double) next_point(2));
 //				printf("Velocity %f, %f, %f\n", (double) velocity(0),(double) velocity(1),(double) velocity(2));

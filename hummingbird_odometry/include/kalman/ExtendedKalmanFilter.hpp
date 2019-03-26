@@ -152,9 +152,10 @@ namespace Kalman {
             try { 
                 PositionModel pm = dynamic_cast<PositionModel&>(m);
                 // check 3 sigmas
-                if ( ( z(0) < x(0)-3*P(0,0) || z(0) > x(0)+3*P(0,0) ) || 
-                    ( z(1) < x(1)-3*P(1,1) || z(1) > x(1)+3*P(1,1) ) ||
-                    ( z(2) < x(2)-3*P(2,2) || z(2) > x(2)+3*P(2,2) )) {
+                if ( ( z(0) < x(0)-3*sqrt(P(0,0)) || z(0) > x(0)+3*sqrt(P(0,0)) ) || 
+                    ( z(1) < x(1)-3*sqrt(P(1,1)) || z(1) > x(1)+3*sqrt(P(1,1)) ) ||
+                    ( z(2) < x(2)-3*sqrt(P(2,2)) || z(2) > x(2)+3*sqrt(P(2,2)) )) {
+                    printf("Skipping position measurement\n");
                     return x;
                } 
             } catch (std::bad_cast) {
@@ -163,9 +164,10 @@ namespace Kalman {
             try {
                 OrientationModel pm = dynamic_cast<OrientationModel&>(m);
                // Check 3 sigmas
-                if ( ( z(0) < x(6)-3*P(6,6) || z(0) > x(6)+3*P(6,6) ) || 
-                    ( z(1) < x(7)-3*P(7,7) || z(1) > x(7)+3*P(7,7) ) ||
-                    ( z(2) < x(8)-3*P(8,8) || z(2) > x(8)+3*P(8,8) )) {
+                if ( ( z(0) < x(6)-3*sqrt(P(6,6)) || z(0) > x(6)+3*sqrt(P(6,6)) ) || 
+                    ( z(1) < x(7)-3*sqrt(P(7,7)) || z(1) > x(7)+3*sqrt(P(7,7)) ) ||
+                    ( z(2) < x(8)-3*sqrt(P(8,8)) || z(2) > x(8)+3*sqrt(P(8,8)) )) {
+                    printf("skipping orientation measurement\n");
                     return x;
                }
             } catch (std::bad_cast) {
