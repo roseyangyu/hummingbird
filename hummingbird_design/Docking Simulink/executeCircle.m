@@ -3,7 +3,7 @@
 numSecsPerRev = 20;
 omega = 2*pi/numSecsPerRev;
 numRevs = 1;
-zOffset = 1.5;
+zOffset = 1.74;
 radius = 0.5;
 tend = posixtime(datetime('now')) + 2*pi*numRevs/omega;
 yaw = 0;
@@ -31,6 +31,6 @@ while t0+t < tend
     publishRawSetpoint(pos, vel, yaw);
     publishRawSetpoint(pos, vel, yaw);
     publishRawSetpoint(pos, vel, yaw);
-    pause(0.2);
+    pause(0.1);
 end
 toc
