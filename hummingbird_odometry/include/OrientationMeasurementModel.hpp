@@ -54,7 +54,7 @@ public:
         this->V.setIdentity();
         // noise vector covariance
         this->P.setIdentity();
-        this->P = 0.2*this->P;
+        this->P = this->P;
     }
     
     /**

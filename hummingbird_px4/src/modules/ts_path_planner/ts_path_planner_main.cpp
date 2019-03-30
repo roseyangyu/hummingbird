@@ -151,22 +151,20 @@ TailsitterPathPlanner::task_main()
 		if (_setpoint_updated){
 
 			math::Vector<3> next_point;
+			math::Vector<3> velocity = _waypoint.velocity;
 
 			if (this->raw_mode) {
 				next_point = _waypoint.end_point;
+				_setpoint_updated = false;
 			} else {
 				float dt = (hrt_absolute_time() - _waypoint.start_time)/1e6f;
 				next_point = _waypoint.start_point + _waypoint.direction * dt * _waypoint.speed;
 			}
 
-			math::Vector<3> velocity = _waypoint.velocity;
-
 			if(!(this->raw_mode) && (next_point - _waypoint.end_point).length() < 0.05f){
 				_setpoint_updated = false;
 				next_point = _waypoint.end_point;
 				velocity.zero();
-			} else if (this->raw_mode) {
-				_setpoint_updated = false;
 			}
 
 			_pos_sp_triplet.previous = _pos_sp_triplet.current;

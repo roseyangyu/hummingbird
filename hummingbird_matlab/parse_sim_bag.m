@@ -3,15 +3,7 @@
 %   m - map frame
 %   p - partner frame
 %   b - base_link frame
-%filename = '2019-03-10-19-35-53.bag'; % forward and backward
-%filename = '2019-03-14-21-22-46.bag' % just go up
-%filename = '2019-03-14-21-44-58.bag'
-%filename = '2019-03-14-22-26-16.bag'
-%filename = '2019-03-14-22-41-05.bag'
-%filename = '2019-03-14-23-30-50.bag'
-%filename = '2019-03-15-12-50-49.bag'
-filename = '2019-03-15-13-56-15.bag'
-%filename = '2019-03-15-14-06-38.bag'
+filename = '2019-03-27-14-51-50.bag'
 bag = rosbag(filename);
 tf_select = select(bag, 'Topic', '/tf');
 tf_msgs = readMessages(tf_select);
@@ -40,7 +32,7 @@ bp = get_transforms(tf_msgs, 'base_link', 'partner');
 
 % compute true values
 % NOTE: need to manually set true map to partner values
-mp_true = [1.5 0 1.5];
+mp_true = [1 0 1.5];
 Rmp_true = [0;0;0]; % roll pitch yaw
 
 % Compute obp_true and Rbp_true
@@ -71,6 +63,13 @@ end
 
 
 %% Plot above
+figure
+hold on
+% plot map to baselink x vs map to baselink y
+% for circle maneuvers
+plot(omb(:, 1), omb(:,2))
+
+figure
 hold on
 plot(tmb, obp_true(:,1))
 plot(tbp, obp(:,1))
@@ -183,7 +182,7 @@ xlabel('time (s)')
 ylabel('rads')
 
 
-%% Plot bundle1 raw measurements
+%% Other plots
 figure
 hold on
 % plot raw baselink to bundle1
@@ -201,6 +200,10 @@ title('raw bundle1 pitch measurement')
 figure
 plot(bundle1_time, bundle1_rpy(:,3))
 title('raw bundle1 yaw measurement')
+figure
+plot(tmb, Rmb(:,3))
+title('map to baselink yaw')
+
 %% Plot bundle1 raw measurements tranformed to baselink frame
 %tmb omb Rmb
 
@@ -235,3 +238,5 @@ imuAcc = [cellfun(@(m) m.LinearAcceleration.X, imuMsgs),...
 imuAng = [cellfun(@(m) m.AngularVelocity.X, imuMsgs),...
                cellfun(@(m) m.AngularVelocity.Y, imuMsgs),...
                cellfun(@(m) m.AngularVelocity.Z, imuMsgs)];
+%% Plot IMU data
+plot(imuTime, imuAcc(:,1))

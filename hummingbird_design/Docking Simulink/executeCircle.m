@@ -4,7 +4,7 @@ numSecsPerRev = 20;
 omega = 2*pi/numSecsPerRev;
 numRevs = 1;
 zOffset = 1.74;
-radius = 0.5;
+radius = 0.3;
 tend = posixtime(datetime('now')) + 2*pi*numRevs/omega;
 yaw = 0;
 

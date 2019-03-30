@@ -77,12 +77,12 @@ public:
 
     SystemModel() {
         inputCovariance.setZero();
-        inputCovariance(0,0) = 0.1; // acc
-        inputCovariance(1,1) = 0.1;
-        inputCovariance(2,2) = 0.1;
-        inputCovariance(3,3) = 0.00001; // gyro
-        inputCovariance(4,4) = 0.00001;
-        inputCovariance(5,5) = 0.00001;
+        inputCovariance(0,0) = 0.35; // acc
+        inputCovariance(1,1) = 0.35;
+        inputCovariance(2,2) = 0.35;
+        inputCovariance(3,3) = 0.001; // gyro
+        inputCovariance(4,4) = 0.001;
+        inputCovariance(5,5) = 0.001;
 
         stateCovariance.setZero();
         stateCovariance(0,0) = 0.1; // position covariance
@@ -91,12 +91,12 @@ public:
         stateCovariance(3,3) = 0.1; // velocity covariance
         stateCovariance(4,4) = 0.1;
         stateCovariance(5,5) = 0.1;
-        stateCovariance(6,6) = 0.05; // roll, pitch, yaw covariance
-        stateCovariance(7,7) = 0.05;
-        stateCovariance(8,8) = 0.05;
-        stateCovariance(9,9) = 0.05; // bias variance
-        stateCovariance(10,10) = 0.1;
-        stateCovariance(11,11) = 0.1; 
+        stateCovariance(6,6) = 0.01; // roll, pitch, yaw covariance
+        stateCovariance(7,7) = 0.01;
+        stateCovariance(8,8) = 0.01;
+        stateCovariance(9,9) = 0.01; // bias variance
+        stateCovariance(10,10) = 0.01;
+        stateCovariance(11,11) = 0.01; 
     } 
 
     /**
