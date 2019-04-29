@@ -45,16 +45,21 @@ SystemModel sys;
 Kalman::ExtendedKalmanFilter<State> predictor;
 Vector3f g(0, 0, -9.82); // gravity in Toronto, Canada
 
-vector<string> tagFrames = {"bundle1"};
-const int NUM_TAGS = 1; 
+// frames to which a correction is applied
+vector<string> tagFrames = {"bundle1", "tag3"};
+const int NUM_TAGS = 2; 
 Matrix3f correctionMatrices[NUM_TAGS] = {
     (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(), // bundle1
+    (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(), // tag3
 };
 Vector3f tagOffsets[NUM_TAGS] = {
     (Vector3f() << -0.02, -0.163, 0.350).finished(), // bundle1
+    (Vector3f() << -0.02, -0.163, 0.350).finished(), // tag3
 };
-map<string, int> tagFrameToCorrectionIndex = {{"bundle1", 0}};
 
+// Elements of this array must be in tagFrames
+// Measurements of these tags is used to update the state
+vector<string> stateUpdateIds = {"bundle1"};
 
 
 ros::Time previous;
@@ -210,7 +215,8 @@ int main(int argc, char** argv){
             // Estimate based on measurements of tag_corrected
             pMeasurement = origin;
             oMeasurement = quaterniontoEulerAngle(qTag.inverse()); // inverse because state is rpy from partner to base_link
-            if (updatePartnerPosition(pMeasurement, oMeasurement, sys, predictor, pm, om)) {
+            if (std::find(stateUpdateIds.begin(), stateUpdateIds.end(), tagFrameId) != stateUpdateIds.end() &&
+                updatePartnerPosition(pMeasurement, oMeasurement, sys, predictor, pm, om)) {
                 start = true; // first estimate successful, begin outputting
             }
         }

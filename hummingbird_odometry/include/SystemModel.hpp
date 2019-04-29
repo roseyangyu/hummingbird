@@ -77,9 +77,9 @@ public:
 
     SystemModel() {
         inputCovariance.setZero();
-        inputCovariance(0,0) = 0.35; // acc
-        inputCovariance(1,1) = 0.35;
-        inputCovariance(2,2) = 0.35;
+        inputCovariance(0,0) = 0.15; // acc
+        inputCovariance(1,1) = 0.15;
+        inputCovariance(2,2) = 0.15;
         inputCovariance(3,3) = 0.001; // gyro
         inputCovariance(4,4) = 0.001;
         inputCovariance(5,5) = 0.001;

@@ -15,6 +15,12 @@ for i=1:100
 end
 
 %%
+numSecsPerRev = 20;
+omega = 2*pi/numSecsPerRev;
+numRevs = 1;
+zOffset = 1.74;
+radius = 0.3;
+yaw = 0;
 tic
 t0 = posixtime(datetime('now'));
 tend = t0 + 2*pi*numRevs/omega;
