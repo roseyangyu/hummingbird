@@ -44,8 +44,9 @@ string partnerFrameId = "partner";
 SystemModel sys;
 Kalman::ExtendedKalmanFilter<State> predictor;
 Vector3f g(0, 0, -9.82); // gravity in Toronto, Canada
+float ttl = 0.5; // If no measurements are recorded after ttl seconds, then estimates of partner are not published
 
-// frames to which a correction is applied
+// frames to which a correction is applied and published on /tf
 vector<string> tagFrames = {"bundle1", "tag3"};
 const int NUM_TAGS = 2; 
 Matrix3f correctionMatrices[NUM_TAGS] = {
@@ -60,7 +61,6 @@ Vector3f tagOffsets[NUM_TAGS] = {
 // Elements of this array must be in tagFrames
 // Measurements of these tags is used to update the state
 vector<string> stateUpdateIds = {"bundle1"};
-
 
 ros::Time previous;
 
@@ -160,7 +160,7 @@ int main(int argc, char** argv){
     predictor.init(x);
 
     geometry_msgs::TransformStamped tagTransforms[NUM_TAGS];
-    float lastUsedTimes[NUM_TAGS] = {0};
+    float lastUsedTimes[NUM_TAGS] = {0, 0};
 
     string tagFrameId;
     // TODO: change tag lookup to a subscription?
@@ -220,10 +220,17 @@ int main(int argc, char** argv){
                 start = true; // first estimate successful, begin outputting
             }
         }
+
+        ros::Time current = ros::Time::now();
+
+        // do not publish an estimate if all measurements are greater than 'ttl' old
+        if (std::all_of(std::begin(lastUsedTimes), std::end(lastUsedTimes), [current](float n){return n < current.toSec()-ttl;})) {
+            start = false;
+        }
         // TODO: Need to change message type to output covariance as well.
         // PoseWithCovariance
         if (start) {
-            currentPartnerEstimate.header.stamp = ros::Time::now();
+            currentPartnerEstimate.header.stamp = current;
             packState();
             br.sendTransform(currentPartnerEstimate);
         }
