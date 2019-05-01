@@ -11,7 +11,7 @@ namespace apriltags2_ros {
 ContinuousPoseDetector::ContinuousPoseDetector(ros::NodeHandle& nh) :
 		TagDetector(nh), it(nh) {
 
-	nh.param<bool>("publish_tag_detections_image", draw_tag_detections_image, false);
+	nh.param<bool>("/apriltags2_ros/publish_tag_detections_image", draw_tag_detections_image, false);
 	nh.param<bool>("optical_flow_accelerated", optical_flow_accelerated, false);
 
 	// Subscribers
