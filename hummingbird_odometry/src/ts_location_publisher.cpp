@@ -50,20 +50,19 @@ int main(int argc, char** argv){
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener listener(tfBuffer);
 
-  ros::Publisher ts_location_pub = node.advertise<geometry_msgs::Pose>("/ts_location_estimates", 10);
+  ros::Publisher ts_location_pub = node.advertise<geometry_msgs::Pose>("/ts_location_estimates", 60);
 
-  ros::Rate rate(20.0);
+  ros::Rate rate(60.0);
 
   while (node.ok()){
   	geometry_msgs::Pose pose;
 	try{
 		geometry_msgs::TransformStamped baselinkToPartnerTransform = tfBuffer.lookupTransform("base_link", "partner", ros::Time(0));
 		pose = transformToPose(baselinkToPartnerTransform.transform);
+		ts_location_pub.publish(pose);
 	}
 	catch (tf2::TransformException & ex){
-		continue;
 	}
-	ts_location_pub.publish(pose);
     rate.sleep();
   }
   return 0;

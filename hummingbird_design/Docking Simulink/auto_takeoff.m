@@ -17,6 +17,8 @@ msg.Pose.Position.Y = 0;
 msg.Pose.Position.Z = 1.5;
 
 eul = [0 0 0];
+% Weird that this works because qZYX is [w, x, y, z]
+% Furthermore, after launching, it requires the correct ordering.
 qZYX = eul2quat(eul);
 msg.Pose.Orientation.X = qZYX(1);
 msg.Pose.Orientation.Y = qZYX(2);

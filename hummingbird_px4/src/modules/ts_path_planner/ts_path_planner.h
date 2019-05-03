@@ -31,6 +31,7 @@ public:
 	void update_control_mode(int argc, char* argv[]);
 
 private:
+	bool raw_mode = false;
 	bool _task_should_exit;
 	int  _planner_task;
 	bool _setpoint_updated;
@@ -81,6 +82,7 @@ private:
 	void reset_control_mode();
 	void params_update(bool force_update);
 	void poll_subscriptions();
+	void set_waypoint(math::Vector<3> endpoint, math::Vector<3> velocity, float yaw);
 };
 
 

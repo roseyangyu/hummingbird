@@ -55,8 +55,9 @@ namespace Kalman {
     protected:
         //! System model jacobian
         Jacobian<State, State> F;
-        //! System model noise jacobian
-        Jacobian<State, State> W;
+
+        // Process noise;
+        Matrix<float, State::RowsAtCompileTime, State::RowsAtCompileTime> Q;
         
         /**
          * Callback function for state-dependent update of Jacobi-matrices F and W before each update step
@@ -71,7 +72,7 @@ namespace Kalman {
         LinearizedSystemModel()
         {
             F.setIdentity();
-            W.setIdentity();
+            Q.setIdentity();
         }
         ~LinearizedSystemModel() {}
     };

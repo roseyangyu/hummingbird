@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   nav_msgs
+  sensor_msgs
   geometry_msgs
   apriltags2_msgs
   apriltags2_ros

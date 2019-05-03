@@ -9,8 +9,8 @@ namespace Robot1
 {
 
 /**
- * @brief Measurement vector measuring an orientation as a quaternion.
- * Vector order is ROLL, PITCH, YAW. 
+ * @brief Measurement vector measuring an orientation.
+ * Vector order is ROLL, PITCH, YAW from partner frame to base_link frame.
  *
  * @param T Numeric scalar type
  */
@@ -44,13 +44,17 @@ public:
     
     OrientationMeasurementModel()
     {
-        // Setup jacobians. As these are static, we can define them once
-        // and do not need to update them dynamically
+        // Output of this measurement is roll, pitch, yaw
+        // which are the last 3 elements of x
         this->H.setZero();
-        this->H(0, 3) = 1;
-        this->H(1, 4) = 1;
-        this->H(2, 5) = 1;
+        this->H(0, 6) = 1;
+        this->H(1, 7) = 1;
+        this->H(2, 8) = 1;
+        // dh/dw 
         this->V.setIdentity();
+        // noise vector covariance
+        this->P.setIdentity();
+        this->P = this->P;
     }
     
     /**
@@ -66,9 +70,9 @@ public:
     M h(const S& x) const
     {
         M measurement;
-        measurement(0) = x(3);
-        measurement(1) = x(4);
-        measurement(2) = x(5); 
+        measurement(0) = x(6);
+        measurement(1) = x(7);
+        measurement(2) = x(8); 
         return measurement;
     }
 };
