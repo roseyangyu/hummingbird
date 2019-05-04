@@ -37,19 +37,18 @@ include_directories(
 )
 
 add_executable(odometry_node src/odometry_node.cpp)
-add_dependencies(odometry_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odometry_node
   ${catkin_LIBRARIES}
+  transformations_yaml_parser
 )
 
 add_executable(ts_location_estimator src/ts_location_estimator.cpp)
-add_dependencies(ts_location_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ts_location_estimator
   ${catkin_LIBRARIES}
 )
 
-add_executable(ts_location_publisher src/ts_location_publisher.cpp)
-add_dependencies(ts_location_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ts_location_publisher
-  ${catkin_LIBRARIES}
+add_library(transformations_yaml_parser STATIC
+  src/transformations_yaml_parser.cpp)
+target_link_libraries(transformations_yaml_parser
+  yaml-cpp
 )

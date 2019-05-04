@@ -1,3 +1,6 @@
+#include <string>
+#include <iostream>
+
 #include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -6,13 +9,14 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <apriltags2_msgs/AprilTagDetectionArray.h>
-#include <string>
-#include <iostream>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
+#include <transformations_yaml_parser.hpp>
 
 using namespace std;
+
 
 void poseCallback(const nav_msgs::OdometryConstPtr& msg) {
 	static tf2_ros::TransformBroadcaster br;
@@ -28,30 +32,6 @@ void poseCallback(const nav_msgs::OdometryConstPtr& msg) {
 	transformStamped.transform.rotation = msg->pose.pose.orientation;
 
 	br.sendTransform(transformStamped);
-}
-
-void cameraLocationCallback(const apriltags2_msgs::AprilTagDetectionArrayConstPtr& msg) {
-	static tf2_ros::TransformBroadcaster br;
-	geometry_msgs::TransformStamped cameraOrientation;
-
-	cameraOrientation.header.stamp = ros::Time::now();
-	cameraOrientation.header.frame_id = "base_link";
-	cameraOrientation.child_frame_id = "camera";
-
-	cameraOrientation.transform.translation.x = 0;
-	cameraOrientation.transform.translation.y = -0.046;
-	cameraOrientation.transform.translation.z = 0.384;
-	
-	tf2::Matrix3x3 m(0,0,1,-1,0,0,0,-1,0);
-	tf2::Quaternion q;
-	m.getRotation(q);
-
-	cameraOrientation.transform.rotation.x = q.x();
-	cameraOrientation.transform.rotation.y = q.y();
-	cameraOrientation.transform.rotation.z = q.z();
-	cameraOrientation.transform.rotation.w = q.w();
-
-	br.sendTransform(cameraOrientation);
 }
 
 void stars_realsense_callback(const geometry_msgs::TransformStampedConstPtr& msg) {
@@ -78,16 +58,51 @@ void stars_realsense_callback(const geometry_msgs::TransformStampedConstPtr& msg
 	br.sendTransform(cameraOrientation);
 }
 
+void publish_transform(std::string frame_id, 
+					   std::string child_frame_id,
+					   geometry_msgs::Quaternion rotation,
+					   geometry_msgs::Vector3 translation) {
+	static tf2_ros::StaticTransformBroadcaster br;
+	geometry_msgs::TransformStamped transformation;
+	transformation.header.stamp = ros::Time::now();
+	transformation.header.frame_id = frame_id;
+	transformation.child_frame_id = child_frame_id;
+	transformation.transform.rotation = rotation;
+	transformation.transform.translation = translation;
+	br.sendTransform(transformation);
+}
+
+
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "tf_transformer");
-
 	ros::NodeHandle node;
+
+	std::string transformations_file;
+	node.getParam("transformations_file", transformations_file);
+
+	std::vector<Transformation> transformations = parse_transformations_yaml(transformations_file);
+	for (int i = 0; i < transformations.size(); i++) {
+		printf("Publishing static transform %s->%s\n", transformations[i].frame_id.c_str(), transformations[i].child_frame_id.c_str());
+		printf("Rotation (x,y,z,w): %f, %f, %f, %f\n", 
+				transformations[i].rotation.x,
+				transformations[i].rotation.y,
+				transformations[i].rotation.z,
+				transformations[i].rotation.w);
+		printf("Translation (x,y,z): %f, %f, %f\n",
+				transformations[i].translation.x,
+				transformations[i].translation.y,
+				transformations[i].translation.z);
+		publish_transform(transformations[i].frame_id,
+						  transformations[i].child_frame_id,
+						  transformations[i].rotation,
+						  transformations[i].translation);
+		ros::spinOnce();
+	}
+
 	ros::Subscriber sub = node.subscribe("/mavros/global_position/local", 10,
 			&poseCallback);
 	ros::Subscriber sub2 = node.subscribe("/vicon/STARS_R200/STARS_R200", 10,
 										 &stars_realsense_callback);
-	ros::Subscriber sub3 = node.subscribe("/tag_detections", 10,
-			&cameraLocationCallback);
 
 	geometry_msgs::TransformStamped transform;
     tf2_ros::Buffer tfBuffer;

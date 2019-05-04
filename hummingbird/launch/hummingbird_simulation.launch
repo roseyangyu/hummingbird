@@ -11,7 +11,9 @@
     </include>
 
     <!-- Launches odometry and tf publishers -->
-    <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
+    <include file="$(find hummingbird_odometry)/launch/odometry.launch">
+        <arg name="transformations_file" value="$(find hummingbird_odometry)/config/simulation/transformations.yaml" />
+    </include>
 
     <!-- Launches the simulation -->
     <include file="$(find hummingbird_px4)/launch/mavros_posix_sitl.launch">
