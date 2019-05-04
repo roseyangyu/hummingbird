@@ -12,7 +12,6 @@
 
     <!-- Launches odometry and tf publishers -->
     <include file="$(find hummingbird_odometry)/launch/odometry.launch">
-        <arg name="transformations_file" value="$(find hummingbird_odometry)/config/simulation/transformations.yaml" />
     </include>
 
     <!-- Launches the simulation -->

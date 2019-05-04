@@ -1,6 +1,7 @@
 <launch>
-  <arg name="transformations_file" default="$(find hummingbird_odometry)/config/simulation/transformations.yaml" />
-  <param name="transformations_file" value="$(arg transformations_file)" />
   <node pkg="hummingbird_odometry" type="odometry_node" name="odometry" output="screen"/>
   <node pkg="hummingbird_odometry" type="ts_location_estimator" name="ts_location_estimator" output="screen"/>
+  <include file="$(find static_tf_publisher)/launch/static_tf_publisher.launch">
+      <arg name="transformations_file" value="$(find static_tf_publisher)/config/simulation/transformations.yaml" />
+  </include>
 </launch>
