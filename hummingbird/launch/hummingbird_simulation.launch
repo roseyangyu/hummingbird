@@ -10,6 +10,10 @@
         <arg name="image_topic" default="image_raw"/>
     </include>
 
+    <include file="$(find static_tf_publisher)/launch/static_tf_publisher.launch">
+        <arg name="transformations_file" value="$(find static_tf_publisher)/config/simulation/transformations.yaml" />
+    </include>
+
     <!-- Launches odometry and tf publishers -->
     <include file="$(find hummingbird_odometry)/launch/odometry.launch">
     </include>
