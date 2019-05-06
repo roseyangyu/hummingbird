@@ -86,9 +86,9 @@ int main(int argc, char** argv) {
     tf2_ros::TransformListener listener(tfBuffer);
     tf2_ros::TransformBroadcaster br;
 	ros::Rate rate(60.0);
-	while (node.ok()) { // broadcast map->partner as well
+	while (node.ok()) { // broadcast base_link to partner explicitly
 		try {
-			transform = tfBuffer.lookupTransform("map", "partner", ros::Time(0));
+			transform = tfBuffer.lookupTransform("base_link", "partner", ros::Time(0));
 			br.sendTransform(transform);
 		} catch (tf2::TransformException & ex){
 		}

@@ -1,3 +1,6 @@
+/*
+ * Estimates base_link tailsitter's IMU to partner tailsitter origin transformation.
+ */
 #include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -39,7 +42,8 @@ typedef Robot1::PositionMeasurementModel<T> PositionModel;
 typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
 
 /* Global constants */
-string meFrameId = "base_link";
+string baselinkFrameId = "base_link";
+string imuFrameId = "imu";
 string partnerFrameId = "partner";
 SystemModel sys;
 Kalman::ExtendedKalmanFilter<State> predictor;
@@ -129,7 +133,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle node;
 
-    currentPartnerEstimate.header.frame_id = meFrameId;
+    currentPartnerEstimate.header.frame_id = imuFrameId;
     currentPartnerEstimate.child_frame_id = partnerFrameId;
    
     tf2_ros::Buffer tfBuffer;
@@ -151,7 +155,7 @@ int main(int argc, char** argv){
     u.setZero();
     predictor.init(x);
 
-    geometry_msgs::TransformStamped base_link_to_tag_corrected;
+    geometry_msgs::TransformStamped imu_to_tag_corrected;
     float lastUsedTimes[NUM_TAGS] = {0, 0};
 
     string tagFrameId;
@@ -165,25 +169,30 @@ int main(int argc, char** argv){
             tagFrameId = tagFrames[i];
             // Lookup transform from base_link to ith tag
             try {
-                base_link_to_tag_corrected = tfBuffer.lookupTransform(meFrameId, tagFrameId + "_corrected", ros::Time(0));
+                // first publish base_link to corrected tag explicitly
+                imu_to_tag_corrected = tfBuffer.lookupTransform(baselinkFrameId, tagFrameId + "_corrected", ros::Time(0));
+                imu_to_tag_corrected.child_frame_id = tagFrameId + "_corrected_raw";
+                br.sendTransform(imu_to_tag_corrected);
+                // now get the actual transform from imu to corrected tag.
+                imu_to_tag_corrected = tfBuffer.lookupTransform(imuFrameId, tagFrameId + "_corrected", ros::Time(0));
             } catch (tf2::TransformException & ex){
                 //ROS_WARN("%s",ex.what());
                 continue;
             }
-            float tagTime = base_link_to_tag_corrected.header.stamp.sec + base_link_to_tag_corrected.header.stamp.nsec/1000000000.0;
+            float tagTime = imu_to_tag_corrected.header.stamp.sec + imu_to_tag_corrected.header.stamp.nsec/1000000000.0;
             // Check if we've already used this tag via timestamp comparison
             if (tagTime == lastUsedTimes[i]) {
                 continue;
             } else {
                 lastUsedTimes[i] = tagTime;
             }
-            Quaternionf q(base_link_to_tag_corrected.transform.rotation.w,
-                           base_link_to_tag_corrected.transform.rotation.x,
-                           base_link_to_tag_corrected.transform.rotation.y,
-                           base_link_to_tag_corrected.transform.rotation.z);
-            Vector3f o(base_link_to_tag_corrected.transform.translation.x,
-                        base_link_to_tag_corrected.transform.translation.y,
-                        base_link_to_tag_corrected.transform.translation.z);
+            Quaternionf q(imu_to_tag_corrected.transform.rotation.w,
+                          imu_to_tag_corrected.transform.rotation.x,
+                          imu_to_tag_corrected.transform.rotation.y,
+                          imu_to_tag_corrected.transform.rotation.z);
+            Vector3f o(imu_to_tag_corrected.transform.translation.x,
+                       imu_to_tag_corrected.transform.translation.y,
+                       imu_to_tag_corrected.transform.translation.z);
 
             // Estimate based on measurements of tag_corrected
             pMeasurement = o;
