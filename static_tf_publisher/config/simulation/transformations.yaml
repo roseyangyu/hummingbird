@@ -5,10 +5,10 @@ transformations:
     translation: [0, -0.046, 0.027]
   - frame_id: 'bundle1'
     child_frame_id: 'bundle1_corrected'
-    rotation: [0,1,0,0,0,1,1,0,0]
+    rotation: [0,-1,0,0,0,1,-1,0,0]
     translation: [-0.14,-0.357,-0.02]
   - frame_id: 'tag3'
     child_frame_id: 'tag3_corrected'
-    rotation: [0,1,0,0,0,1,1,0,0]
+    rotation: [0,-1,0,0,0,1,-1,0,0]
     translation: [-0.14,-0.357,-0.02]
 
