@@ -20,9 +20,9 @@
 standalone_tags:
   [
     {id: 2, size: 0.08, name: tag3},
-    {id: 3, size: 0.08, name: tag4},
-    {id: 4, size: 0.04, name: tag5},
-    {id: 5, size: 0.04, name: tag6}
+    {id: 3, size: 0.08, name: tag4}
+    #{id: 4, size: 0.04, name: tag5},
+    #{id: 5, size: 0.04, name: tag6}
   ]
 
 # ## Tag bundle definitions
@@ -48,4 +48,12 @@ standalone_tags:
 #   ]
 tag_bundles:
   [
+    {
+      name: 'bundle1',
+      layout:
+        [
+          {id: 2, size: 0.08, x: 0.0000, y: 0.0000, z: 0.0000, qw: 1.0000, qx: 0.0000, qy: 0.0000, qz: 0.0000},
+          {id: 3, size: 0.08, x: -0.2696, y: 0.0015, z: -0.0060, qw: 0.9999, qx: 0.0067, qy: -0.0094, qz: -0.0002}
+        ]
+    }
   ]
