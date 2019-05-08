@@ -1,3 +1,6 @@
+/*
+ * Estimates base_link tailsitter's IMU to partner tailsitter origin transformation.
+ */
 #include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -39,7 +42,8 @@ typedef Robot1::PositionMeasurementModel<T> PositionModel;
 typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
 
 /* Global constants */
-string meFrameId = "base_link";
+string baselinkFrameId = "base_link";
+string imuFrameId = "imu";
 string partnerFrameId = "partner";
 SystemModel sys;
 Kalman::ExtendedKalmanFilter<State> predictor;
@@ -49,14 +53,6 @@ float ttl = 0.5; // If no measurements are recorded after ttl seconds, then esti
 // frames to which a correction is applied and published on /tf
 vector<string> tagFrames = {"bundle1", "tag3"};
 const int NUM_TAGS = 2; 
-Matrix3f correctionMatrices[NUM_TAGS] = {
-    (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(), // bundle1
-    (Matrix3f() << 0,-1,0,0,0,1,-1,0,0).finished(), // tag3
-};
-Vector3f tagOffsets[NUM_TAGS] = {
-    (Vector3f() << -0.02, -0.163, 0.350).finished(), // bundle1
-    (Vector3f() << -0.02, -0.163, 0.350).finished(), // tag3
-};
 
 // Elements of this array must be in tagFrames
 // Measurements of these tags is used to update the state
@@ -137,7 +133,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle node;
 
-    currentPartnerEstimate.header.frame_id = meFrameId;
+    currentPartnerEstimate.header.frame_id = imuFrameId;
     currentPartnerEstimate.child_frame_id = partnerFrameId;
    
     tf2_ros::Buffer tfBuffer;
@@ -159,7 +155,7 @@ int main(int argc, char** argv){
     u.setZero();
     predictor.init(x);
 
-    geometry_msgs::TransformStamped tagTransforms[NUM_TAGS];
+    geometry_msgs::TransformStamped imu_to_tag_corrected;
     float lastUsedTimes[NUM_TAGS] = {0, 0};
 
     string tagFrameId;
@@ -173,57 +169,42 @@ int main(int argc, char** argv){
             tagFrameId = tagFrames[i];
             // Lookup transform from base_link to ith tag
             try {
-                tagTransforms[i] = tfBuffer.lookupTransform(meFrameId, tagFrameId, ros::Time(0));
+                // first publish base_link to corrected tag explicitly
+                imu_to_tag_corrected = tfBuffer.lookupTransform(baselinkFrameId, tagFrameId + "_corrected", ros::Time(0));
+                imu_to_tag_corrected.child_frame_id = tagFrameId + "_corrected_raw";
+                br.sendTransform(imu_to_tag_corrected);
+                // now get the actual transform from imu to corrected tag.
+                imu_to_tag_corrected = tfBuffer.lookupTransform(imuFrameId, tagFrameId + "_corrected", ros::Time(0));
             } catch (tf2::TransformException & ex){
                 //ROS_WARN("%s",ex.what());
                 continue;
             }
-            float tagTime = tagTransforms[i].header.stamp.sec + tagTransforms[i].header.stamp.nsec/1000000000.0;
+            float tagTime = imu_to_tag_corrected.header.stamp.sec + imu_to_tag_corrected.header.stamp.nsec/1000000000.0;
             // Check if we've already used this tag via timestamp comparison
             if (tagTime == lastUsedTimes[i]) {
                 continue;
             } else {
                 lastUsedTimes[i] = tagTime;
             }
-
-            Vector3f origin(tagTransforms[i].transform.translation.x,
-                            tagTransforms[i].transform.translation.y,
-                            tagTransforms[i].transform.translation.z);
-            Quaternionf qTag(tagTransforms[i].transform.rotation.w, 
-                             tagTransforms[i].transform.rotation.x,
-                             tagTransforms[i].transform.rotation.y,
-                             tagTransforms[i].transform.rotation.z);
-
-            Quaternionf qCorrect(correctionMatrices[i]);
-            qTag = qTag*qCorrect;
-
-            // Correct the origin
-            origin = origin - qTag*tagOffsets[i];
-
-            // Repack and broadcast as corrected tag
-            tagTransforms[i].header.stamp = ros::Time::now();
-            tagTransforms[i].child_frame_id = tagFrameId + "_corrected";
-            tagTransforms[i].transform.rotation.x = qTag.x();
-            tagTransforms[i].transform.rotation.y = qTag.y();
-            tagTransforms[i].transform.rotation.z = qTag.z();
-            tagTransforms[i].transform.rotation.w = qTag.w();
-            tagTransforms[i].transform.translation.x = origin(0);
-            tagTransforms[i].transform.translation.y = origin(1);
-            tagTransforms[i].transform.translation.z = origin(2);
-            br.sendTransform(tagTransforms[i]);
+            Quaternionf q(imu_to_tag_corrected.transform.rotation.w,
+                          imu_to_tag_corrected.transform.rotation.x,
+                          imu_to_tag_corrected.transform.rotation.y,
+                          imu_to_tag_corrected.transform.rotation.z);
+            Vector3f o(imu_to_tag_corrected.transform.translation.x,
+                       imu_to_tag_corrected.transform.translation.y,
+                       imu_to_tag_corrected.transform.translation.z);
 
             // Estimate based on measurements of tag_corrected
-            pMeasurement = origin;
-            oMeasurement = quaterniontoEulerAngle(qTag.inverse()); // inverse because state is rpy from partner to base_link
+            pMeasurement = o;
+            oMeasurement = quaterniontoEulerAngle(q.inverse()); // inverse because state is rpy from partner to base_link
             if (std::find(stateUpdateIds.begin(), stateUpdateIds.end(), tagFrameId) != stateUpdateIds.end() &&
                 updatePartnerPosition(pMeasurement, oMeasurement, sys, predictor, pm, om)) {
                 start = true; // first estimate successful, begin outputting
             }
         }
 
-        ros::Time current = ros::Time::now();
-
         // do not publish an estimate if all measurements are greater than 'ttl' old
+        ros::Time current = ros::Time::now();
         if (std::all_of(std::begin(lastUsedTimes), std::end(lastUsedTimes), [current](float n){return n < current.toSec()-ttl;})) {
             start = false;
         }
