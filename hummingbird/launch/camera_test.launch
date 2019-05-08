@@ -1,0 +1,21 @@
+<launch>
+
+  <!-- Publishes camera topics -->
+  <include file="$(find realsense_camera)/launch/r200_nodelet_default.launch">
+  </include>
+
+  <node pkg="rqt_image_view" type="rqt_image_view" name="image_viewer">
+  </node>
+  <!-- Launches april tag detection -->
+  <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch">
+    <arg name="camera_name" default="/camera/color"/>
+    <arg name="camera_frame" default="camera"/>
+    <arg name="image_topic" default="image_raw"/>
+    <arg name="tag_settings_file" default="$(find apriltags2_ros)/config/camera_test/settings.yaml" />
+    <arg name="tag_definitions_file" default="$(find apriltags2_ros)/config/camera_test/tags.yaml" />
+  </include>
+
+  <!-- Launch display to visualize frames -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hummingbird)/rviz/hummingbird.rviz"/>
+
+</launch>

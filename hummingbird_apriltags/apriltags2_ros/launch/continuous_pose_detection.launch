@@ -4,10 +4,12 @@
     <arg name="camera_name" default="/camera/color"/>
     <arg name="camera_frame" default="camera"/>
     <arg name="image_topic" default="image_raw"/>
+    <arg name="tag_settings_file" default="$(find apriltags2_ros)/config/simulation/settings.yaml" />
+    <arg name="tag_definitions_file" default="$(find apriltags2_ros)/config/simulation/tags.yaml" />
 
     <!-- Set parameters -->
-    <rosparam command="load" file="$(find apriltags2_ros)/config/settings.yaml"/>
-    <rosparam command="load" file="$(find apriltags2_ros)/config/tags.yaml"/>
+    <rosparam command="load" file="$(arg tag_settings_file)"/>
+    <rosparam command="load" file="$(arg tag_definitions_file)"/>
 
     <param name="apriltags2_ros/publish_tag_detections_image" type="bool" value="true"/>
     <param name="apriltags2_ros/camera_frame" type="str" value="$(arg camera_frame)"/>
