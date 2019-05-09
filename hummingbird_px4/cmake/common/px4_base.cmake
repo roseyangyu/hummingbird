@@ -312,7 +312,7 @@ function(px4_add_module)
 	if(${OS} STREQUAL "qurt" )
 		set_property(TARGET ${MODULE} PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 	elseif(${OS} STREQUAL "nuttx" )
-		list(APPEND COMPILE_FLAGS -Wframe-larger-than=${STACK_MAX})
+		list(APPEND COMPILE_FLAGS -Wno-expansion-to-defined -Wno-int-in-bool-context -Werror=format-truncation=0 -Werror=stringop-overflow=0 -Werror=implicit-fallthrough=0 -Werror=format-overflow=0 -Wframe-larger-than=${STACK_MAX})
 	endif()
 
 	if(MAIN)

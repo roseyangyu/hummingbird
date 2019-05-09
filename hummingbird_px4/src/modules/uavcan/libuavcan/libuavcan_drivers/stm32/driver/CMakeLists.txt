@@ -7,6 +7,8 @@ add_library(uavcan_stm32_driver STATIC
     ./src/uc_stm32_clock.cpp
     ./src/uc_stm32_thread.cpp
     )
+target_compile_options(uavcan_stm32_driver
+    PUBLIC -Wno-expansion-to-defined)
 
 add_dependencies(uavcan_stm32_driver uavcan)
 

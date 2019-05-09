@@ -130,9 +130,9 @@ TailsitterPathPlanner::task_main()
 	work_queue(HPWORK, &_work, (worker_t)&TailsitterPathPlanner::publish_control_mode_trampoline, this, 0);
 
 	// If in 'raw' mode, we poll the setpoint and publish upon receive
-	px4_pollfd_struct_t fds[] = {
-		{ .fd = _position_setpoint_step_sub,   .events = POLLIN },
-	};
+	px4_pollfd_struct_t fds[1];
+	fds[0].fd = _position_setpoint_step_sub;
+	fds[0].events = POLLIN;
 
 	while(!_task_should_exit){
 		
