@@ -15,7 +15,6 @@
     <arg name="tag_definitions_file" default="$(find apriltags2_ros)/config/camera_test/tags.yaml" />
   </include>
 
-  <!-- Launch display to visualize frames -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hummingbird)/rviz/hummingbird.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find apriltags2_ros)/rviz/realsense_test.rviz"/>
 
 </launch>
