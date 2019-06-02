@@ -17,4 +17,7 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find apriltags2_ros)/rviz/realsense_test.rviz"/>
 
+  <include file="$(find vicon_bridge)/launch/vicon.launch">
+  </include>
+
 </launch>
