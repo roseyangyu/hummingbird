@@ -1,7 +1,11 @@
-filename = '2019-06-01-18-17-02.bag'
+filename = '20cm_still1.bag'
 bag = rosbag(filename);
 tf_select = select(bag, 'Topic', '/tf');
 tf_msgs = readMessages(tf_select);
+
+bundle_name = 'inner_bundle'
+tailsitter = 'vicon/MockTS/main'
+camera = 'vicon/realsense3/main'
 
 %% Compute mocap_cam_to_ts
 % mocap correction
@@ -10,11 +14,16 @@ tf_msgs = readMessages(tf_select);
 mocap_camera_rotation_correction = quaternion(rotz(-pi/2), 'rotmat', 'point');
 mocap_camera_translation_correction = [15/1000 8/1000 20/1000];
 mocap_bundle_rotation_correction = quaternion(roty(pi/2)*rotz(pi/2), 'rotmat', 'point');
-mocap_bundle_translation_correction = [-9/1000 400/1000 0];
+if strcmp(bundle_name, 'bundle1')
+    mocap_bundle_translation_correction = [-9/1000 370/1000 -80/1000];
+elseif strcmp(bundle_name, 'inner_bundle')
+    mocap_bundle_translation_correction = [-9/1000 227/1000 -15/1000];
+    
+end
 % because server pull and no occlusion,
 % these two have the same timestamp and number of messages
-mocap_world_to_ts = get_transforms(tf_msgs, '/world', 'vicon/MockTS/main');
-mocap_world_to_cam = get_transforms(tf_msgs, '/world', 'vicon/realsense2/main');
+mocap_world_to_ts = get_transforms(tf_msgs, '/world', tailsitter);
+mocap_world_to_cam = get_transforms(tf_msgs, '/world', camera);
 mocap_world_to_cam = apply_transform(mocap_world_to_cam, ...
                                      mocap_camera_rotation_correction,...
                                      mocap_camera_translation_correction);              
@@ -24,7 +33,7 @@ mocap_world_to_ts = apply_transform(mocap_world_to_ts, ...
 mocap_cam_to_ts = calculate_transform(mocap_world_to_cam, mocap_world_to_ts);
 
 %% Get apriltags_cam_to_ts
-apriltags_cam_to_ts = get_transforms(tf_msgs, 'camera', 'bundle1');
+apriltags_cam_to_ts = get_transforms(tf_msgs, 'camera', bundle_name);
 
 %% Plot Mocap v.s. Apriltag Euler Angles
 mocap_time = [cellfun(@(m) m.timestamp , mocap_world_to_cam)];

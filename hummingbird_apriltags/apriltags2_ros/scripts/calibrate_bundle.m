@@ -48,13 +48,13 @@
 %% User inputs
 
 % Relative directory of calibration bagfile
-calibration_file = 'bundle1_calibration2.bag';
+calibration_file = 'inner_bundle_calibration3.bag';
 
 % Bundle name
 bundle_name = 'my_bundle';
 
 % Master tag's ID
-master_id = 2;
+master_id = 4;
 
 %% Make sure matlab_rosbag is installed
 
