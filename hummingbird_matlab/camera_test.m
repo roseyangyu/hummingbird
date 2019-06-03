@@ -1,9 +1,9 @@
-filename = '20cm_still1.bag'
+filename = 'eratic1.bag'
 bag = rosbag(filename);
 tf_select = select(bag, 'Topic', '/tf');
 tf_msgs = readMessages(tf_select);
 
-bundle_name = 'inner_bundle'
+bundle_name = 'bundle1'
 tailsitter = 'vicon/MockTS/main'
 camera = 'vicon/realsense3/main'
 
@@ -15,7 +15,7 @@ mocap_camera_rotation_correction = quaternion(rotz(-pi/2), 'rotmat', 'point');
 mocap_camera_translation_correction = [15/1000 8/1000 20/1000];
 mocap_bundle_rotation_correction = quaternion(roty(pi/2)*rotz(pi/2), 'rotmat', 'point');
 if strcmp(bundle_name, 'bundle1')
-    mocap_bundle_translation_correction = [-9/1000 370/1000 -80/1000];
+    mocap_bundle_translation_correction = [-9/1000 410/1000 -40/1000];
 elseif strcmp(bundle_name, 'inner_bundle')
     mocap_bundle_translation_correction = [-9/1000 227/1000 -15/1000];
     
@@ -37,9 +37,10 @@ apriltags_cam_to_ts = get_transforms(tf_msgs, 'camera', bundle_name);
 
 %% Plot Mocap v.s. Apriltag Euler Angles
 mocap_time = [cellfun(@(m) m.timestamp , mocap_world_to_cam)];
-mocap_time = mocap_time-mocap_time(1);
+t0 = mocap_time(1)
+mocap_time = mocap_time - t0;
 tag_time = [cellfun(@(m) m.timestamp , apriltags_cam_to_ts)];
-tag_time = tag_time-tag_time(1);
+tag_time = tag_time-t0;
 
 mocap_ts_to_cam_eul = [cellfun(@(m) quat2eul(m.rotation.conj, 'ZYX'), mocap_cam_to_ts, 'UniformOutput', false)];
 mocap_ts_to_cam_eul = [[cellfun(@(m) m(1), mocap_ts_to_cam_eul)] [cellfun(@(m) m(2), mocap_ts_to_cam_eul)] [cellfun(@(m) m(3), mocap_ts_to_cam_eul)]];
