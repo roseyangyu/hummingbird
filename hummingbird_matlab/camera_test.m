@@ -1,4 +1,4 @@
-filename = '2019-06-01-18-19-18.bag'
+filename = '2019-06-01-18-17-02.bag'
 bag = rosbag(filename);
 tf_select = select(bag, 'Topic', '/tf');
 tf_msgs = readMessages(tf_select);
@@ -8,9 +8,9 @@ tf_msgs = readMessages(tf_select);
 % applied to mocap measurements so that the frame
 % aligns with the frame attached to the camera by AprilTag
 mocap_camera_rotation_correction = quaternion(rotz(-pi/2), 'rotmat', 'point');
-mocap_camera_translation_correction = [0 0 0];
+mocap_camera_translation_correction = [15/1000 8/1000 20/1000];
 mocap_bundle_rotation_correction = quaternion(roty(pi/2)*rotz(pi/2), 'rotmat', 'point');
-mocap_bundle_translation_correction = [0 0 0];
+mocap_bundle_translation_correction = [-9/1000 400/1000 0];
 % because server pull and no occlusion,
 % these two have the same timestamp and number of messages
 mocap_world_to_ts = get_transforms(tf_msgs, '/world', 'vicon/MockTS/main');
@@ -63,3 +63,37 @@ legend('mocap', 'apriltag')
 title('Camera Roll')
 xlabel('time')
 ylabel('rad')
+
+%% Plot Mocap v.s. Camera to TS Position
+figure
+hold on
+plot(mocap_time, [cellfun(@(m) m.translation(1), mocap_cam_to_ts)])
+plot(tag_time, [cellfun(@(m) m.translation(1), apriltags_cam_to_ts)])
+legend('mocap', 'apriltag')
+title('Camera to TS X')
+xlabel('time')
+ylabel('distance (m)')
+
+figure
+hold on
+plot(mocap_time, [cellfun(@(m) m.translation(2), mocap_cam_to_ts)])
+plot(tag_time, [cellfun(@(m) m.translation(2), apriltags_cam_to_ts)])
+legend('mocap', 'apriltag')
+title('Camera to TS Y')
+xlabel('time')
+ylabel('distance (m)')
+
+figure
+hold on
+plot(mocap_time, [cellfun(@(m) m.translation(3), mocap_cam_to_ts)])
+plot(tag_time, [cellfun(@(m) m.translation(3), apriltags_cam_to_ts)])
+legend('mocap', 'apriltag')
+title('Camera to TS Z')
+xlabel('time')
+ylabel('distance (m)')
+
+%% Plot some raw data
+%plot(mocap_time, [cellfun( @(m) m(3),...
+%        [cellfun(@(m) quat2eul(m.rotation, 'ZYX'), mocap_world_to_ts, 'UniformOutput', false)])...
+%     ])
+%plot(mocap_time, [cellfun(@(m) m.translation(3), mocap_world_to_ts)])
