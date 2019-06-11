@@ -1,0 +1,17 @@
+<!-- This launch file is meant to be used on the odroid. It brings up no GUIs -->
+<launch>
+
+  <!-- Publishes camera topics -->
+  <include file="$(find realsense_camera)/launch/r200_nodelet_default.launch">
+  </include>
+
+  <!-- Launches april tag detection -->
+  <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch">
+    <arg name="camera_name" default="/camera/color"/>
+    <arg name="camera_frame" default="camera"/>
+    <arg name="image_topic" default="image_raw"/>
+    <arg name="tag_settings_file" default="$(find apriltags2_ros)/config/camera_test/settings.yaml" />
+    <arg name="tag_definitions_file" default="$(find apriltags2_ros)/config/camera_test/tags.yaml" />
+  </include>
+
+</launch>

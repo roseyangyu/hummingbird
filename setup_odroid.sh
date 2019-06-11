@@ -23,3 +23,7 @@ mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws/src
 git clone https://github.com/utiasSTARS/hummingbird_ws
 catkin build apriltags2_ros
+
+echo "export ROS_IP=`hostname -I`" >> ~/.bashrc
+echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+echo "export ROS_MASTER_URI=http://roscore_computer_ip_here:11311" >> ~/.bashrc
