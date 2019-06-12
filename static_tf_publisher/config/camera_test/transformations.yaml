@@ -1,5 +1,5 @@
 transformations:
-  - frame_id: 'base_link'
+  - frame_id: 'vicon/STARS_TS3/main'
     child_frame_id: 'camera'
-    rotation: [0,0,1,-1,0,0,0,-1,0]
-    translation: [0, -0.046, 0.384]
+    rotation: [-1, 0, 0, 0, 1, 0, 0, -1]
+    translation: [0,0,0]
