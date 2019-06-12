@@ -2,7 +2,10 @@
 <launch>
 
   <!-- Publishes camera topics -->
-  <include file="$(find realsense_camera)/launch/r200_nodelet_default.launch">
+  <include file="$(find realsense_camera)/launch/r200_nodelet_modify_params.launch">
+    <arg name="enable_depth" default="false" />
+    <arg name="color_width" default="640" />
+    <arg name="color_height" default="480" />
   </include>
 
   <!-- Launches april tag detection -->
