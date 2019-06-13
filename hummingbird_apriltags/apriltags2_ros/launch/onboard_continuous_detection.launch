@@ -17,9 +17,4 @@
     <arg name="tag_definitions_file" default="$(find apriltags2_ros)/config/camera_test/tags.yaml" />
   </include>
 
-  <include file="$(find static_tf_publisher)/launch/static_tf_publisher.launch">
-    <arg name="transformations_file" value="$(find static_tf_publisher)/config/camera_test/transformations.yaml" />
-  </include>
-
-
 </launch>
