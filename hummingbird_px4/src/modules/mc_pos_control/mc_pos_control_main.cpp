@@ -2001,7 +2001,7 @@ MulticopterPositionControl::control_position(float dt)
 			float psi = asin(thrust_sp(0) / l);
 			psi = _att_sp.yaw_body;
 			math::Vector<3> y_C(-sin(psi), cos(psi), 0.0f);
-			if(!_pos_sp_triplet.current.yaw_valid || PX4_ISFINITE(psi)){
+			if(!_pos_sp_triplet.current.yaw_valid || !PX4_ISFINITE(psi)){
 				y_C.zero();
 				y_C(0) = -1.0f;
 				//warnx("Yaw %f \n", (double) psi);
