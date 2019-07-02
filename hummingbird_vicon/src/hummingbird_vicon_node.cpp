@@ -14,10 +14,15 @@ geometry_msgs::PoseStamped mocap_COM_pose;
 
 std::string vicon_frame_id = "vicon/STARS_TS3/main";
 
-void transformCallback(const geometry_msgs::TransformStamped::ConstPtr& transform) {
-    if (transform->child_frame_id == vicon_frame_id) {
-        // look up world->COM transform and publish
+int main(int argc, char **argv) {
+    ros::init(argc, argv, "hummingbird_vicon_node");
+    tf2_ros::TransformListener tfListener(tfBuffer);
+    ros::NodeHandle n;
+    mavros_mocap_pub = n.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 1000);
+    while (n.ok()) {
         try {
+            tfBuffer.lookupTransform("world", vicon_frame_id, ros::Time::now(), ros::Duration(1)); // block for 1 second waiting for latest transform
+            // if new transform available, look up world->COM and publih to /maros/mocap/pose
             COM_transform = tfBuffer.lookupTransform("world", "COM", ros::Time(0));
             mocap_COM_pose.pose.position.x = COM_transform.transform.translation.x;
             mocap_COM_pose.pose.position.y = COM_transform.transform.translation.y;
@@ -30,17 +35,8 @@ void transformCallback(const geometry_msgs::TransformStamped::ConstPtr& transfor
         } catch (tf2::TransformException &ex) {
             ROS_WARN("%s",ex.what());
         }
-    } else {
-        return;
     }
-}
 
-int main(int argc, char **argv) {
-    ros::init(argc, argv, "hummingbird_vicon_node");
-    tf2_ros::TransformListener tfListener(tfBuffer);
-    ros::NodeHandle n;
-    mavros_mocap_pub = n.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 1000);
-    tf_sub = n.subscribe("/tf", 1000, transformCallback);
     ros::spin();
     return 0;
 }
