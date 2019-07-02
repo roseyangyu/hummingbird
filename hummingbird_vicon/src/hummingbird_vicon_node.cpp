@@ -8,7 +8,6 @@
 ros::Subscriber tf_sub;
 ros::Publisher mavros_mocap_pub;
 tf2_ros::Buffer tfBuffer;
-tf2_ros::TransformListener tfListener(tfBuffer);
 
 geometry_msgs::TransformStamped COM_transform;
 geometry_msgs::PoseStamped mocap_COM_pose;
@@ -37,12 +36,11 @@ void transformCallback(const geometry_msgs::TransformStamped::ConstPtr& transfor
 }
 
 int main(int argc, char **argv) {
-
     ros::init(argc, argv, "hummingbird_vicon_node");
+    tf2_ros::TransformListener tfListener(tfBuffer);
     ros::NodeHandle n;
     mavros_mocap_pub = n.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 1000);
     tf_sub = n.subscribe("/tf", 1000, transformCallback);
     ros::spin();
     return 0;
-
 }

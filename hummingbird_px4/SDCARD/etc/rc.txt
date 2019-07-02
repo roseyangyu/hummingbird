@@ -17,12 +17,15 @@ else
 	fi
 fi
 
+# no safety switch
+param set CBRK_IO_SAFETY 22027
+
 #commander start
 tsfmu start
 sh /fs/microsd/etc/rc.sensors
-mavlink start -r 800000 -d /dev/ttyACM0 -m config -x
-mavlink start -r 20000 -m config -b 921600 -d /dev/ttyS0 -p 1
-mavlink start -r 20000 -m config -b 230400 -d /dev/ttyS2
+mavlink start -r 800000 -d /dev/ttyACM0 -x
+mavlink start -r 20000 -b 921600 -d /dev/ttyS0 -p 1
+mavlink start -r 20000 -b 115200 -d /dev/ttyS2
 
 sh /fs/microsd/etc/config.txt
 mavlink boot_complete

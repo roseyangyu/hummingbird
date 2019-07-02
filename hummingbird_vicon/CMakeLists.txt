@@ -10,6 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
 )
 
+catkin_package()
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(

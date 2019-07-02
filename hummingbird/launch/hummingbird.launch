@@ -1,6 +1,6 @@
 <!-- The real launch files for the robot -->
 <launch>
-    <arg name="fcu_url" default=""/>
+    <arg name="fcu_url" default="udp://:14551@0.0.0.0:14557"/>
     <arg name="gcs_url" default="udp://:14550@:14555"/>
 
     <!-- launch vicon -->
@@ -8,6 +8,9 @@
         <param name="stream_mode" value="ClientPull" type="str" />
         <param name="datastream_hostport" value="192.168.1.33:801" type="str" />
         <param name="tf_ref_frame_id" value="/world" type="str" />
+    </node>
+    <!-- Monitors /tf for vicon/STARS_TS3/main and publishes WORLD->COM to /mavros/mocap/pose -->
+    <node pkg="hummingbird_vicon" type="hummingbird_vicon_node" name="hummingbird_vicon_node">
     </node>
 
     <!-- launch static tranforms -->
