@@ -164,7 +164,8 @@ public:
 		MAVLINK_MODE_OSD,
 		MAVLINK_MODE_MAGIC,
 		MAVLINK_MODE_CONFIG,
-		MAVLINK_MODE_IRIDIUM
+		MAVLINK_MODE_IRIDIUM,
+		MAVLINK_MODE_VICON
 	};
 
 	enum BROADCAST_MODE {
@@ -195,6 +196,9 @@ public:
 
 		case MAVLINK_MODE_IRIDIUM:
 			return "Iridium";
+
+		case MAVLINK_MODE_VICON:
+			return "Vicon";
 
 		default:
 			return "Unknown";

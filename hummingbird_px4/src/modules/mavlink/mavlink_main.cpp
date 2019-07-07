@@ -1849,6 +1849,8 @@ Mavlink::task_main(int argc, char *argv[])
 			} else if (strcmp(myoptarg, "iridium") == 0) {
 				_mode = MAVLINK_MODE_IRIDIUM;
 				_rstatus.type = telemetry_status_s::TELEMETRY_STATUS_RADIO_TYPE_IRIDIUM;
+			} else if (strcmp(myoptarg, "vicon") == 0) {
+				_mode = MAVLINK_MODE_VICON;
 			}
 
 			break;
@@ -2007,6 +2009,9 @@ Mavlink::task_main(int argc, char *argv[])
 	LL_APPEND(_streams, _mission_manager);
 
 	switch (_mode) {
+	case MAVLINK_MODE_VICON:
+		printf("mode is vicon\n");
+		break; // send absolutely no data
 	case MAVLINK_MODE_NORMAL:
 		configure_stream("SYS_STATUS", 1.0f);
 		configure_stream("EXTENDED_SYS_STATE", 10.0f);
@@ -2178,9 +2183,6 @@ Mavlink::task_main(int argc, char *argv[])
 	default:
 		break;
 	}
-
-	configure_stream("HIGHRES_IMU", 50.0f);
-	configure_stream("GLOBAL_POSITION_INT", 30.0f);
 
 	/* set main loop delay depending on data rate to minimize CPU overhead */
 	_main_loop_delay = (MAIN_LOOP_DELAY * 1000) / _datarate;
