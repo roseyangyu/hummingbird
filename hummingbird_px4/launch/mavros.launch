@@ -4,6 +4,7 @@
     <arg name="ns" default="/" />
     <arg name="fcu_url" default="" />
     <arg name="gcs_url" default="udp://:14550@:14555" />
+    <arg name="fcu_protocol" default="v1.0" />
     <arg name="tgt_system" default="1" />
     <arg name="tgt_component" default="1" />
     <arg name="pluginlists_yaml" default="$(find mavros)/launch/px4_pluginlists.yaml" />
@@ -13,7 +14,7 @@
         <include file="$(find mavros)/launch/node.launch">
             <arg name="pluginlists_yaml" value="$(arg pluginlists_yaml)" />
             <arg name="config_yaml" value="$(arg config_yaml)" />
-
+            <arg name="fcu_protocol" value="$(arg fcu_protocol)" />
             <arg name="fcu_url" value="$(arg fcu_url)" />
             <arg name="gcs_url" value="$(arg gcs_url)" />
             <arg name="tgt_system" value="$(arg tgt_system)" />
