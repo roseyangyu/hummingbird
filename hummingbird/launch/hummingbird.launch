@@ -1,7 +1,10 @@
 <!-- The real launch files for the robot -->
 <launch>
-    <arg name="fcu_url" default="udp://:14551@192.168.1.214:14556" />
-    <arg name="gcs_url" default="udp://@localhost:14552"/>
+
+    <!--wifly :14551 <-> :14556 -->
+    <!--expressif :14552 <-> :14555 -->
+    <arg name="fcu_url" default="udp://:14552@192.168.1.126:14555" /> <!-- expressif -->
+    <arg name="gcs_url" default="udp://@localhost" />
 
     <!-- launch vicon -->
     <node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
@@ -23,7 +26,7 @@
         <arg name="ns" default="/"/>
         <arg name="fcu_url" default="$(arg fcu_url)"/>
         <arg name="gcs_url" default="$(arg gcs_url)"/>
-        <arg name="fcu_protocol" default="v1.0" />
+        <arg name="fcu_protocol" default="v2.0" />
         <arg name="tgt_system" default="1"/>
         <arg name="tgt_component" default="1"/>
         <arg name="config_yaml" default="$(find hummingbird)/config/mavros/vicon.yaml" />
