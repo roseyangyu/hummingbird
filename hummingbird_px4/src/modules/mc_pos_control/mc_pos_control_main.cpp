@@ -1192,7 +1192,6 @@ MulticopterPositionControl::control_non_manual(float dt)
 		}
 
 		if (!_takeoff_jumped) {
-			printf("taking off");
 			// ramp thrust setpoint up
 			if (_vel(2) > -(_params.tko_speed / 2.0f)) {
 				_takeoff_thrust_sp += 0.5f * dt;
@@ -1222,10 +1221,7 @@ MulticopterPositionControl::control_non_manual(float dt)
 	if (_pos_sp_triplet.current.valid
 	    && _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_IDLE) {
 		/* idle state, don't run controller and set zero thrust */
-		_R_setpoint.identity();
-
-
-		matrix::Quatf qd = _R_setpoint;
+		matrix::Quatf qd = matrix::Eulerf(0, 0, _yaw);
 		memcpy(&_att_sp.q_d[0], qd.data(), sizeof(_att_sp.q_d));
 		_att_sp.q_d_valid = true;
 

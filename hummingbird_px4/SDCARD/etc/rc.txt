@@ -24,6 +24,7 @@ param set CBRK_IO_SAFETY 22027
 # logger start
 
 commander start
+navigator start
 tsfmu start
 
 land_detector start vtol
