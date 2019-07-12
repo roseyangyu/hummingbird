@@ -3,7 +3,8 @@
 
     <!--wifly :14551 <-> :14556 -->
     <!--expressif :14552 <-> :14555 -->
-    <arg name="fcu_url" default="udp://:14552@192.168.1.126:14555" /> <!-- expressif -->
+    <arg name="wifly_fcu_url" default="udp://:14551@:14556" />
+    <arg name="expressif_fcu_url" default="udp://:14552@192.168.1.126:14555" /> <!-- expressif -->
     <arg name="gcs_url" default="udp://@localhost" />
 
     <!-- launch vicon -->
@@ -12,8 +13,15 @@
         <param name="datastream_hostport" value="192.168.1.33:801" type="str" />
         <param name="tf_ref_frame_id" value="/world" type="str" />
     </node>
+
+    <remap from="/mavros/mocap/pose" to="/vicon_mavros/mavros/mocap/pose" />
     <!-- Monitors /tf for vicon/STARS_TS3/main and publishes WORLD->COM to /mavros/mocap/pose -->
     <node pkg="hummingbird_vicon" type="hummingbird_vicon_node" name="hummingbird_vicon_node">
+    </node>
+
+    <node pkg="joy" type="joy_node" name="joy" />
+    <node pkg="hummingbird_joy" type="main.py" name="hummingbird_joy" output="screen">
+        <param name="command_service" value="/telemetry_mavros/mavros/cmd/command" />
     </node>
 
     <!-- launch static tranforms -->
@@ -23,9 +31,20 @@
 
     <!-- Launches the connection to mavros -->
     <include file="$(find hummingbird_px4)/launch/mavros.launch">
-        <arg name="ns" default="/"/>
-        <arg name="fcu_url" default="$(arg fcu_url)"/>
-        <arg name="gcs_url" default="$(arg gcs_url)"/>
+        <arg name="ns" default="vicon_mavros"/>
+        <arg name="fcu_url" default="$(arg expressif_fcu_url)"/>
+        <arg name="gcs_url" default=""/>
+        <arg name="fcu_protocol" default="v2.0" />
+        <arg name="tgt_system" default="1"/>
+        <arg name="tgt_component" default="1"/>
+        <arg name="config_yaml" default="$(find hummingbird)/config/mavros/vicon.yaml" />
+    </include>
+
+    <!-- Launches the connection to mavros -->
+    <include file="$(find hummingbird_px4)/launch/mavros.launch">
+        <arg name="ns" default="telemetry_mavros"/>
+        <arg name="fcu_url" default="$(arg wifly_fcu_url)"/>
+        <arg name="gcs_url" default=""/>
         <arg name="fcu_protocol" default="v2.0" />
         <arg name="tgt_system" default="1"/>
         <arg name="tgt_component" default="1"/>
