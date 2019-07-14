@@ -151,20 +151,20 @@ TailsitterPathPlanner::task_main()
 		if (_setpoint_updated){
 
 			math::Vector<3> next_point;
-			math::Vector<3> velocity = _waypoint.velocity;
 
 			if (this->raw_mode) {
 				next_point = _waypoint.end_point;
 				_setpoint_updated = false;
 			} else {
 				float dt = (hrt_absolute_time() - _waypoint.start_time)/1e6f;
+				set_waypoint(_waypoint.end_point, _waypoint.yaw);
 				next_point = _waypoint.start_point + _waypoint.direction * dt * _waypoint.speed;
 			}
 
 			if(!(this->raw_mode) && (next_point - _waypoint.end_point).length() < 0.05f){
 				_setpoint_updated = false;
 				next_point = _waypoint.end_point;
-				velocity.zero();
+				_waypoint.velocity.zero();
 			}
 
 			_pos_sp_triplet.previous = _pos_sp_triplet.current;
@@ -180,13 +180,14 @@ TailsitterPathPlanner::task_main()
 			_pos_sp_triplet.current.x = next_point(0);
 			_pos_sp_triplet.current.y = next_point(1);
 			_pos_sp_triplet.current.z = next_point(2);
-			_pos_sp_triplet.current.vx = velocity(0);
-			_pos_sp_triplet.current.vy = velocity(1);
-			_pos_sp_triplet.current.vz = velocity(2);
+			_pos_sp_triplet.current.vx = _waypoint.velocity(0);
+			_pos_sp_triplet.current.vy = _waypoint.velocity(1);
+			_pos_sp_triplet.current.vz = _waypoint.velocity(2);
 			_pos_sp_triplet.current.yaw = _waypoint.yaw;
 			_pos_sp_triplet.current.timestamp = hrt_absolute_time();
-//			printf("Next point %f, %f, %f\n", (double) next_point(0),(double) next_point(1),(double) next_point(2));
-//			printf("Velocity %f, %f, %f\n", (double) velocity(0),(double) velocity(1),(double) velocity(2));
+			printf("End point: %f, %f, %f\n", (double) _waypoint.end_point(0), (double) _waypoint.end_point(1), (double) _waypoint.end_point(2));
+			printf("Next point %f, %f, %f\n", (double) next_point(0),(double) next_point(1),(double) next_point(2));
+			printf("Velocity %f, %f, %f\n", (double) _waypoint.velocity(0),(double) _waypoint.velocity(1),(double) _waypoint.velocity(2));
 
 			publish_setpoint();
 		}
@@ -268,16 +269,12 @@ TailsitterPathPlanner::update_pos_setpoint(int argc, char*argv[]){
 
 		if(!strcmp(argv[0], "pos")){
 			math::Vector<3> end_point;
-			math::Vector<3> velocity;
 			float yaw;
 			end_point(0) = strtof(argv[1], 0);
 			end_point(1) = strtof(argv[2], 0);
 			end_point(2) = strtof(argv[3], 0);
-			velocity(0) = 0;
-			velocity(1) = 0;
-			velocity(2) = 0;
 			yaw = strtof(argv[4], 0) / 180.f * 3.1415926f;
-			set_waypoint(end_point, velocity, yaw);
+			set_waypoint(end_point, yaw);
 		}
 	}
 }
@@ -339,34 +336,25 @@ TailsitterPathPlanner::params_update(bool force)
 }
 
 void
-TailsitterPathPlanner::set_waypoint(math::Vector<3> end_point, math::Vector<3> velocity, float yaw)
+TailsitterPathPlanner::set_waypoint(math::Vector<3> end_point, float yaw)
 {
+	printf("setting waypoint\n");
 	if (_control_mode.ignore_position) {
 		_control_mode.ignore_position = false;
 		_control_mode.ignore_acceleration_force = true;
 	}
+	printf("start point: %f, %f, %f\n", (double)_local_pos.x, (double)_local_pos.y, (double)_local_pos.z);
 	_waypoint.start_point(0) = _local_pos.x;
 	_waypoint.start_point(1) = _local_pos.y;
 	_waypoint.start_point(2) = _local_pos.z;
 	_waypoint.end_point = end_point;
 	_waypoint.direction =  _waypoint.end_point - _waypoint.start_point;
 	_waypoint.direction.normalize();
+	printf("direction: %f, %f, %f\n", (double)_waypoint.direction(0), (double)_waypoint.direction(1), (double)_waypoint.direction(2));
 	_waypoint.yaw = yaw;
-	// Saturate the maximum velocity in all directions
-	for (int i=0; i<3; i++){
-		if (velocity(i) > _params.cruise_speed_max(i) || velocity(i) < -_params.cruise_speed_max(i)){
-			PX4_INFO("Clipping velocity while setting waypoint");
-			float scale = _params.cruise_speed_max(i) / velocity(i);
-			scale = scale > 0 ? scale:-scale;
-			velocity = velocity * scale;
-		}
-	}
-	if (velocity.length() < 1e-6f ) { // If effectively no velocity
-		PX4_INFO("Published setpoint has effectively no velocity. Setting based on default cruise speed.");
-		velocity = _waypoint.direction * _params.cruise_speed;
-	}
-	_waypoint.velocity = velocity;
-	_waypoint.speed = velocity.length();
+	_waypoint.velocity = _waypoint.direction * _params.cruise_speed;
+	printf("cruise speed: %f\n", (double) _params.cruise_speed);
+	_waypoint.speed = _waypoint.velocity.length();
 	_waypoint.start_time = hrt_absolute_time();
 	_setpoint_updated = true;
 }
@@ -385,7 +373,7 @@ TailsitterPathPlanner::poll_subscriptions()
 	if (updated) {
 		orb_copy(ORB_ID(position_setpoint_triplet_step), _position_setpoint_step_sub, &_pos_sp_triplet_step);
 		math::Vector<3> velocity;
-		velocity(0) = _pos_sp_triplet_step.current.vx;
+		velocity(0) = _pos_sp_triplet_step.current.vx; // unused right now
 		velocity(1) = _pos_sp_triplet_step.current.vy;
 		velocity(2) = _pos_sp_triplet_step.current.vz;
 		math::Vector<3> end_point;
@@ -393,7 +381,7 @@ TailsitterPathPlanner::poll_subscriptions()
 		end_point(1) = _pos_sp_triplet_step.current.y;
 		end_point(2) = _pos_sp_triplet_step.current.z;
 		float yaw = _pos_sp_triplet_step.current.yaw;
-		set_waypoint(end_point, velocity, yaw);
+		set_waypoint(end_point, yaw);
 	}
 }
 

@@ -14,10 +14,25 @@ plot(t1, vel1(:,1))
 %% Plot position_setpoint_triplet
 filename = find_file('.', '.*position_setpoint_triplet.*')
 positionsetpointtriplet = readtable(filename);
-t = positionsetpointtriplet.current_timestamp;
+
+filename = find_file('.', '.*vehicle_local_position.*')
+vehiclelocalposition = readtable(filename);
+
+filename = find_file('.', '.*att_pos_mocap.*')
+attposmocap = readtable(filename);
+
+t1 = positionsetpointtriplet.current_timestamp;
+t2 = vehiclelocalposition.timestamp;
+t3 = attposmocap.timestamp;
 
 % plot z tracking
-plot(t, positionsetpointtriplet.current_z)
+figure
+plot(t1, positionsetpointtriplet.current_z)
+hold on
+plot(t2, vehiclelocalposition.z)
+plot(t3, attposmocap.z)
+legend('setpoint', 'measured', 'mocap')
+
 %% Plot actuator outputs
 filename = find_file('.', '.*actuator_outputs.*')
 actuatoroutputs0 = readtable(filename);
