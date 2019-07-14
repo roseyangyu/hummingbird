@@ -12,21 +12,12 @@ plot(xyz1(:,1), xyz1(:,2))
 figure(2)
 plot(t1, vel1(:,1))
 %% Plot position_setpoint_triplet
-t2 = positionsetpointtriplet0.currenttimestamp;
-xyz2 = [positionsetpointtriplet0.currentx,...
-       positionsetpointtriplet0.currenty,...
-       positionsetpointtriplet0.currentz];
-vel2 = [positionsetpointtriplet0.currentvx,...
-       positionsetpointtriplet0.currentvy,...
-       positionsetpointtriplet0.currentvz];
-% plot x vs y graph
-figure(1)
-hold on
-plot(xyz2(:,1), xyz2(:,2))
-figure(2)
-hold on
-plot(t2, vel2(:,1))
+filename = find_file('.', '.*position_setpoint_triplet.*')
+positionsetpointtriplet = readtable(filename);
+t = positionsetpointtriplet.current_timestamp;
 
+% plot z tracking
+plot(t, positionsetpointtriplet.current_z)
 %% Plot actuator outputs
 filename = find_file('.', '.*actuator_outputs.*')
 actuatoroutputs0 = readtable(filename);
