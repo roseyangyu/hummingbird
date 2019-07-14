@@ -185,9 +185,9 @@ TailsitterPathPlanner::task_main()
 			_pos_sp_triplet.current.vz = _waypoint.velocity(2);
 			_pos_sp_triplet.current.yaw = _waypoint.yaw;
 			_pos_sp_triplet.current.timestamp = hrt_absolute_time();
-			printf("End point: %f, %f, %f\n", (double) _waypoint.end_point(0), (double) _waypoint.end_point(1), (double) _waypoint.end_point(2));
-			printf("Next point %f, %f, %f\n", (double) next_point(0),(double) next_point(1),(double) next_point(2));
-			printf("Velocity %f, %f, %f\n", (double) _waypoint.velocity(0),(double) _waypoint.velocity(1),(double) _waypoint.velocity(2));
+			//printf("End point: %f, %f, %f\n", (double) _waypoint.end_point(0), (double) _waypoint.end_point(1), (double) _waypoint.end_point(2));
+			//printf("Next point %f, %f, %f\n", (double) next_point(0),(double) next_point(1),(double) next_point(2));
+			//printf("Velocity %f, %f, %f\n", (double) _waypoint.velocity(0),(double) _waypoint.velocity(1),(double) _waypoint.velocity(2));
 
 			publish_setpoint();
 		}
@@ -338,22 +338,22 @@ TailsitterPathPlanner::params_update(bool force)
 void
 TailsitterPathPlanner::set_waypoint(math::Vector<3> end_point, float yaw)
 {
-	printf("setting waypoint\n");
+	//printf("setting waypoint\n");
 	if (_control_mode.ignore_position) {
 		_control_mode.ignore_position = false;
 		_control_mode.ignore_acceleration_force = true;
 	}
-	printf("start point: %f, %f, %f\n", (double)_local_pos.x, (double)_local_pos.y, (double)_local_pos.z);
+	//printf("start point: %f, %f, %f\n", (double)_local_pos.x, (double)_local_pos.y, (double)_local_pos.z);
 	_waypoint.start_point(0) = _local_pos.x;
 	_waypoint.start_point(1) = _local_pos.y;
 	_waypoint.start_point(2) = _local_pos.z;
 	_waypoint.end_point = end_point;
 	_waypoint.direction =  _waypoint.end_point - _waypoint.start_point;
 	_waypoint.direction.normalize();
-	printf("direction: %f, %f, %f\n", (double)_waypoint.direction(0), (double)_waypoint.direction(1), (double)_waypoint.direction(2));
+	//printf("direction: %f, %f, %f\n", (double)_waypoint.direction(0), (double)_waypoint.direction(1), (double)_waypoint.direction(2));
 	_waypoint.yaw = yaw;
 	_waypoint.velocity = _waypoint.direction * _params.cruise_speed;
-	printf("cruise speed: %f\n", (double) _params.cruise_speed);
+	//printf("cruise speed: %f\n", (double) _params.cruise_speed);
 	_waypoint.speed = _waypoint.velocity.length();
 	_waypoint.start_time = hrt_absolute_time();
 	_setpoint_updated = true;
