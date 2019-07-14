@@ -15,13 +15,35 @@ class Buttons:
 
 class Command:
     ARM_DISARM = 400
+    TAKEOFF = 22
 
 def joyCallback(data):
-    if data.buttons[Buttons.B]:
+    if data.buttons[Buttons.A]: # arm
+        rospy.loginfo("A button pressed")
+        try:
+            service_stub = rospy.ServiceProxy(service, CommandLong)
+            arm = True
+            confirmation = False
+            response = service_stub(False, Command.ARM_DISARM, confirmation, arm, 0, 0, 0, 0, 0, 0)
+            print(response)
+        except rospy.ServiceException, e:
+            rospy.logerr("Service call failed: %s"%e)
+    elif data.buttons[Buttons.B]: # disarm
         rospy.loginfo("B button pressed")
         try:
             service_stub = rospy.ServiceProxy(service, CommandLong)
-            response = service_stub(False, Command.ARM_DISARM, True, 0, 0, 0, 0, 0, 0, 0)
+            arm = False
+            confirmation = False
+            response = service_stub(False, Command.ARM_DISARM, confirmation, arm, 0, 0, 0, 0, 0, 0)
+            print(response)
+        except rospy.ServiceException, e:
+            rospy.logerr("Service call failed: %s"%e)
+    elif data.buttons[Buttons.Y]: # takeoff
+        rospy.loginfo("Y button pressed")
+        try:
+            service_stub = rospy.ServiceProxy(service, CommandLong)
+            confirmation = False
+            response = service_stub(False, Command.TAKEOFF, confirmation, None, None, None, None, None, None, None)
             print(response)
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: %s"%e)

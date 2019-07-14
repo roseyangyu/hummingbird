@@ -1973,16 +1973,8 @@ Mavlink::task_main(int argc, char *argv[])
 	/* add default streams depending on mode */
 
 	if (_mode != MAVLINK_MODE_IRIDIUM) {
-
 		/* HEARTBEAT is constant rate stream, rate never adjusted */
 		configure_stream("HEARTBEAT", 1.0f);
-
-		/* STATUSTEXT stream is like normal stream but gets messages from logbuffer instead of uORB */
-		configure_stream("STATUSTEXT", 20.0f);
-
-		/* COMMAND_LONG stream: use high rate to avoid commands skipping */
-		configure_stream("COMMAND_LONG", 100.0f);
-
 	}
 
 	/* PARAM_VALUE stream */
