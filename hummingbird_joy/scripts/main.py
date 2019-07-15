@@ -43,7 +43,7 @@ def joyCallback(data):
         try:
             service_stub = rospy.ServiceProxy(service, CommandLong)
             confirmation = False
-            response = service_stub(False, Command.TAKEOFF, confirmation, None, None, None, None, None, None, None)
+            response = service_stub(False, Command.TAKEOFF, confirmation, 0, 0, 0, 0, 0, 0, 0)
             print(response)
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: %s"%e)
