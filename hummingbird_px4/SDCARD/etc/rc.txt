@@ -20,8 +20,7 @@ fi
 # no safety switch
 param set CBRK_IO_SAFETY 22027
 
-# Remember to call logger start before taking off
-# logger start
+logger start
 
 commander start
 navigator start

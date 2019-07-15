@@ -1,7 +1,7 @@
 transformations:
   - frame_id: 'vicon/STARS_TS3/main'
     child_frame_id: 'COM'
-    rotation: [1,0,0,0,-1,0,0,0,-1]
+    rotation: [1,0,0,0,1,0,0,0,1]
     translation: [0,0.327,-0.051]
   - frame_id: 'vicon/STARS_TS3/main'
     child_frame_id: 'camera'
