@@ -76,7 +76,11 @@ Next, clone this repository into catkin_ws/src and build the code using the foll
 cd ~/catkin_ws/src
 git clone --recurse-submodules https://github.com/RahmanQureshi/hummingbird_ws #  To clone the repository
 cd ~/catkin_ws
-catkin build
+catkin build hummingbird
+catkin build mavros
+catkin build hummingbird_joy
+catkin build joy
+catkin build hummingbird_vicon
 source devel/setup.bash # Needs to be done everytime you finish building
 ```
 

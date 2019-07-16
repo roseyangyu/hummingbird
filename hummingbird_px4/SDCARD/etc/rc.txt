@@ -20,6 +20,12 @@ fi
 # no safety switch
 param set CBRK_IO_SAFETY 22027
 
+# set minimum takeoff altitude to 1.5m
+param set MIS_TAKEOFF_ALT 1.5
+
+# as per hardware configuration
+param set SENS_BOARD_ROT 24
+
 logger start
 
 commander start

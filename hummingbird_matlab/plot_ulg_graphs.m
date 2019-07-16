@@ -11,7 +11,9 @@ figure(1)
 plot(xyz1(:,1), xyz1(:,2))
 figure(2)
 plot(t1, vel1(:,1))
-%% Plot position_setpoint_triplet
+
+
+%% Plot position_setpoint_triplet vs local position vs mocap
 filename = find_file('.', '.*position_setpoint_triplet.*')
 positionsetpointtriplet = readtable(filename);
 
