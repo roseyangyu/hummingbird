@@ -20,6 +20,7 @@
   <depend>vicon_bridge</depend>
   <depend>libogre-dev</depend>
   <depend>mavros</depend>
+  <depend>mavros_extras</depend>
   <depend>mavlink</depend>
   <depend>protobuf-dev</depend>
 

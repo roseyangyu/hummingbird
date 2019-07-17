@@ -42,8 +42,8 @@ ts_path_planner start
 
 sh /fs/microsd/etc/rc.sensors
 mavlink start -r 800000 -d /dev/ttyACM0 -x
-mavlink start -r 20000 -b 921600 -d /dev/ttyS0 
-mavlink start -r 20000 -b 230400 -d /dev/ttyS2 
+mavlink start -r 20000 -b 921600 -d /dev/ttyS0 -m vicon
+mavlink start -r 20000 -b 230400 -d /dev/ttyS2
 
 sh /fs/microsd/etc/config.txt
 mavlink boot_complete

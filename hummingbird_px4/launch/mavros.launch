@@ -2,6 +2,7 @@
     <!-- MAVROS launch script PX4 (default) -->
 
     <arg name="ns" default="/" />
+    <arg name="output" default="log" />
     <arg name="fcu_url" default="" />
     <arg name="gcs_url" default="udp://:14550@:14555" />
     <arg name="fcu_protocol" default="v1.0" />
@@ -12,6 +13,7 @@
 
     <group ns="$(arg ns)">
         <include file="$(find mavros)/launch/node.launch">
+            <arg name="log_output" value="$(arg output)" />
             <arg name="pluginlists_yaml" value="$(arg pluginlists_yaml)" />
             <arg name="config_yaml" value="$(arg config_yaml)" />
             <arg name="fcu_protocol" value="$(arg fcu_protocol)" />

@@ -3,7 +3,7 @@
 
     <!--wifly :14551 <-> :14556 -->
     <!--expressif :14552 <-> :14555 -->
-    <arg name="wifly_fcu_url" default="udp://:14551@:14556" />
+    <arg name="wifly_fcu_url" default="udp://192.168.1.13:14551@192.168.1.214:14556" />
     <arg name="expressif_fcu_url" default="udp://:14552@192.168.1.126:14555" /> 
     <arg name="gcs_url" default="udp://@localhost" />
 
@@ -31,8 +31,9 @@
 
     <!-- Launches the connection to mavros -->
     <include file="$(find hummingbird_px4)/launch/mavros.launch">
+        <arg name="output" default="screen" />
         <arg name="ns" default="vicon_mavros"/>
-        <arg name="fcu_url" default="$(arg expressif_fcu_url)"/>
+        <arg name="fcu_url" default="$(arg expressif_fcu_url)" />
         <arg name="gcs_url" default=""/>
         <arg name="fcu_protocol" default="v2.0" />
         <arg name="tgt_system" default="1"/>
@@ -43,7 +44,7 @@
     <!-- Launches the connection to mavros -->
     <include file="$(find hummingbird_px4)/launch/mavros.launch">
         <arg name="ns" default="telemetry_mavros"/>
-        <arg name="fcu_url" default="$(arg wifly_fcu_url)"/>
+        <arg name="fcu_url" default="$(arg expressif_fcu_url)"/>
         <arg name="gcs_url" default=""/>
         <arg name="fcu_protocol" default="v2.0" />
         <arg name="tgt_system" default="1"/>
