@@ -3,9 +3,10 @@
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Joy
-from mavros_msgs.srv import CommandLong
+from mavros_msgs.srv import CommandInt
 
 service = None
+service_stub = None
 
 class Buttons:
     X = 0
@@ -17,33 +18,63 @@ class Command:
     ARM_DISARM = 400
     TAKEOFF = 22
 
+
 def joyCallback(data):
+    global service_stub
     if data.buttons[Buttons.A]: # arm
         rospy.loginfo("A button pressed")
         try:
-            service_stub = rospy.ServiceProxy(service, CommandLong)
-            arm = True
-            confirmation = False
-            response = service_stub(False, Command.ARM_DISARM, confirmation, arm, 0, 0, 0, 0, 0, 0)
+            broadcast = False
+            frame = 0
+            command = Command.ARM_DISARM
+            current = 0
+            autocontinue = 0
+            param1_arm = 1
+            param2 = 0
+            param3 = 0
+            param4 = 0
+            x = 0
+            y = 0
+            z = 0
+            response = service_stub(broadcast, frame, command, current, autocontinue, param1_arm, param2, param3, param4, x, y, z)
             print(response)
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: %s"%e)
     elif data.buttons[Buttons.B]: # disarm
         rospy.loginfo("B button pressed")
         try:
-            service_stub = rospy.ServiceProxy(service, CommandLong)
-            arm = False
-            confirmation = False
-            response = service_stub(False, Command.ARM_DISARM, confirmation, arm, 0, 0, 0, 0, 0, 0)
+            broadcast = False
+            frame = 0
+            command = Command.ARM_DISARM
+            current = 0
+            autocontinue = 0
+            param1_arm = 0
+            param2 = 0
+            param3 = 0
+            param4 = 0
+            x = 0
+            y = 0
+            z = 0
+            response = service_stub(broadcast, frame, command, current, autocontinue, param1_arm, param2, param3, param4, x, y, z)
             print(response)
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: %s"%e)
     elif data.buttons[Buttons.Y]: # takeoff
         rospy.loginfo("Y button pressed")
         try:
-            service_stub = rospy.ServiceProxy(service, CommandLong)
-            confirmation = False
-            response = service_stub(False, Command.TAKEOFF, confirmation, 0, 0, 0, 0, 0, 0, 0)
+            broadcast = False
+            frame = 0
+            command = Command.TAKEOFF
+            current = 0
+            autocontinue = 0
+            param1 = 0
+            param2 = 0
+            param3 = 0
+            param4 = 0
+            x = 0
+            y = 0
+            z = 0
+            response = service_stub(broadcast, frame, command, current, autocontinue, param1, param2, param3, param4, x, y, z)
             print(response)
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: %s"%e)
@@ -51,9 +82,11 @@ def joyCallback(data):
 def main():
     rospy.init_node('hummingbird_joy', anonymous=True)
     global service
+    global service_stub
     service = rospy.get_param("~command_service")
     try:
         rospy.wait_for_service(service, timeout=5)
+        service_stub = rospy.ServiceProxy(service, CommandInt)
     except rospy.ROSException, e:
         rospy.logerr("Failed while waiting for service %s", service)
     rospy.Subscriber("/joy", Joy, joyCallback)
