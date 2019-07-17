@@ -25,7 +25,7 @@
 
     <node pkg="joy" type="joy_node" name="joy" />
     <node pkg="hummingbird_joy" type="main.py" name="hummingbird_joy" output="screen">
-        <param name="command_service" value="/mavros/cmd/command" />
+        <param name="command_service" value="/mavros/cmd/command_int" />
     </node>
 
     <!-- Launches the display -->

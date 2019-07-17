@@ -21,7 +21,7 @@
 
     <node pkg="joy" type="joy_node" name="joy" />
     <node pkg="hummingbird_joy" type="main.py" name="hummingbird_joy" output="screen">
-        <param name="command_service" value="/telemetry_mavros/mavros/cmd/command" />
+        <param name="command_service" value="/telemetry_mavros/mavros/cmd/command_int" />
     </node>
 
     <!-- launch static tranforms -->
@@ -44,7 +44,7 @@
     <!-- Launches the connection to mavros -->
     <include file="$(find hummingbird_px4)/launch/mavros.launch">
         <arg name="ns" default="telemetry_mavros"/>
-        <arg name="fcu_url" default="$(arg expressif_fcu_url)"/>
+        <arg name="fcu_url" default="$(arg wifly_fcu_url)"/>
         <arg name="gcs_url" default=""/>
         <arg name="fcu_protocol" default="v2.0" />
         <arg name="tgt_system" default="1"/>
