@@ -46,7 +46,7 @@ local_position_estimator start
 attitude_estimator_q start
 
 ts_att_control start
-mc_pos_control start
+ts_pos_control start
 ts_path_planner start
 
 sh /fs/microsd/etc/rc.sensors
