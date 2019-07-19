@@ -233,7 +233,7 @@ PARAM_DEFINE_INT32(COM_AUTOS_PAR, 1);
  * @value 1 Joystick/No RC Checks
  * @value 2 Virtual RC by Joystick
  */
-PARAM_DEFINE_INT32(COM_RC_IN_MODE, 0);
+PARAM_DEFINE_INT32(COM_RC_IN_MODE, 1);
 
 /**
  * RC input arm/disarm command duration

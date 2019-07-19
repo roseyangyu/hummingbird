@@ -17,14 +17,23 @@ else
 	fi
 fi
 
-# no safety switch
-param set CBRK_IO_SAFETY 22027
+param set CBRK_IO_SAFETY 22027 # no safety switch
+param set CBRK_AIRSPD_CHK 162128 # no airspeed sensor
+param set CBRK_GPSFAIL 240024 # no gps
 
 # set minimum takeoff altitude to 1.5m
 param set MIS_TAKEOFF_ALT 1.5
 
 # as per hardware configuration
 param set SENS_BOARD_ROT 24
+
+param set MAV_TYPE 19 # Set airframe to duorotor
+param set VT_TYPE 0
+param set VT_MOT_COUNT 2
+param set VT_IDLE_PWM_MC  1080
+param set SYS_AUTOSTART 13001
+param set SYS_RESTART_TYPE 2
+param set SYS_MC_EST_GROUP 1
 
 logger start
 
@@ -42,7 +51,7 @@ ts_path_planner start
 
 sh /fs/microsd/etc/rc.sensors
 mavlink start -r 800000 -d /dev/ttyACM0 -x
-mavlink start -r 20000 -b 921600 -d /dev/ttyS0 -m vicon
+mavlink start -r 20000 -b 921600 -d /dev/ttyS0 
 mavlink start -r 20000 -b 230400 -d /dev/ttyS2
 
 sh /fs/microsd/etc/config.txt

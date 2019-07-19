@@ -8,6 +8,8 @@ vehicle_local_position # has current position estimate
 att_pos_mocap # ground truth position/orientation
 vehicle_control_mode
 vehicle_status
+commander_state
+vehicle_command
 esc_rads
 actuator_outputs
 ts_actuator_outputs_virtual

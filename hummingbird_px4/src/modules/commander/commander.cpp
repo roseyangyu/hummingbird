@@ -1600,7 +1600,7 @@ int commander_thread_main(int argc, char *argv[])
 	}
 
 	// Run preflight check
-	int32_t rc_in_off = 0;
+	int32_t rc_in_off = 1;
 	bool hotplug_timeout = hrt_elapsed_time(&commander_boot_timestamp) > HOTPLUG_SENS_TIMEOUT;
 	int32_t arm_without_gps = 0;
 	param_get(_param_autostart_id, &autostart_id);

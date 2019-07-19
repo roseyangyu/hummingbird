@@ -2004,6 +2004,7 @@ Mavlink::task_main(int argc, char *argv[])
 	case MAVLINK_MODE_VICON:
 		break; // send absolutely no data
 	case MAVLINK_MODE_NORMAL:
+		configure_stream("SYS_STATUS", 1.0f);
 		configure_stream("STATUSTEXT", 20.0f);
 		break;
 

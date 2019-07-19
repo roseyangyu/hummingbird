@@ -1,18 +1,16 @@
-%% Plot position_setpoint_triplet_step
-t1 = positionsetpointtripletstep0.timestamp;
-xyz1 = [positionsetpointtripletstep0.currentx,...
-       positionsetpointtripletstep0.currenty,...
-       positionsetpointtripletstep0.currentz];
-vel1 = [positionsetpointtripletstep0.currentvx,...
-       positionsetpointtripletstep0.currentvy,...
-       positionsetpointtripletstep0.currentvz];
-% plot x vs y graph
-figure(1)
-plot(xyz1(:,1), xyz1(:,2))
-figure(2)
-plot(t1, vel1(:,1))
+%% Vehicle status, vehicle control mode
+filename = find_file('.', '.*vehicle_status.*');
+vehiclestatus = readtable(filename);
 
+filename = find_file('.', '.*control_mode.*');
+vehiclecontrolmode = readtable(filename);
 
+filename = find_file('.', '.*commander_state.*');
+commanderstate = readtable(filename);
+
+%% Show commands
+filename = find_file('.', '.*vehicle_command.*');
+vehiclecommand = readtable(filename);
 %% Plot position_setpoint_triplet vs local position vs mocap
 filename = find_file('.', '.*position_setpoint_triplet.*')
 positionsetpointtriplet = readtable(filename);
@@ -29,6 +27,21 @@ t3 = attposmocap.timestamp;
 
 % plot z tracking
 figure
+subplot(1,3,1)
+plot(t1, positionsetpointtriplet.current_x)
+hold on
+plot(t2, vehiclelocalposition.x)
+plot(t3, attposmocap.x)
+legend('setpoint', 'measured', 'mocap')
+
+subplot(1,3,2)
+plot(t1, positionsetpointtriplet.current_y)
+hold on
+plot(t2, vehiclelocalposition.y)
+plot(t3, attposmocap.y)
+legend('setpoint', 'measured', 'mocap')
+
+subplot(1,3,3)
 plot(t1, positionsetpointtriplet.current_z)
 hold on
 plot(t2, vehiclelocalposition.z)
