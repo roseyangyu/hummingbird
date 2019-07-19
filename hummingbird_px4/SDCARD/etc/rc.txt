@@ -25,7 +25,7 @@ param set CBRK_GPSFAIL 240024 # no gps
 param set MIS_TAKEOFF_ALT 1.5
 
 # as per hardware configuration
-param set SENS_BOARD_ROT 24
+param set SENS_BOARD_ROT 28 # pitch 90, yaw 180
 
 param set MAV_TYPE 19 # Set airframe to duorotor
 param set VT_TYPE 0
