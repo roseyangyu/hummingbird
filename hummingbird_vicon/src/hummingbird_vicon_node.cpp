@@ -19,6 +19,8 @@ int main(int argc, char **argv) {
     tf2_ros::TransformListener tfListener(tfBuffer);
     ros::NodeHandle n;
     mavros_mocap_pub = n.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 1000);
+
+    ros::Rate r(60);
     while (n.ok()) {
         try {
             tfBuffer.lookupTransform("world", vicon_frame_id, ros::Time::now(), ros::Duration(1)); // block for 1 second waiting for latest transform
@@ -35,6 +37,7 @@ int main(int argc, char **argv) {
         } catch (tf2::TransformException &ex) {
             ROS_WARN("%s",ex.what());
         }
+        r.sleep();
     }
 
     ros::spin();

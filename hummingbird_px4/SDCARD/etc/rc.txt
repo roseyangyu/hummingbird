@@ -21,7 +21,7 @@ param set CBRK_IO_SAFETY 22027 # no safety switch
 param set CBRK_AIRSPD_CHK 162128 # no airspeed sensor
 param set CBRK_GPSFAIL 240024 # no gps
 
-# set minimum takeoff altitude to 1.5m
+# set minimum takeoff altitude
 param set MIS_TAKEOFF_ALT 1.5
 
 # as per hardware configuration
@@ -35,6 +35,8 @@ param set SYS_AUTOSTART 13001
 param set SYS_RESTART_TYPE 2
 param set SYS_MC_EST_GROUP 1
 
+param set ATT_EXT_HDG_M 2 # use mocap for heading
+
 logger start
 
 commander start
@@ -46,7 +48,7 @@ local_position_estimator start
 attitude_estimator_q start
 
 ts_att_control start
-ts_pos_control start
+mc_pos_control start
 ts_path_planner start
 
 sh /fs/microsd/etc/rc.sensors

@@ -52,37 +52,31 @@ legend('setpoint', 'measured', 'mocap')
 filename = find_file('.', '.*actuator_outputs.*')
 actuatoroutputs0 = readtable(filename);
 t = actuatoroutputs0.timestamp;
-hold on
-subplot(2,2,1)
+figure
 plot(t, actuatoroutputs0.output_0_)
-title('motor left')
-subplot(2,2,2)
+hold on
 plot(t, actuatoroutputs0.output_1_)
-title('motor right')
-subplot(2,2,3)
+legend('motor left', 'motor right')
+figure
 plot(t, actuatoroutputs0.output_4_)
-title('elevon left')
-subplot(2,2,4)
+hold on
 plot(t, actuatoroutputs0.output_5_)
-title('elevon right')
+legend('elevon left', 'elevon right')
 
 %% Plot virtual actuator outputs
 filename = find_file('.', '.*actuator_outputs_virtual.*')
 actuatoroutputsvirtual = readtable(filename);
 t = actuatoroutputsvirtual.timestamp;
-hold on
-subplot(2,2,1)
+figure
 plot(t, actuatoroutputsvirtual.output_0_)
-title('motor left')
-subplot(2,2,2)
+hold on
 plot(t, actuatoroutputsvirtual.output_1_)
-title('motor right')
-subplot(2,2,3)
+legend('motor left', 'motor right')
+figure
 plot(t, actuatoroutputsvirtual.output_4_)
-title('elevon left')
-subplot(2,2,4)
+hold on
 plot(t, actuatoroutputsvirtual.output_5_)
-title('elevon right')
+legend('elevon left', 'elevon right')
 
 %% Attitude setpoints versus measured versus mocap
 filename = find_file('.', '.*vehicle_attitude_setpoint.*')
@@ -96,9 +90,9 @@ t1 = vehicleattitudesetpoints.timestamp;
 t2 = controlstate.timestamp;
 t3 = attposmocap.timestamp;
 
-rpy1 = quat2eul([vehicleattitudesetpoints.q_d_0_ vehicleattitudesetpoints.q_d_1_ vehicleattitudesetpoints.q_d_2_, vehicleattitudesetpoints.q_d_3_], 'XYZ'); 
-rpy = quat2eul([controlstate.q_0_ controlstate.q_1_ controlstate.q_2_, controlstate.q_3_], 'XYZ');
-rpy2 = quat2eul([attposmocap.q_0_ attposmocap.q_1_ attposmocap.q_2_, attposmocap.q_3_], 'XYZ');
+rpy1 = quat2eul([vehicleattitudesetpoints.q_d_0_ vehicleattitudesetpoints.q_d_1_ vehicleattitudesetpoints.q_d_2_, vehicleattitudesetpoints.q_d_3_], 'ZYX'); 
+rpy = quat2eul([controlstate.q_0_ controlstate.q_1_ controlstate.q_2_, controlstate.q_3_], 'ZYX');
+rpy2 = quat2eul([attposmocap.q_0_ attposmocap.q_1_ attposmocap.q_2_, attposmocap.q_3_], 'ZYX');
 
 figure
 subplot(1,4,1)
@@ -106,7 +100,7 @@ plot(t1, rpy1(:,1))
 hold on
 plot(t2, rpy(:,1))
 plot(t3, rpy2(:,1))
-title('roll setpoint')
+title('yaw setpoint')
 legend('setpoint', 'measured', 'mocap')
 subplot(1,4,2)
 plot(t1, rpy1(:,2))
@@ -120,7 +114,7 @@ plot(t1, rpy1(:,3))
 hold on
 plot(t2, rpy(:,3))
 plot(t3, rpy2(:,3))
-title('yaw setpoint')
+title('roll setpoint')
 legend('setpoint', 'measured', 'mocap')
 subplot(1,4,4)
 plot(t1, vehicleattitudesetpoints.thrust)
@@ -140,23 +134,110 @@ subplot(1,4,1)
 plot(t, vehicleratessetpoints.roll)
 hold on
 plot(t2, controlstate.roll_rate)
-title('roll')
+title('roll rate')
 legend('setpoint', 'measured')
 
 subplot(1,4,2)
 plot(t, vehicleratessetpoints.pitch)
 hold on
 plot(t2, controlstate.pitch_rate)
-title('pitch')
+title('pitch rate')
 legend('setpoint', 'measured')
 
 subplot(1,4,3)
 plot(t, vehicleratessetpoints.yaw)
 hold on
 plot(t2, controlstate.yaw_rate)
-title('yaw')
+title('yaw rate')
 legend('setpoint', 'measured')
 
 subplot(1,4,4)
 plot(t, vehicleratessetpoints.thrust)
 title('thrust')
+
+%% Plot actual pitch v.s. pitch setpoint v.s. pitch rate
+filename = find_file('.', '.*vehicle_rates_setpoint.*')
+vehicleratessetpoints = readtable(filename);
+filename = find_file('.', '.*control_state.*')
+controlstate = readtable(filename);
+filename = find_file('.', '.*vehicle_attitude_setpoint.*')
+vehicleattitudesetpoints = readtable(filename);
+filename = find_file('.', '.*att_pos_mocap.*')
+attposmocap = readtable(filename);
+
+t1 = vehicleattitudesetpoints.timestamp;
+t2 = controlstate.timestamp;
+t3 = attposmocap.timestamp;
+t4 = vehicleratessetpoints.timestamp;
+
+rpy1 = quat2eul([vehicleattitudesetpoints.q_d_0_ vehicleattitudesetpoints.q_d_1_ vehicleattitudesetpoints.q_d_2_, vehicleattitudesetpoints.q_d_3_], 'ZYX'); 
+rpy2 = quat2eul([controlstate.q_0_ controlstate.q_1_ controlstate.q_2_, controlstate.q_3_], 'ZYX');
+rpy3 = quat2eul([attposmocap.q_0_ attposmocap.q_1_ attposmocap.q_2_, attposmocap.q_3_], 'ZYX');
+
+figure
+plot(t1, rpy1(:,2))
+hold on
+plot(t2, rpy2(:,2))
+plot(t3, rpy3(:,2))
+plot(t4, vehicleratessetpoints.pitch)
+plot(t2, controlstate.pitch_rate)
+legend('pitch setpoint', 'estimated pitch', 'mocap pitch', 'pitch rate setpoint', 'estimated pitch rate')
+
+%% Plot actual yaw v.s. setpoint v.s. rate
+filename = find_file('.', '.*vehicle_rates_setpoint.*')
+vehicleratessetpoints = readtable(filename);
+filename = find_file('.', '.*control_state.*')
+controlstate = readtable(filename);
+filename = find_file('.', '.*vehicle_attitude_setpoint.*')
+vehicleattitudesetpoints = readtable(filename);
+filename = find_file('.', '.*att_pos_mocap.*')
+attposmocap = readtable(filename);
+
+t1 = vehicleattitudesetpoints.timestamp;
+t2 = controlstate.timestamp;
+t3 = attposmocap.timestamp;
+t4 = vehicleratessetpoints.timestamp;
+
+rpy1 = quat2eul([vehicleattitudesetpoints.q_d_0_ vehicleattitudesetpoints.q_d_1_ vehicleattitudesetpoints.q_d_2_, vehicleattitudesetpoints.q_d_3_], 'ZYX'); 
+rpy2 = quat2eul([controlstate.q_0_ controlstate.q_1_ controlstate.q_2_, controlstate.q_3_], 'ZYX');
+rpy3 = quat2eul([attposmocap.q_0_ attposmocap.q_1_ attposmocap.q_2_, attposmocap.q_3_], 'ZYX');
+
+figure
+plot(t1, rpy1(:,1))
+hold on
+plot(t2, rpy2(:,1))
+plot(t3, rpy3(:,1))
+plot(t4, vehicleratessetpoints.yaw)
+plot(t2, controlstate.yaw_rate)
+legend('yaw setpoint', 'estimated yaw', 'mocap yaw', 'yaw rate setpoint', 'estimated yaw rate')
+%% Plot actual roll v.s. setpoint v.s. rate
+filename = find_file('.', '.*vehicle_rates_setpoint.*')
+vehicleratessetpoints = readtable(filename);
+filename = find_file('.', '.*control_state.*')
+controlstate = readtable(filename);
+filename = find_file('.', '.*vehicle_attitude_setpoint.*')
+vehicleattitudesetpoints = readtable(filename);
+filename = find_file('.', '.*att_pos_mocap.*')
+attposmocap = readtable(filename);
+
+t1 = vehicleattitudesetpoints.timestamp;
+t2 = controlstate.timestamp;
+t3 = attposmocap.timestamp;
+t4 = vehicleratessetpoints.timestamp;
+
+rpy1 = quat2eul([vehicleattitudesetpoints.q_d_0_ vehicleattitudesetpoints.q_d_1_ vehicleattitudesetpoints.q_d_2_, vehicleattitudesetpoints.q_d_3_], 'ZYX'); 
+rpy2 = quat2eul([controlstate.q_0_ controlstate.q_1_ controlstate.q_2_, controlstate.q_3_], 'ZYX');
+rpy3 = quat2eul([attposmocap.q_0_ attposmocap.q_1_ attposmocap.q_2_, attposmocap.q_3_], 'ZYX');
+
+figure
+plot(t1, rpy1(:,3))
+hold on
+plot(t2, rpy2(:,3))
+plot(t3, rpy3(:,3))
+plot(t4, vehicleratessetpoints.roll)
+plot(t2, controlstate.roll_rate)
+legend('roll setpoint', 'estimated roll', 'mocap roll', 'roll rate setpoint', 'estimated roll rate')
+
+
+
+
