@@ -48,6 +48,10 @@
 #include <lib/tailsitter_recovery/tailsitter_recovery.h>
 #include "ts_rate_control.h"
 
+#include <systemlib/mavlink_log.h>
+#include <uORB/topics/mavlink_log.h>
+
+
 /**
  * Tailsitter attitude control app start / stop handling function
  *
@@ -426,6 +430,8 @@ TailsitterAttitudeControl::TailsitterAttitudeControl() :
 
 
 }
+
+//static orb_advert_t mavlink_log_pub = 0;
 
 TailsitterAttitudeControl::~TailsitterAttitudeControl()
 {
@@ -1060,12 +1066,17 @@ TailsitterAttitudeControl::task_main()
 				momentum_ref(2) = _actuators.control[2];
 				double thrust_ref = _actuators.control[3];
 
-				if (thrust_ref  < 1e-6) {
-					thrust_ref = 2; // numerical stability to prevent elevons from saturating
+				// if thrust is 0 and system is armed/landed, momentum_ref will be aproximately 0
+				// and during mixing you will divide by a large number and saturate the outputs
+				if (thrust_ref < 1e-6) {
+					outputs[0] = 0;
+					outputs[1] = 0;
+					outputs[2] = 0;
+					outputs[3] = 0; 
+				} else {
+					_ts_rate_control->mix(thrust_ref, momentum_ref, outputs);	
 				}
 
-
-				_ts_rate_control->mix(thrust_ref, momentum_ref, outputs);
 			}
 
 			if(sitl_enabled){
