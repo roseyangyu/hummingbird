@@ -17,7 +17,7 @@
  * @group Tailsitter Attitude Control
  */
 
-PARAM_DEFINE_FLOAT(TS_PITCH_P, 8.f);
+PARAM_DEFINE_FLOAT(TS_PITCH_P, 5.f);
 /**
  * TS Roll I Gain
  *

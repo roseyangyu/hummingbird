@@ -480,7 +480,7 @@ PARAM_DEFINE_INT32(MPC_ALT_MODE, 0);
  * @decimal 2
  * @group Tailsitter Position Control
  */
-PARAM_DEFINE_FLOAT(TS_POS_TC_X, 1.f);
+PARAM_DEFINE_FLOAT(TS_POS_TC_X, 0.8f);
 
 /**
  * Position controller time constant Y
@@ -492,7 +492,7 @@ PARAM_DEFINE_FLOAT(TS_POS_TC_X, 1.f);
  * @decimal 2
  * @group Tailsitter Position Control
  */
-PARAM_DEFINE_FLOAT(TS_POS_TC_Y, 1.f);
+PARAM_DEFINE_FLOAT(TS_POS_TC_Y, 0.8f);
 
 /**
  * Position controller time constant Z
@@ -504,7 +504,7 @@ PARAM_DEFINE_FLOAT(TS_POS_TC_Y, 1.f);
  * @decimal 2
  * @group Tailsitter Position Control
  */
-PARAM_DEFINE_FLOAT(TS_POS_TC_Z, 0.2f);
+PARAM_DEFINE_FLOAT(TS_POS_TC_Z, 0.5f);
 
 /**
  * Position controller damping ratios X
@@ -516,7 +516,7 @@ PARAM_DEFINE_FLOAT(TS_POS_TC_Z, 0.2f);
  * @decimal 2
  * @group Tailsitter Position Control
  */
-PARAM_DEFINE_FLOAT(TS_POS_DR_X, 0.6f);
+PARAM_DEFINE_FLOAT(TS_POS_DR_X, 0.7f);
 
 /**
  * Position controller damping ratios Y
@@ -528,7 +528,7 @@ PARAM_DEFINE_FLOAT(TS_POS_DR_X, 0.6f);
  * @decimal 2
  * @group Tailsitter Position Control
  */
-PARAM_DEFINE_FLOAT(TS_POS_DR_Y, 0.6f);
+PARAM_DEFINE_FLOAT(TS_POS_DR_Y, 0.7f);
 
 /**
  * Position controller damping ratios Z
@@ -540,6 +540,6 @@ PARAM_DEFINE_FLOAT(TS_POS_DR_Y, 0.6f);
  * @decimal 2
  * @group Tailsitter Position Control
  */
-PARAM_DEFINE_FLOAT(TS_POS_DR_Z, 1.5f);
+PARAM_DEFINE_FLOAT(TS_POS_DR_Z, 0.7f);
 
 

@@ -467,9 +467,9 @@ TailsitterAttitudeControl::parameters_update()
 	param_get(_params_handles.roll_tc, &roll_tc);
 	param_get(_params_handles.pitch_tc, &pitch_tc);
 	param_get(_params_handles.pitch_tc, &yaw_tc);
-	_params.att_tc(0) = roll_tc;
-	_params.att_tc(1) = pitch_tc;
-	_params.att_tc(2) = yaw_tc;
+	_params.att_tc(0) = roll_tc; // unused
+	_params.att_tc(1) = pitch_tc; // unsed
+	_params.att_tc(2) = yaw_tc; // unused
 
 	/* roll gains */
 	param_get(_params_handles.roll_p, &v);

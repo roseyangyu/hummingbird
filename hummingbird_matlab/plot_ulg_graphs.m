@@ -15,38 +15,45 @@ vehiclecommand = readtable(filename);
 filename = find_file('.', '.*position_setpoint_triplet.*')
 positionsetpointtriplet = readtable(filename);
 
-filename = find_file('.', '.*vehicle_local_position.*')
+filename = find_file('.', '.*vehicle_local_position_setpoint.*')
+vehiclelocalpositionsetpoint = readtable(filename);
+
+filename = find_file('.', '.*vehicle_local_position_0.csv')
 vehiclelocalposition = readtable(filename);
 
 filename = find_file('.', '.*att_pos_mocap.*')
 attposmocap = readtable(filename);
 
-t1 = positionsetpointtriplet.current_timestamp;
+t1 = vehiclelocalpositionsetpoint.timestamp;
 t2 = vehiclelocalposition.timestamp;
 t3 = attposmocap.timestamp;
 
 % plot z tracking
 figure
 subplot(1,3,1)
-plot(t1, positionsetpointtriplet.current_x)
+plot(t1, vehiclelocalpositionsetpoint.x)
 hold on
 plot(t2, vehiclelocalposition.x)
 plot(t3, attposmocap.x)
 legend('setpoint', 'measured', 'mocap')
 
 subplot(1,3,2)
-plot(t1, positionsetpointtriplet.current_y)
+plot(t1, vehiclelocalpositionsetpoint.y)
 hold on
 plot(t2, vehiclelocalposition.y)
 plot(t3, attposmocap.y)
 legend('setpoint', 'measured', 'mocap')
 
 subplot(1,3,3)
-plot(t1, positionsetpointtriplet.current_z)
+plot(t1, vehiclelocalpositionsetpoint.z)
 hold on
 plot(t2, vehiclelocalposition.z)
 plot(t3, attposmocap.z)
-legend('setpoint', 'measured', 'mocap')
+plot(t1, vehiclelocalpositionsetpoint.acc_z)
+plot(t1, vehiclelocalpositionsetpoint.vz)
+plot(t1, vehiclelocalposition.vz)
+
+legend('setpoint z', 'estimated z', 'mocap', 'az des', 'vz setpoint', 'estimated vz')
 
 %% Plot actuator outputs
 filename = find_file('.', '.*actuator_outputs.*')

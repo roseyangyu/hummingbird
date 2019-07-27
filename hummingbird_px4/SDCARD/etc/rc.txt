@@ -22,7 +22,7 @@ param set CBRK_AIRSPD_CHK 162128 # no airspeed sensor
 param set CBRK_GPSFAIL 240024 # no gps
 
 # set minimum takeoff altitude
-param set MIS_TAKEOFF_ALT 1.5
+param set MIS_TAKEOFF_ALT 0.5
 
 # as per hardware configuration
 param set SENS_BOARD_ROT 28 # pitch 90, yaw 180
@@ -36,6 +36,8 @@ param set SYS_RESTART_TYPE 2
 param set SYS_MC_EST_GROUP 1
 
 param set ATT_EXT_HDG_M 2 # use mocap for heading
+
+param set TS_POS_DR_Z 1.5
 
 logger start
 

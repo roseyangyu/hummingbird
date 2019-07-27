@@ -2,6 +2,7 @@ battery_status
 position_setpoint_triplet_step
 position_setpoint_triplet
 vehicle_attitude_setpoint
+vehicle_local_position_setpoint 
 vehicle_rates_setpoint
 control_state # has current quaternion estimate
 vehicle_local_position # has current position estimate
