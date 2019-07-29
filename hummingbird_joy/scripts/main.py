@@ -17,6 +17,7 @@ class Buttons:
 class Command:
     ARM_DISARM = 400
     TAKEOFF = 22
+    LAND = 21
 
 
 def joyCallback(data):
@@ -65,6 +66,25 @@ def joyCallback(data):
             broadcast = False
             frame = 0
             command = Command.TAKEOFF
+            current = 0
+            autocontinue = 0
+            param1 = 0
+            param2 = 0
+            param3 = 0
+            param4 = 0
+            x = 0
+            y = 0
+            z = 0
+            response = service_stub(broadcast, frame, command, current, autocontinue, param1, param2, param3, param4, x, y, z)
+            print(response)
+        except rospy.ServiceException, e:
+            rospy.logerr("Service call failed: %s"%e)
+    elif data.buttons[Buttons.X]: # land
+        rospy.loginfo("X button pressed")
+        try:
+            broadcast = False
+            frame = 0
+            command = Command.LAND
             current = 0
             autocontinue = 0
             param1 = 0
