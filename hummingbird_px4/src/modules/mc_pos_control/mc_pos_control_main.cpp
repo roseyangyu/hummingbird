@@ -169,6 +169,7 @@ private:
 	control::BlockDerivative _vel_z_deriv;
 
 	struct {
+		param_t mass;
 		param_t thr_min;
 		param_t thr_max;
 		param_t thr_hover;
@@ -213,6 +214,7 @@ private:
 	}		_params_handles;		/**< handles for interesting parameters */
 
 	struct {
+		float mass;
 		float thr_min;
 		float thr_max;
 		float thr_hover;
@@ -475,6 +477,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_params.vel_cruise.zero();
 	_params.vel_ff.zero();
 	_params.sp_offs_max.zero();
+	_params.mass = 0; // underestimate so that thrust is minimal incase of error
 
 	_pos.zero();
 	_pos_sp.zero();
@@ -491,6 +494,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 
 	_thrust_int.zero();
 
+	_params_handles.mass 		= param_find("TS_MASS");
 	_params_handles.thr_min		= param_find("MPC_THR_MIN");
 	_params_handles.thr_max		= param_find("MPC_THR_MAX");
 	_params_handles.thr_hover	= param_find("MPC_THR_HOVER");
@@ -585,6 +589,7 @@ MulticopterPositionControl::parameters_update(bool force)
 		updateParams();
 
 		/* update legacy C interface params */
+		param_get(_params_handles.mass, &_params.mass);
 		param_get(_params_handles.thr_min, &_params.thr_min);
 		param_get(_params_handles.thr_max, &_params.thr_max);
 		param_get(_params_handles.thr_hover, &_params.thr_hover);
@@ -1810,7 +1815,7 @@ MulticopterPositionControl::control_position(float dt)
 //			thrust_sp(2) = 0.0f;
 //		}
 
-		float mass = 0.655; 
+		float mass = _params.mass; 
 		math::Vector<3> gravity(0, 0, mass * ONE_G);
 		math::Vector<3> f_prop = thrust_sp*mass - gravity;
 		//warnx("Before Before Thrust setpoint: %f, %f, %f\n", (double)thrust_sp(0),(double)thrust_sp(1),(double)thrust_sp(2));
