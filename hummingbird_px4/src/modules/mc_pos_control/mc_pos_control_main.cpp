@@ -1810,8 +1810,9 @@ MulticopterPositionControl::control_position(float dt)
 //			thrust_sp(2) = 0.0f;
 //		}
 
-		math::Vector<3> gravity(0, 0, 0.63f * ONE_G);
-		math::Vector<3> f_prop = thrust_sp * 0.63f - gravity;
+		float mass = 0.655; 
+		math::Vector<3> gravity(0, 0, mass * ONE_G);
+		math::Vector<3> f_prop = thrust_sp*mass - gravity;
 		//warnx("Before Before Thrust setpoint: %f, %f, %f\n", (double)thrust_sp(0),(double)thrust_sp(1),(double)thrust_sp(2));
 		thrust_sp = f_prop;
 		//warnx("Before Thrust setpoint: %f, %f, %f\n", (double)thrust_sp(0),(double)thrust_sp(1),(double)thrust_sp(2));

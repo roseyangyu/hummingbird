@@ -35,14 +35,20 @@ plot(t1, vehiclelocalpositionsetpoint.x)
 hold on
 plot(t2, vehiclelocalposition.x)
 plot(t3, attposmocap.x)
-legend('setpoint', 'measured', 'mocap')
+plot(t1, vehiclelocalpositionsetpoint.acc_x)
+plot(t1, vehiclelocalpositionsetpoint.vx)
+plot(t2, vehiclelocalposition.vx)
+legend('setpoint x', 'estimated x', 'mocap', 'ax des', 'vx setpoint', 'estimated vx')
 
 subplot(1,3,2)
 plot(t1, vehiclelocalpositionsetpoint.y)
 hold on
 plot(t2, vehiclelocalposition.y)
 plot(t3, attposmocap.y)
-legend('setpoint', 'measured', 'mocap')
+plot(t1, vehiclelocalpositionsetpoint.acc_y)
+plot(t1, vehiclelocalpositionsetpoint.vy)
+plot(t2, vehiclelocalposition.vy)
+legend('setpoint y', 'estimated y', 'mocap', 'ay des', 'vy setpoint', 'estimated vy')
 
 subplot(1,3,3)
 plot(t1, vehiclelocalpositionsetpoint.z)
@@ -51,8 +57,7 @@ plot(t2, vehiclelocalposition.z)
 plot(t3, attposmocap.z)
 plot(t1, vehiclelocalpositionsetpoint.acc_z)
 plot(t1, vehiclelocalpositionsetpoint.vz)
-plot(t1, vehiclelocalposition.vz)
-
+plot(t2, vehiclelocalposition.vz)
 legend('setpoint z', 'estimated z', 'mocap', 'az des', 'vz setpoint', 'estimated vz')
 
 %% Plot actuator outputs
