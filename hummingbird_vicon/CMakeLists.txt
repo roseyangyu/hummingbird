@@ -10,6 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
 )
 
+find_package(Eigen3 REQUIRED)
+
 catkin_package()
 
 ## Specify additional locations of header files
@@ -17,6 +19,7 @@ catkin_package()
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 add_executable(${PROJECT_NAME}_node src/hummingbird_vicon_node.cpp)

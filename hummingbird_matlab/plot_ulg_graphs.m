@@ -1,4 +1,4 @@
-%% Vehicle status, vehicle control mode
+%% Vehicle status, vehicle control mode, commands
 filename = find_file('.', '.*vehicle_status.*');
 vehiclestatus = readtable(filename);
 
@@ -8,12 +8,13 @@ vehiclecontrolmode = readtable(filename);
 filename = find_file('.', '.*commander_state.*');
 commanderstate = readtable(filename);
 
-%% Show commands
 filename = find_file('.', '.*vehicle_command.*');
 vehiclecommand = readtable(filename);
 %% Plot position_setpoint_triplet vs local position vs mocap
-filename = find_file('.', '.*position_setpoint_triplet.*')
-positionsetpointtriplet = readtable(filename);
+mass = 0.615;
+gravity = 9.8066;
+tc_z = 0.5;
+dr_z = 14;
 
 filename = find_file('.', '.*vehicle_local_position_setpoint.*')
 vehiclelocalpositionsetpoint = readtable(filename);
@@ -23,6 +24,10 @@ vehiclelocalposition = readtable(filename);
 
 filename = find_file('.', '.*att_pos_mocap.*')
 attposmocap = readtable(filename);
+
+N = min([size(vehiclelocalpositionsetpoint,1) size(vehiclelocalposition, 1)])
+vehiclelocalpositionsetpoint = vehiclelocalpositionsetpoint(1:N, :);
+vehiclelocalposition = vehiclelocalposition(1:N, :);
 
 t1 = vehiclelocalpositionsetpoint.timestamp;
 t2 = vehiclelocalposition.timestamp;
@@ -38,7 +43,7 @@ plot(t3, attposmocap.x)
 plot(t1, vehiclelocalpositionsetpoint.acc_x)
 plot(t1, vehiclelocalpositionsetpoint.vx)
 plot(t2, vehiclelocalposition.vx)
-legend('setpoint x', 'estimated x', 'mocap', 'ax des', 'vx setpoint', 'estimated vx')
+legend('setpoint x', 'estimated x', 'mocap', 'fx des', 'vx setpoint', 'estimated vx')
 
 subplot(1,3,2)
 plot(t1, vehiclelocalpositionsetpoint.y)
@@ -48,7 +53,11 @@ plot(t3, attposmocap.y)
 plot(t1, vehiclelocalpositionsetpoint.acc_y)
 plot(t1, vehiclelocalpositionsetpoint.vy)
 plot(t2, vehiclelocalposition.vy)
-legend('setpoint y', 'estimated y', 'mocap', 'ay des', 'vy setpoint', 'estimated vy')
+legend('setpoint y', 'estimated y', 'mocap', 'fy des', 'vy setpoint', 'estimated vy')
+
+fz_expected = (vehiclelocalpositionsetpoint.z - vehiclelocalposition.z)./tc_z^2 + ...
+              (vehiclelocalpositionsetpoint.vz - vehiclelocalposition.vz).*dr_z./tc_z;
+fz_expected = fz_expected.*mass - mass*gravity;
 
 subplot(1,3,3)
 plot(t1, vehiclelocalpositionsetpoint.z)
@@ -58,7 +67,8 @@ plot(t3, attposmocap.z)
 plot(t1, vehiclelocalpositionsetpoint.acc_z)
 plot(t1, vehiclelocalpositionsetpoint.vz)
 plot(t2, vehiclelocalposition.vz)
-legend('setpoint z', 'estimated z', 'mocap', 'az des', 'vz setpoint', 'estimated vz')
+plot(t1, fz_expected)
+legend('setpoint z', 'estimated z', 'mocap', 'fz des', 'vz setpoint', 'estimated vz', 'fz expected')
 
 %% Plot actuator outputs
 filename = find_file('.', '.*actuator_outputs.*')
@@ -250,6 +260,29 @@ plot(t4, vehicleratessetpoints.roll)
 plot(t2, controlstate.roll_rate)
 legend('roll setpoint', 'estimated roll', 'mocap roll', 'roll rate setpoint', 'estimated roll rate')
 
+%% Motor tracking
+filename = find_file('.', '.*esc_rads.*');
+escrads = readtable(filename);
 
+filename = find_file('.', '.*ts_actuator_controls_0.*')
+actuatorcontrols0 = readtable(filename);
+
+t1 = actuatorcontrols0.timestamp;
+t2 = escrads.timestamp;
+
+figure
+plot(t1, actuatorcontrols0.control_0_)
+hold on
+plot(t2, escrads.rads_filtered_0_)
+title('motor left tracking')
+legend('actuator output', 'esc rad filtered')
+
+
+figure
+plot(t1, actuatorcontrols0.control_1_)
+hold on
+plot(t2, escrads.rads_filtered_1_)
+title('motor right tracking')
+legend('actuator output', 'esc rad filtered')
 
 

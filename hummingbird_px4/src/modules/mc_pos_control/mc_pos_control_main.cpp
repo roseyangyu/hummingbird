@@ -662,11 +662,11 @@ MulticopterPositionControl::parameters_update(bool force)
 		_params.pos_tc(2) = v;
 
 		param_get(_params_handles.pos_dr_x, &v);
-		_params.pos_dr(0) = 2*v;
+		_params.pos_dr(0) = v;
 		param_get(_params_handles.pos_dr_y, &v);
-		_params.pos_dr(1) = 2*v;
+		_params.pos_dr(1) = v;
 		param_get(_params_handles.pos_dr_z, &v);
-		_params.pos_dr(2) = 2*v;
+		_params.pos_dr(2) = v;
 		/*
 		 * increase the maximum horizontal acceleration such that stopping
 		 * within 1 s from full speed is feasible
