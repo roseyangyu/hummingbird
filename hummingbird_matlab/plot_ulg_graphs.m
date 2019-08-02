@@ -55,10 +55,6 @@ plot(t1, vehiclelocalpositionsetpoint.vy)
 plot(t2, vehiclelocalposition.vy)
 legend('setpoint y', 'estimated y', 'mocap', 'fy des', 'vy setpoint', 'estimated vy')
 
-fz_expected = (vehiclelocalpositionsetpoint.z - vehiclelocalposition.z)./tc_z^2 + ...
-              (vehiclelocalpositionsetpoint.vz - vehiclelocalposition.vz).*dr_z./tc_z;
-fz_expected = fz_expected.*mass - mass*gravity;
-
 subplot(1,3,3)
 plot(t1, vehiclelocalpositionsetpoint.z)
 hold on
@@ -67,9 +63,37 @@ plot(t3, attposmocap.z)
 plot(t1, vehiclelocalpositionsetpoint.acc_z)
 plot(t1, vehiclelocalpositionsetpoint.vz)
 plot(t2, vehiclelocalposition.vz)
-plot(t1, fz_expected)
-legend('setpoint z', 'estimated z', 'mocap', 'fz des', 'vz setpoint', 'estimated vz', 'fz expected')
+legend('setpoint z', 'estimated z', 'mocap', 'fz des', 'vz setpoint', 'estimated vz')
 
+%% Plot position/velocity estimates
+filename = find_file('.', '.*vehicle_local_position_0.csv')
+vehiclelocalposition = readtable(filename);
+
+filename = find_file('.', '.*sensor_combined.*');
+sensorcombined = readtable(filename);
+
+t1 = sensorcombined.timestamp;
+t2 = vehiclelocalposition.timestamp;
+
+% plot z tracking
+figure
+subplot(1,3,1)
+plot(t2, vehiclelocalposition.x)
+hold on
+plot(t2, vehiclelocalposition.vx)
+legend('estimated x', 'estimated vx')
+
+subplot(1,3,2)
+plot(t2, vehiclelocalposition.y)
+hold on
+plot(t2, vehiclelocalposition.vy)
+legend('estimated y','estimated vy')
+
+subplot(1,3,3)
+plot(t2, vehiclelocalposition.z)
+hold on
+plot(t2, vehiclelocalposition.vz)
+plot(t1, sensorcombined.accelerometer_m_s2_2_)
 %% Plot actuator outputs
 filename = find_file('.', '.*actuator_outputs.*')
 actuatoroutputs0 = readtable(filename);

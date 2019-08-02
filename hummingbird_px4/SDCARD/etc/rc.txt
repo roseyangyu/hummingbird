@@ -1,5 +1,3 @@
-#Custom rc startup script for FlightX Tailsitter
-
 uorb start
 
 set PARAM_FILE /fs/microsd/params
@@ -22,7 +20,7 @@ param set CBRK_AIRSPD_CHK 162128 # no airspeed sensor
 param set CBRK_GPSFAIL 240024 # no gps
 
 # set minimum takeoff altitude
-param set MIS_TAKEOFF_ALT 0.5
+param set MIS_TAKEOFF_ALT 0.7
 
 # as per hardware configuration
 param set SENS_BOARD_ROT 28 # pitch 90, yaw 180
@@ -37,7 +35,25 @@ param set SYS_MC_EST_GROUP 1
 
 param set ATT_EXT_HDG_M 2 # use mocap for heading
 
-param set TS_POS_DR_Z 1.5
+param set TS_MASS 0.615
+
+param set TS_POS_DR_X 1.4
+param set TS_POS_TC_X 0.6
+
+param set TS_POS_DR_Y 1.4
+param set TS_POS_TC_Y 0.6
+
+param set TS_POS_DR_Z 2
+param set TS_POS_TC_Z 0.4
+
+param set TS_YAW_P 3
+param set TS_YAW_RATE_TC 0.06
+
+param set TS_PITCH_P 5
+param set TS_PITCH_RATE_TC 0.15
+
+param set TS_ROLL_P 12.5
+param set TS_ROLL_RATE_TC 0.04
 
 logger start
 
@@ -60,4 +76,5 @@ mavlink start -r 20000 -b 230400 -d /dev/ttyS2
 
 sh /fs/microsd/etc/config.txt
 mavlink boot_complete
+
 

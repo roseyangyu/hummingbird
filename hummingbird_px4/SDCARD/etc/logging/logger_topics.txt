@@ -13,3 +13,4 @@ esc_rads
 actuator_outputs
 ts_actuator_outputs_virtual
 ts_actuator_controls_0
+sensor_combined 10

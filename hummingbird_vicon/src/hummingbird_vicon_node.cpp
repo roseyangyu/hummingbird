@@ -34,6 +34,7 @@ void viconCallback(const geometry_msgs::TransformStamped::ConstPtr& msg)
     tsTranslation = tsTranslation + tsRotation*comTranslation;
     tsRotation = tsRotation*comRotation;
 
+    comPose.header.stamp = msg->header.stamp;
     comPose.pose.position.x = tsTranslation(0); 
     comPose.pose.position.y = tsTranslation(1);
     comPose.pose.position.z = tsTranslation(2);
