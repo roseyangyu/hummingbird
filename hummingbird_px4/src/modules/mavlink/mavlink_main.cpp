@@ -2006,6 +2006,8 @@ Mavlink::task_main(int argc, char *argv[])
 	case MAVLINK_MODE_NORMAL:
 		configure_stream("SYS_STATUS", 1.0f);
 		configure_stream("STATUSTEXT", 20.0f);
+		//configure_stream("HIGHRES_IMU", 50.0f); // will publish /mavros/imu/data_raw
+		configure_stream("ATTITUDE", 50.0f); // will publish /mavros/imu/data 
 		break;
 
 	case MAVLINK_MODE_CUSTOM:

@@ -1,4 +1,10 @@
 <launch>
-  <node pkg="hummingbird_odometry" type="odometry_node" name="odometry" output="screen"/>
-  <node pkg="hummingbird_odometry" type="ts_location_estimator" name="ts_location_estimator" output="screen"/>
+  <arg name="baselink_frame" default="base_link" />
+  <arg name="imu_frame" default="imu" />
+
+  <node pkg="hummingbird_odometry" type="odometry_node" name="odometry" output="screen" />
+  <node pkg="hummingbird_odometry" type="ts_location_estimator" name="ts_location_estimator" output="screen">
+    <param name="baselink_frame" value="$(arg baselink_frame)" />
+    <param name="imu_frame" value="$(arg imu_frame)" />
+  </node>
 </launch>
