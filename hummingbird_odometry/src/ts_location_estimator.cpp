@@ -42,16 +42,16 @@ typedef Robot1::PositionMeasurementModel<T> PositionModel;
 typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
 
 /* Global constants */
-string baselinkFrameId = "base_link";
-string imuFrameId = "imu";
+string baselinkFrameId;
+string imuFrameId;
 string partnerFrameId = "partner";
 SystemModel sys;
 Kalman::ExtendedKalmanFilter<State> predictor;
 Vector3f g(0, 0, -9.82); // gravity in Toronto, Canada
-float ttl = 0.5; // If no measurements are recorded after ttl seconds, then estimates of partner are not published
+ros::Duration ttl(0.5); // If no measurements are recorded after ttl seconds, then estimates of partner are not published
 
 // frames to which a correction is applied and published on /tf
-vector<string> tagFrames = {"bundle1", "tag3"};
+vector<string> tagFrames = {"bundle1"};
 const int NUM_TAGS = 2; 
 
 // Elements of this array must be in tagFrames
@@ -130,8 +130,11 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
  */
 int main(int argc, char** argv){
     ros::init(argc, argv, "apriltag_destination");
+    ros::NodeHandle node("~");
+    ros::Duration(2).sleep();
 
-    ros::NodeHandle node;
+    node.param<std::string>("baselink_frame", baselinkFrameId, "base_link");
+    node.param<std::string>("imu_frame", imuFrameId, "imu");
 
     currentPartnerEstimate.header.frame_id = imuFrameId;
     currentPartnerEstimate.child_frame_id = partnerFrameId;
@@ -156,7 +159,7 @@ int main(int argc, char** argv){
     predictor.init(x);
 
     geometry_msgs::TransformStamped imu_to_tag_corrected;
-    float lastUsedTimes[NUM_TAGS] = {0, 0};
+    ros::Time lastUsedTimes[NUM_TAGS];
 
     string tagFrameId;
     // TODO: change tag lookup to a subscription?
@@ -179,7 +182,7 @@ int main(int argc, char** argv){
                 //ROS_WARN("%s",ex.what());
                 continue;
             }
-            float tagTime = imu_to_tag_corrected.header.stamp.sec + imu_to_tag_corrected.header.stamp.nsec/1000000000.0;
+            ros::Time tagTime = imu_to_tag_corrected.header.stamp;
             // Check if we've already used this tag via timestamp comparison
             if (tagTime == lastUsedTimes[i]) {
                 continue;
@@ -205,7 +208,7 @@ int main(int argc, char** argv){
 
         // do not publish an estimate if all measurements are greater than 'ttl' old
         ros::Time current = ros::Time::now();
-        if (std::all_of(std::begin(lastUsedTimes), std::end(lastUsedTimes), [current](float n){return n < current.toSec()-ttl;})) {
+        if (std::all_of(std::begin(lastUsedTimes), std::end(lastUsedTimes), [current](ros::Time n){return n < current-ttl;})) {
             start = false;
         }
         // TODO: Need to change message type to output covariance as well.
