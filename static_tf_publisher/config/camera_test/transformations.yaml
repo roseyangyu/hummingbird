@@ -5,8 +5,8 @@ transformations:
     translation: [0,0.32,-0.042]
   - frame_id: 'vicon/STARS_TS3/STARS_TS3'
     child_frame_id: 'camera'
-    rotation: [0,0,1,-1,0,0,0,-1,0]
-    translation: [0.013,0.313,-0.071]
+    rotation: [0,0,-1,1,0,0,0,-1,0]
+    translation: [0,0.375,0]
   - frame_id: 'bundle1' # transformation from tag detection to partner tailsitter 
     child_frame_id: 'bundle1_corrected'
     rotation: [0,-1,0,0,0,-1,1,0,0]
