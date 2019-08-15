@@ -39,9 +39,15 @@
         <arg name="config_yaml" default="$(find hummingbird)/config/mavros/vicon.yaml" />
     </include>
 
+    <node name="tf_to_posestamped_node" pkg="tf_to_posestamped" type="tf_to_posestamped_node">
+        <param name="pose_output_topic" value="parter_pose" />
+        <param name="parent_frame_id" value="world" />
+        <param name="child_frame_id" value="partner" />
+    </node>
+
     <!-- Launches odometry and tf publishers -->
     <include file="$(find hummingbird_odometry)/launch/odometry.launch">
-        <arg name="baselink_frame" default="vicon/STARS_TS3/STARS_TS3" />
+        <arg name="baselink_frame" default="COM" />
         <arg name="imu_frame" default="COM" /> <!-- assuming imu is aproximately at COM -->
     </include>
 

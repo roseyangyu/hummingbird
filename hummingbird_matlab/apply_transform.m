@@ -5,11 +5,14 @@
 
 % Assumes transforms is a list of structs containing .rotation
 % that is a matlab quaternion and .translation which is a row vector
-function transforms=apply_transform(transforms, q, o)
+function transforms=apply_transform(transforms, o, q)
     N = length(transforms);
     for i=1:N
+        quat = quaternion(transforms{i}.rotation);
         transforms{i}.translation = transforms{i}.translation + ...
-                                    transforms{i}.rotation.rotatepoint(o);
-        transforms{i}.rotation = transforms{i}.rotation*q;
+                                    quat.rotatepoint(o);
+        quat = quat*q;
+        [w x y z] = parts(quat);
+        transforms{i}.rotation = [w x y z];
     end
 end

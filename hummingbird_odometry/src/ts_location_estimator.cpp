@@ -65,6 +65,7 @@ State x;
 Control u;
 
 bool start = false;
+bool initState = true;
 
 // Updates the estimated partner transformation
 // Returns true if the estimate was updated
@@ -200,9 +201,25 @@ int main(int argc, char** argv){
             // Estimate based on measurements of tag_corrected
             pMeasurement = o;
             oMeasurement = quaterniontoEulerAngle(q.inverse()); // inverse because state is rpy from partner to base_link
-            if (std::find(stateUpdateIds.begin(), stateUpdateIds.end(), tagFrameId) != stateUpdateIds.end() &&
-                updatePartnerPosition(pMeasurement, oMeasurement, sys, predictor, pm, om)) {
-                start = true; // first estimate successful, begin outputting
+            if (initState) {
+                x(0) = pMeasurement(0);
+                x(1) = pMeasurement(1);
+                x(2) = pMeasurement(2);
+                x(3) = 0;
+                x(4) = 0;
+                x(5) = 0;
+                x(6) = oMeasurement(0);
+                x(7) = oMeasurement(1);
+                x(8) = oMeasurement(2);
+                x(9) = 0;
+                x(10) = 0;
+                x(11) = 0;
+                initState = false;
+            } else {
+                if (std::find(stateUpdateIds.begin(), stateUpdateIds.end(), tagFrameId) != stateUpdateIds.end() &&
+                    updatePartnerPosition(pMeasurement, oMeasurement, sys, predictor, pm, om)) {
+                    start = true; // first estimate successful, begin outputting
+                }
             }
         }
 
@@ -210,6 +227,7 @@ int main(int argc, char** argv){
         ros::Time current = ros::Time::now();
         if (std::all_of(std::begin(lastUsedTimes), std::end(lastUsedTimes), [current](ros::Time n){return n < current-ttl;})) {
             start = false;
+            initState = true;
         }
         // TODO: Need to change message type to output covariance as well.
         // PoseWithCovariance

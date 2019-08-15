@@ -63,6 +63,8 @@ Visualization Manager:
           Value: false
         bundle1_corrected:
           Value: true
+        bundle1_corrected_raw:
+          Value: false
         camera:
           Value: false
         fcu:
@@ -73,6 +75,8 @@ Visualization Manager:
           Value: false
         local_origin_ned:
           Value: false
+        partner:
+          Value: true
         tag3:
           Value: false
         tag4:
@@ -94,7 +98,10 @@ Visualization Manager:
             {}
           vicon/STARS_TS3/STARS_TS3:
             COM:
-              {}
+              bundle1_corrected_raw:
+                {}
+              partner:
+                {}
             camera:
               bundle1:
                 bundle1_corrected:
@@ -158,16 +165,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.0861268
+      Distance: 1.8996588
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.534884274
-        Y: 0.456415713
-        Z: 0.0554856658
+        X: -1.25498557
+        Y: 1.06523895
+        Z: 0.134171218
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false

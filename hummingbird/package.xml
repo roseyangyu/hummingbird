@@ -12,6 +12,7 @@
   <depend>hummingbird_odometry</depend>
   <depend>hummingbird_vicon_node</depend>
   <depend>static_tf_publisher</depend>
+  <depend>tf_to_posestamped</depend>
   <depend>mavlink_sitl_gazebo</depend>
   <depend>realsense_gazebo_plugin</depend>
   <depend>geographiclib</depend>
