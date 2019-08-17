@@ -50,63 +50,84 @@ bp_true = bp_true';
 
 
 %% Plot Position
+t0 = min([min(tbp), min(tbp_true), min(bundle1c_time)]);
+tbp = tbp - t0;
+tbp_true = tbp_true - t0;
+bundle1c_time = bundle1c_time - t0;
+
+tmin = 20;
+tmax = 80;
+
 figure
 hold on
 plot(tbp_true, obp_true(:,1))
 plot(tbp, obp(:,1))
 plot(bundle1c_time, bundle1c_pos(:,1))
+xlim([tmin tmax])
 legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner X offset')
 xlabel('time (s)')
 ylabel('m')
+print('x','-dpng')
 
 figure
 hold on
 plot(tbp_true, obp_true(:,2))
 plot(tbp, obp(:,2))
 plot(bundle1c_time, bundle1c_pos(:,2))
+xlim([tmin tmax])
 legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner Y offset')
 xlabel('time (s)')
 ylabel('m')
+print('y','-dpng')
 
 figure
 hold on
 plot(tbp_true, obp_true(:,3))
 plot(tbp, obp(:,3))
 plot(bundle1c_time, bundle1c_pos(:,3))
+xlim([tmin tmax])
 legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner Z offset')
 xlabel('time (s)')
 ylabel('m')
+print('z','-dpng')
 
 %% Plot rotation
+
 figure
 hold on
 plot(tbp_true, Rbp_true(:,1))
 plot(tbp, Rbp(:,1))
 plot(bundle1c_time, bundle1c_rpy(:,1))
+xlim([tmin tmax])
 legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner roll')
 xlabel('time (s)')
 ylabel('rads')
+print('roll','-dpng')
 
 figure
 hold on
 plot(tbp_true, Rbp_true(:,2))
 plot(tbp, Rbp(:,2))
 plot(bundle1c_time, bundle1c_rpy(:,2))
+xlim([tmin tmax])
 legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner pitch')
 xlabel('time (s)')
 ylabel('rads')
+print('pitch','-dpng')
 
 figure
 hold on
 plot(tbp_true, Rbp_true(:,3))
 plot(tbp, Rbp(:,3))
 plot(bundle1c_time, bundle1c_rpy(:,3))
+xlim([tmin tmax])
 legend('True base\_link to partner', 'estimated base\_link to partner', 'base\_link to tag')
 title('base\_link to partner yaw')
 xlabel('time (s)')
 ylabel('rads')
+print('yaw','-dpng')
