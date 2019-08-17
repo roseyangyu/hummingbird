@@ -57,7 +57,7 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        COM:
+        base_link:
           Value: true
         bundle1:
           Value: false
@@ -71,45 +71,52 @@ Visualization Manager:
           Value: false
         fcu_frd:
           Value: false
+        imu:
+          Value: true
         local_origin:
           Value: false
         local_origin_ned:
           Value: false
+        map:
+          Value: true
         partner:
           Value: true
         tag3:
           Value: false
+        tag3_corrected:
+          Value: false
         tag4:
           Value: false
-        vicon/MOCK_TS/MOCK_TS:
-          Value: true
-        vicon/STARS_TS3/STARS_TS3:
+        tag5:
           Value: false
-        world:
-          Value: true
+        tag6:
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          vicon/MOCK_TS/MOCK_TS:
-            {}
-          vicon/STARS_TS3/STARS_TS3:
-            COM:
-              bundle1_corrected_raw:
-                {}
-              partner:
-                {}
-            camera:
-              bundle1:
-                bundle1_corrected:
+        map:
+          base_link:
+            bundle1_corrected_raw:
+              {}
+            imu:
+              camera:
+                bundle1:
+                  bundle1_corrected:
+                    {}
+                tag3:
+                  tag3_corrected:
+                    {}
+                tag4:
                   {}
-              tag3:
-                {}
-              tag4:
-                {}
+                tag5:
+                  {}
+                tag6:
+                  {}
+            partner:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz/Group
@@ -144,7 +151,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: world
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -165,25 +172,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.8996588
+      Distance: 3.58633399
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.25498557
-        Y: 1.06523895
-        Z: 0.134171218
+        X: 0.276192904
+        Y: 0.139420033
+        Z: -0.154828489
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.785398185
+      Pitch: 0.380398244
       Target Frame: odom
       Value: Orbit (rviz)
-      Yaw: 0.785398185
+      Yaw: 5.76858282
     Saved: ~
 Window Geometry:
   Displays:

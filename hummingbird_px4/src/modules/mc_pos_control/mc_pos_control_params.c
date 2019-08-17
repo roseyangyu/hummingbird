@@ -540,7 +540,7 @@ PARAM_DEFINE_FLOAT(TS_POS_DR_Y, 0.7f);
  * @decimal 2
  * @group Tailsitter Position Control
  */
-PARAM_DEFINE_FLOAT(TS_POS_DR_Z, 0.7f);
+PARAM_DEFINE_FLOAT(TS_POS_DR_Z, 1.4f);
 
 /**
  * Mass of tailsitter 
