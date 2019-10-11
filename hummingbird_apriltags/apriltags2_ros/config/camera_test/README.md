@@ -1,1 +1,0 @@
-This folder contains the tag configurations/calibration for a test board with apriltag targets printed and pasted on it.

@@ -1,6 +1,0 @@
-<launch>
-
-    <param name="apriltags2_ros/optical_flow_accelerated" type="bool" value="true"/>
-
-    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch" />
-</launch>

@@ -1,1 +1,0 @@
-This folder contains the tag configuration on the simulated hummingbird.

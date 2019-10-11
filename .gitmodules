@@ -44,3 +44,6 @@
 [submodule "NuttX"]
 	path = hummingbird_px4/NuttX
 	url = https://github.com/PX4/PX4NuttX.git
+[submodule "external/apriltag_ros"]
+	path = external/apriltag_ros
+	url = https://github.com/utiasSTARS/apriltag_ros
