@@ -13,12 +13,6 @@
 [submodule "hummingbird_px4/src/modules/uavcan/libuavcan"]
 	path = hummingbird_px4/src/modules/uavcan/libuavcan
 	url = https://github.com/UAVCAN/libuavcan.git
-[submodule "hummingbird_px4/Tools/genmsg"]
-	path = hummingbird_px4/Tools/genmsg
-	url = https://github.com/ros/genmsg.git
-[submodule "hummingbird_px4/Tools/gencpp"]
-	path = hummingbird_px4/Tools/gencpp
-	url = https://github.com/ros/gencpp.git
 [submodule "hummingbird_px4/Tools/jMAVSim"]
 	path = hummingbird_px4/Tools/jMAVSim
 	url = https://github.com/PX4/jMAVSim.git
@@ -44,6 +38,3 @@
 [submodule "NuttX"]
 	path = hummingbird_px4/NuttX
 	url = https://github.com/PX4/PX4NuttX.git
-[submodule "external/apriltag_ros"]
-	path = external/apriltag_ros
-	url = https://github.com/utiasSTARS/apriltag_ros

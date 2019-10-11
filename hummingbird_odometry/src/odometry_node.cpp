@@ -8,7 +8,7 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <apriltags2_msgs/AprilTagDetectionArray.h>
+#include <apriltag_ros/AprilTagDetectionArray.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>

@@ -126,7 +126,7 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 
 /*
  * This node attempts to determine the location of the partner tailsitter relative to itself.
- * It does this by looking up the transformations from itself to the apriltags, adding a correction to orientate
+ * It does this by looking up the transformations from itself to the apriltag, adding a correction to orientate
  * correctly and adjust offsets, and calculates an estimate of the partner's location
  */
 int main(int argc, char** argv){

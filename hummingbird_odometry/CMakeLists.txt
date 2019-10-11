@@ -13,11 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   sensor_msgs
   geometry_msgs
-  apriltags2_msgs
-  apriltags2_ros
+  apriltag_ros
   tf2
   tf2_ros
 )
+
+find_package(Eigen3 REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -34,6 +35,7 @@ catkin_package()
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 add_executable(odometry_node src/odometry_node.cpp)
