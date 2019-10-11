@@ -7,6 +7,6 @@ param set BAT_N_CELLS 3
 param set BAT_R_INTERNAL 0.01
 param set BAT_SOURCE 0
 param set BAT_V_CHARGED 4.2
-param set BAT_V_DIV 10.37
+param set BAT_V_DIV 13.86
 param set BAT_V_EMPTY 3.0
 param set BAT_V_CURR 0

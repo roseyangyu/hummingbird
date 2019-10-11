@@ -76,7 +76,7 @@ PARAM_DEFINE_INT32(MAV_RADIO_ID, 0);
  * @min 1
  * @group MAVLink
  */
-PARAM_DEFINE_INT32(MAV_TYPE, 2);
+PARAM_DEFINE_INT32(MAV_TYPE, 19);
 
 /**
  * Use/Accept HIL GPS message even if not in HIL mode

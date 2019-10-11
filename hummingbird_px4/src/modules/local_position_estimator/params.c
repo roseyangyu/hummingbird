@@ -113,7 +113,7 @@ PARAM_DEFINE_FLOAT(LPE_LDR_OFF_Z, 0.00f);
  * @max 2
  * @decimal 4
  */
-PARAM_DEFINE_FLOAT(LPE_ACC_XY, 0.012f);
+PARAM_DEFINE_FLOAT(LPE_ACC_XY, 1f);
 
 /**
  * Accelerometer z noise density
@@ -126,7 +126,7 @@ PARAM_DEFINE_FLOAT(LPE_ACC_XY, 0.012f);
  * @max 2
  * @decimal 4
  */
-PARAM_DEFINE_FLOAT(LPE_ACC_Z, 0.02f);
+PARAM_DEFINE_FLOAT(LPE_ACC_Z, 2f);
 
 /**
  * Barometric presssure altitude z standard deviation.
@@ -439,4 +439,4 @@ PARAM_DEFINE_FLOAT(LPE_LAND_VXY, 0.05f);
  * @bit 6 flow gyro compensation
  * @bit 7 fuse baro
  */
-PARAM_DEFINE_INT32(LPE_FUSION, 247);
+PARAM_DEFINE_INT32(LPE_FUSION, 0);

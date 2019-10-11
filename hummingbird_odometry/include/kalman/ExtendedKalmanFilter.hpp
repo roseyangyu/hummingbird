@@ -27,6 +27,23 @@
 #include "LinearizedSystemModel.hpp"
 #include "LinearizedMeasurementModel.hpp"
 
+#include <SystemModel.hpp>
+#include <PositionMeasurementModel.hpp>
+#include <OrientationMeasurementModel.hpp>
+#include <typeinfo>
+#include <iostream>
+
+using namespace KalmanExamples;
+
+typedef float T;
+typedef Robot1::State<T> State;
+typedef Robot1::Control<T> Control;
+typedef Robot1::SystemModel<T> SystemModel;
+typedef Robot1::PositionMeasurement<T> PositionMeasurement;
+typedef Robot1::OrientationMeasurement<T> OrientationMeasurement;
+typedef Robot1::PositionMeasurementModel<T> PositionModel;
+typedef Robot1::OrientationMeasurementModel<T> OrientationModel;
+
 namespace Kalman {
     
     /**
@@ -80,6 +97,7 @@ namespace Kalman {
         {
             // Setup state and covariance
             P.setIdentity();
+            this->P = 10*this->P; // No knowledge of initial state
         }
         
         /**
@@ -108,12 +126,12 @@ namespace Kalman {
         const State& predict( SystemModelType<Control, CovarianceBase>& s, const Control& u, float dt )
         {
             s.updateJacobians( x, u, dt );
-            
+
             // predict state
             x = s.f(x, u, dt);
             
             // predict covariance
-            P  = ( s.F * P * s.F.transpose() ) + ( s.W * s.getCovariance() * s.W.transpose() );
+            P  = ( s.F * P * s.F.transpose() ) + ( s.Q );
             // return state prediction
             return x;
         }
@@ -129,16 +147,42 @@ namespace Kalman {
         const State& update( MeasurementModelType<Measurement, CovarianceBase>& m, const Measurement& z )
         {
             m.updateJacobians( x );
-            
+
+            /*
+            try { 
+                PositionModel pm = dynamic_cast<PositionModel&>(m);
+                // check 3 sigmas
+                if ( ( z(0) < x(0)-3*sqrt(P(0,0)) || z(0) > x(0)+3*sqrt(P(0,0)) ) || 
+                    ( z(1) < x(1)-3*sqrt(P(1,1)) || z(1) > x(1)+3*sqrt(P(1,1)) ) ||
+                    ( z(2) < x(2)-3*sqrt(P(2,2)) || z(2) > x(2)+3*sqrt(P(2,2)) )) {
+                    printf("Skipping position measurement\n");
+                    return x;
+               } 
+            } catch (std::bad_cast) {
+                // Do nothing
+            }
+            try {
+                OrientationModel pm = dynamic_cast<OrientationModel&>(m);
+               // Check 3 sigmas
+                if ( ( z(0) < x(6)-3*sqrt(P(6,6)) || z(0) > x(6)+3*sqrt(P(6,6)) ) || 
+                    ( z(1) < x(7)-3*sqrt(P(7,7)) || z(1) > x(7)+3*sqrt(P(7,7)) ) ||
+                    ( z(2) < x(8)-3*sqrt(P(8,8)) || z(2) > x(8)+3*sqrt(P(8,8)) )) {
+                    printf("skipping orientation measurement\n");
+                    return x;
+               }
+            } catch (std::bad_cast) {
+                // Do nothing
+            }
+            */
+
             // COMPUTE KALMAN GAIN
             // compute innovation covariance
-            // H = 3x6, P = 6x6, m.getCovariance = 3x3, m.V = 3x3
-            // Therefore S = 3x3
             Covariance<Measurement> S = ( m.H * P * m.H.transpose() ) + ( m.V * m.getCovariance() * m.V.transpose() );
             
             // compute kalman gain
-            // K = 6x6 * 6*3 * 3x3 = 6x3
             KalmanGain<Measurement> K = P * m.H.transpose() * S.inverse();
+            //std::cout << "Kalman gain: " << std::endl;
+            //std::cout << K << std::endl;
             
             // UPDATE STATE ESTIMATE AND COVARIANCE
             // Update state using computed kalman gain and innovation

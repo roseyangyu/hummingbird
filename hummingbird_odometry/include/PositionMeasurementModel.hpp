@@ -49,9 +49,15 @@ public:
      */
     PositionMeasurementModel()
     {
-        // Setup noise jacobian. As this one is static, we can define it once
-        // and do not need to update it dynamically
+        this->H.setZero();
+        this->H(0,0) = 1;
+        this->H(1,1) = 1;
+        this->H(2,2) = 1;
+        // dh/dw
         this->V.setIdentity();
+        // noise vector covariance matrix
+        this->P.setIdentity();
+        this->P = this->P;
     }
     
     /**
@@ -73,31 +79,6 @@ public:
         return measurement;
     }
     
-protected:
-    
-    /**
-     * @brief Update jacobian matrices for the system state transition function using current state
-     *
-     * This will re-compute the (state-dependent) elements of the jacobian matrices
-     * to linearize the non-linear measurement function \f$h(x)\f$ around the
-     * current state \f$x\f$.
-     *
-     * @note This is only needed when implementing a LinearizedSystemModel,
-     *       for usage with an ExtendedKalmanFilter or SquareRootExtendedKalmanFilter.
-     *       When using a fully non-linear filter such as the UnscentedKalmanFilter
-     *       or its square-root form then this is not needed.
-     *
-     * @param x The current system state around which to linearize
-     * @param u The current system control input
-     */
-    void updateJacobians( const S& x )
-    {
-        // H = dh/dx (Jacobian of measurement function w.r.t. the state)
-        this->H.setZero();
-        this->H(0,0) = 1;
-        this->H(1,1) = 1;
-        this->H(2,2) = 1;
-    }
 };
 
 } // namespace Robot

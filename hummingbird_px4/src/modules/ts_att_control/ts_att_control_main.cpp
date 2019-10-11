@@ -48,6 +48,10 @@
 #include <lib/tailsitter_recovery/tailsitter_recovery.h>
 #include "ts_rate_control.h"
 
+#include <systemlib/mavlink_log.h>
+#include <uORB/topics/mavlink_log.h>
+
+
 /**
  * Tailsitter attitude control app start / stop handling function
  *
@@ -427,6 +431,8 @@ TailsitterAttitudeControl::TailsitterAttitudeControl() :
 
 }
 
+//static orb_advert_t mavlink_log_pub = 0;
+
 TailsitterAttitudeControl::~TailsitterAttitudeControl()
 {
 	if (_control_task != -1) {
@@ -461,9 +467,9 @@ TailsitterAttitudeControl::parameters_update()
 	param_get(_params_handles.roll_tc, &roll_tc);
 	param_get(_params_handles.pitch_tc, &pitch_tc);
 	param_get(_params_handles.pitch_tc, &yaw_tc);
-	_params.att_tc(0) = roll_tc;
-	_params.att_tc(1) = pitch_tc;
-	_params.att_tc(2) = yaw_tc;
+	_params.att_tc(0) = roll_tc; // unused
+	_params.att_tc(1) = pitch_tc; // unsed
+	_params.att_tc(2) = yaw_tc; // unused
 
 	/* roll gains */
 	param_get(_params_handles.roll_p, &v);
@@ -681,6 +687,8 @@ TailsitterAttitudeControl::control_attitude(float dt)
 	math::Quaternion q_sp(_v_att_sp.q_d[0], _v_att_sp.q_d[1], _v_att_sp.q_d[2], _v_att_sp.q_d[3]);
 	math::Matrix<3, 3> R_sp = q_sp.to_dcm();
 
+	//printf("q_sp: %f, %f, %f, %f\n", (double)q_sp(0), (double)q_sp(1), (double)q_sp(2), (double)q_sp(3));
+
 	/* get current rotation matrix from control state quaternions */
 	math::Quaternion q_att(_ctrl_state.q[0], _ctrl_state.q[1], _ctrl_state.q[2], _ctrl_state.q[3]);
 	math::Matrix<3, 3> R = q_att.to_dcm();
@@ -688,7 +696,7 @@ TailsitterAttitudeControl::control_attitude(float dt)
 //	warnx("ROTATION MATRIX Body y: %f, %f, %f",(double) R(0,1),(double) R(1,1),(double) R(2,1));
 //	warnx("ROTATION MATRIX Body z: %f, %f, %f",(double) R(0,2),(double) R(1,2),(double) R(2,2));
 //	warnx("CONTROL_STATE: %f, %f, %f, %f", (double) q_att(0), (double) q_att(1), (double) q_att(2), (double) q_att(3));
-
+	//printf("q_att: %f, %f, %f, %f\n", (double)q_att(0), (double)q_att(1), (double)q_att(2), (double)q_att(3));
 
 	/* all input data is ready, run controller itself */
 
@@ -803,6 +811,7 @@ TailsitterAttitudeControl::control_attitude_rates(float dt)
 
 	/* angular rates error */
 	math::Vector<3> rates_err = _rates_sp - rates;
+	//printf("Rates err: %f, %f, %f\n", (double)rates_err(0), (double) rates_err(1), (double)rates_err(2));
 	math::Vector<3> rates_d = (_rates_prev - rates)/dt;
 
 	if (!PX4_ISFINITE(rates_err(0)) && !PX4_ISFINITE(rates_err(1)) && !PX4_ISFINITE(rates_err(2))) _rates_int = _rates_int +  rates_err * dt;
@@ -955,6 +964,8 @@ TailsitterAttitudeControl::task_main()
 				// calculates _rates_sp
 				control_attitude(dt);
 
+				//printf("rates sp:%f, %f, %f\n", (double)_rates_sp(0), (double)_rates_sp(1), (double)_rates_sp(2));
+
 				/* publish attitude rates setpoint */
 				_v_rates_sp.roll = _rates_sp(0);
 				_v_rates_sp.pitch = _rates_sp(1);
@@ -1053,9 +1064,19 @@ TailsitterAttitudeControl::task_main()
 				momentum_ref(0) = _actuators.control[0];
 				momentum_ref(1) = _actuators.control[1];
 				momentum_ref(2) = _actuators.control[2];
+				double thrust_ref = _actuators.control[3];
 
+				// if thrust is 0 and system is armed/landed, momentum_ref will be aproximately 0
+				// and during mixing you will divide by a large number and saturate the outputs
+				if (thrust_ref < 1e-6) {
+					outputs[0] = 0;
+					outputs[1] = 0;
+					outputs[2] = 0;
+					outputs[3] = 0; 
+				} else {
+					_ts_rate_control->mix(thrust_ref, momentum_ref, outputs);	
+				}
 
-				_ts_rate_control->mix(_actuators.control[3], momentum_ref, outputs);
 			}
 
 			if(sitl_enabled){
@@ -1088,7 +1109,7 @@ TailsitterAttitudeControl::task_main()
 				else{
 					_ts_actuator_controls_pub =orb_advertise(ORB_ID(ts_actuator_controls_0), &_ts_actuator_controls);
 				}
-		}
+			}
 
 
 

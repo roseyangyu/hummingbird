@@ -1,23 +1,44 @@
 <!-- The real launch files for the robot -->
 <launch>
-    <arg name="fcu_url" default=""/>
-    <arg name="gcs_url" default="udp://:14550@:14555"/>
 
-    <!-- Launches april tag detection -->
-    <remap from="/camera/color" to="/realsense/camera/color"/>
-    <include file="$(find apriltags2_ros)/launch/continuous_pose_detection.launch"/>
+    <!--wifly :14551 <-> :14556 -->
+    <!--expressif :14552 <-> :14555 -->
+    <arg name="wifly_fcu_url" default="udp://:14551@192.168.1.214:14556" />
+    <arg name="expressif_fcu_url" default="udp://:14552@192.168.1.126:14555" /> 
+    <arg name="gcs_url" default="udp://@localhost" />
 
-    <!-- Launches odometry and tf publishers -->
-    <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
+    <!-- launch vicon -->
+    <node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
+        <param name="stream_mode" value="ClientPull" type="str" />
+        <param name="datastream_hostport" value="192.168.2.120:801" type="str" />
+        <param name="tf_ref_frame_id" value="/world" type="str" />
+    </node>
+
+    <remap from="/mavros/mocap/pose" to="/mavros/mocap/pose" />
+    <node pkg="hummingbird_vicon" type="hummingbird_vicon_node" name="hummingbird_vicon_node" output="screen">
+    </node>
+
+    <node pkg="joy" type="joy_node" name="joy" />
+    <node pkg="hummingbird_joy" type="main.py" name="hummingbird_joy" output="screen">
+        <param name="command_service" value="/mavros/cmd/command_int" />
+    </node>
+
+    <!-- launch static tranforms -->
+    <include file="$(find static_tf_publisher)/launch/static_tf_publisher.launch">
+        <arg name="transformations_file" value="$(find static_tf_publisher)/config/camera_test/transformations.yaml" />
+    </include>
 
     <!-- Launches the connection to mavros -->
     <include file="$(find hummingbird_px4)/launch/mavros.launch">
-        <arg name="ns" default="/"/>
-        <arg name="fcu_url" default="$(arg fcu_url)"/>
-        <arg name="gcs_url" default="$(arg gcs_url)"/>
+        <arg name="output" default="screen" />
+        <arg name="fcu_url" default="$(arg expressif_fcu_url)" />
+        <arg name="gcs_url" default=""/>
+        <arg name="fcu_protocol" default="v2.0" />
         <arg name="tgt_system" default="1"/>
         <arg name="tgt_component" default="1"/>
+        <arg name="config_yaml" default="$(find hummingbird)/config/mavros/vicon.yaml" />
     </include>
+
 
     <!-- Launches the display -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hummingbird)/rviz/hummingbird.rviz"/>

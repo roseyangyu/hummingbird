@@ -36,8 +36,6 @@ namespace apriltags2_ros {
 	ContinuousDetector::ContinuousDetector(ros::NodeHandle& nh) :
 		TagDetector(nh), it(nh) {
 
-		nh.param<bool>("publish_tag_detections_image", draw_tag_detections_image, false);
-
 		// Subscribers
 		camera_image_subscriber = it.subscribeCamera("image_rect", 2, &ContinuousDetector::imageCallback, this);
 

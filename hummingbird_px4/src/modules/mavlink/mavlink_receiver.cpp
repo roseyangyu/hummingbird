@@ -2325,6 +2325,13 @@ MavlinkReceiver::receive_thread(void *arg)
 					unsigned sleeptime = (1.0f / (_mavlink->get_baudrate() / 10)) * character_count * 1000000;
 					usleep(sleeptime);
 				}
+
+				//printf("nread: %d\n", nread);
+
+				//for (ssize_t i = 0; i < nread; i++) {
+				//	printf("%X ", buf[i]);
+				//}
+				//printf("\n");
 			}
 
 #ifdef __PX4_POSIX

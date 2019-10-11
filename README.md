@@ -26,23 +26,23 @@ SOFTWARE.
 ## Components
 
 #### Mechanical Components
-######(hummingbird_design/CAD Files)
+######hummingbird_design/CAD Files
 An overall mechanical CAD design document, 3D-print-ready model files, and a BOM (Bill of Material) required to assemble Hummingbird is provided under `Hummingbird-MCAD`. For details, refer to the README of the submodule repo.
 
 #### SITL Simulation
-######(hummingbird_px4/Tools/sitl_gazebo)
+######hummingbird_px4/Tools/sitl_gazebo
 A set of Gazebo Plug-ins required for Hummingbird SITL simulation is provided under `Hummingbird-sitl_gazebo`. This submodule contains a gazebo model description file for the complete Hummingbird model as well as a calibrated aerodynamic model for the vehicle.
 
 #### MATLAB Simulink Model for Tailsitter Dynamics and Motion Control
-######(hummingbird_design/Dynamics and Motion Controller)
+######hummingbird_design/Dynamics and Motion Controller
 A high-fidelity MATLAB simulink model is released for easy, quick and accurate simulation of the dynamics and motion control of Hummingbird. The models can be found under `Hummingbird-Simulink`.
 
 #### BLHeli ESC Firmware
-######(hummingbird_px4)
+######hummingbird_px4
 Our modified BLHeli firmware released under `BLHeli` allows DYS-SN20A ESCs to send synchronous pulses at phase commutations to the flight computer which processes the timestamps of these signals to infer motor speeds. Please refer to the README of the repo for compiling and flashing ESC firmware. 
 
 #### PX4 Microcontroller Firmware
-######(hummingbird_firmware/BLHeli)
+######hummingbird_firmware/BLHeli
 This repo (`PX4-Hummingbird`) contains all of the flight code (controller, state estimator, state machine, drivers, communication software) running onboard the flight computer. One may use QGroundControl (the default PX4 GCS), or any MAVlink-enabled clients such as MAVROS to communicate with the onboard computer to receive telemtry and send commands.
 
 ## Contact
@@ -76,7 +76,11 @@ Next, clone this repository into catkin_ws/src and build the code using the foll
 cd ~/catkin_ws/src
 git clone --recurse-submodules https://github.com/RahmanQureshi/hummingbird_ws #  To clone the repository
 cd ~/catkin_ws
-catkin build
+catkin build hummingbird
+catkin build mavros_extras
+catkin build hummingbird_joy
+catkin build joy
+catkin build hummingbird_vicon
 source devel/setup.bash # Needs to be done everytime you finish building
 ```
 
@@ -108,3 +112,5 @@ roslaunch hummingbird hummingbird_simulation.launch
 #### Matlab Code instructions
 
 See `hummingbird_ws/hummingbird_design/Docking Simulink` for useful scripts.
+
+Install the custom ROS messages for MATLAB in `hummingbird_design/Docking Simulink/msgs`

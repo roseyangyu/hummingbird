@@ -1,5 +1,3 @@
-#Custom rc startup script for FlightX Tailsitter
-
 uorb start
 
 set PARAM_FILE /fs/microsd/params
@@ -17,13 +15,66 @@ else
 	fi
 fi
 
-#commander start
+param set CBRK_IO_SAFETY 22027 # no safety switch
+param set CBRK_AIRSPD_CHK 162128 # no airspeed sensor
+param set CBRK_GPSFAIL 240024 # no gps
+
+# set minimum takeoff altitude
+param set MIS_TAKEOFF_ALT 0.7
+
+# as per hardware configuration
+param set SENS_BOARD_ROT 28 # pitch 90, yaw 180
+
+param set MAV_TYPE 19 # Set airframe to duorotor
+param set VT_TYPE 0
+param set VT_MOT_COUNT 2
+param set VT_IDLE_PWM_MC  1080
+param set SYS_AUTOSTART 13001
+param set SYS_RESTART_TYPE 2
+param set SYS_MC_EST_GROUP 1
+
+param set ATT_EXT_HDG_M 2 # use mocap for heading
+
+param set TS_MASS 0.615
+
+param set TS_POS_DR_X 1.4
+param set TS_POS_TC_X 0.6
+
+param set TS_POS_DR_Y 1.4
+param set TS_POS_TC_Y 0.6
+
+param set TS_POS_DR_Z 2
+param set TS_POS_TC_Z 0.4
+
+param set TS_YAW_P 3
+param set TS_YAW_RATE_TC 0.06
+
+param set TS_PITCH_P 5
+param set TS_PITCH_RATE_TC 0.15
+
+param set TS_ROLL_P 12.5
+param set TS_ROLL_RATE_TC 0.04
+
+logger start
+
+commander start
+navigator start
 tsfmu start
+
+land_detector start vtol
+local_position_estimator start
+attitude_estimator_q start
+
+ts_att_control start
+mc_pos_control start
+ts_path_planner start
+
 sh /fs/microsd/etc/rc.sensors
-mavlink start -r 800000 -d /dev/ttyACM0 -m config -x
-mavlink start -r 20000 -m config -b 921600 -d /dev/ttyS0 -p 1
-mavlink start -r 20000 -m config -b 230400 -d /dev/ttyS2
+mavlink start -r 800000 -d /dev/ttyACM0 -x
+mavlink start -r 20000 -b 921600 -d /dev/ttyS0 
+mavlink start -r 20000 -b 230400 -d /dev/ttyS2
 
 sh /fs/microsd/etc/config.txt
 mavlink boot_complete
+
 

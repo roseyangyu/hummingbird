@@ -56,7 +56,7 @@ OBJCOPY			 = $(CROSSDEV)objcopy
 OBJDUMP			 = $(CROSSDEV)objdump
 
 MAXOPTIMIZATION		 = -Os
-ARCHCPUFLAGS		 = -mcpu=cortex-m4 \
+ARCHCPUFLAGS		 = -Wimplicit-fallthrough=0 -mcpu=cortex-m4 \
 			   -mthumb \
 			   -march=armv7e-m \
 			   -mfpu=fpv4-sp-d16 \

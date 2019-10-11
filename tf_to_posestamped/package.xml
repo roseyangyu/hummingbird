@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>tf_to_posestamped</name>
+  <version>0.0.0</version>
+  <description>The tf_to_posestamped package</description>
+
+  <maintainer email="rahman.a.qureshi@gmail.com">Abdurrahman Qureshi</maintainer>
+
+  <license>TODO</license>
+
+  <depend>roscpp</depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

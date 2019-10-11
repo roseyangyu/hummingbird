@@ -6,7 +6,7 @@
  */
 
 /**
- * TS Cruise Speed Z
+ * TS Cruise Speed Z (Unused)
  *
  * TS path planner
  *
@@ -17,10 +17,10 @@
  * @group Tailsitter Path Planner
  */
 
-PARAM_DEFINE_FLOAT(TS_CRUISE_MAX_Z, 1.f);
+PARAM_DEFINE_FLOAT(TS_CRUISE_MAX_Z, 0.1f);
 
 /**
- * TS Cruise Speed XY
+ * TS Cruise Speed XY (Unused)
  *
  * TS path planner
  *
@@ -31,10 +31,10 @@ PARAM_DEFINE_FLOAT(TS_CRUISE_MAX_Z, 1.f);
  * @group Tailsitter Path Planner
  */
 
-PARAM_DEFINE_FLOAT(TS_CRUISE_MAX_XY, 2.f);
+PARAM_DEFINE_FLOAT(TS_CRUISE_MAX_XY, 0.1f);
 
 /**
- * TS Cruise Speed XY
+ * TS Cruise Speed 
  *
  * TS path planner
  *
@@ -45,4 +45,4 @@ PARAM_DEFINE_FLOAT(TS_CRUISE_MAX_XY, 2.f);
  * @group Tailsitter Path Planner
  */
 
-PARAM_DEFINE_FLOAT(TS_CRUISE_SPEED, 0.5f);
+PARAM_DEFINE_FLOAT(TS_CRUISE_SPEED, 0.2f);

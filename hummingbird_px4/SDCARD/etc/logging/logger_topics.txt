@@ -1,4 +1,16 @@
+position_setpoint_triplet
+vehicle_attitude_setpoint
+vehicle_local_position_setpoint 
+vehicle_rates_setpoint
+control_state # has current quaternion estimate
+vehicle_local_position # has current position estimate
+att_pos_mocap # ground truth position/orientation
+vehicle_control_mode
+vehicle_status
+commander_state
+vehicle_command
 esc_rads
 actuator_outputs
-battery_status
-
+ts_actuator_outputs_virtual
+ts_actuator_controls_0
+sensor_combined 10

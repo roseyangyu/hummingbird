@@ -1,0 +1,5 @@
+<launch>
+  <arg name="transformations_file" default="$(find static_tf_publisher)/config/simulation/transformations.yaml" />
+  <param name="transformations_file" value="$(arg transformations_file)" />
+  <node pkg="static_tf_publisher" type="static_tf_publisher_node" name="static_tf_publisher" output="screen"/>
+</launch>

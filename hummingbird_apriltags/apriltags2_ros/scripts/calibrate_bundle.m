@@ -48,13 +48,13 @@
 %% User inputs
 
 % Relative directory of calibration bagfile
-calibration_file = 'data/calibration.bag';
+calibration_file = 'inner_bundle_calibration3.bag';
 
 % Bundle name
 bundle_name = 'my_bundle';
 
 % Master tag's ID
-master_id = 0;
+master_id = 4;
 
 %% Make sure matlab_rosbag is installed
 
@@ -70,13 +70,13 @@ addpath('matlab_rosbag-0.5.0-linux64');
 %% Load the tag detections bagfile
 
 bag = ros.Bag.load(calibration_file);
-tag_msg = bag.readAll('/tag_detections');
+tag_msg = bag.readAll('/tag_pose_detections');
 
 clear tag_data;
 N = numel(tag_msg);
-t0 = getBagTime(tag_msg{1});
+%t0 = getBagTime(tag_msg{1});
 for i = 1:N
-    tag_data.t(i) = getBagTime(tag_msg{i})-t0;
+    %tag_data.t(i) = getBagTime(tag_msg{i})-t0;
     for j = 1:numel(tag_msg{i}.detections)
         detection = tag_msg{i}.detections(j);
         if numel(detection.id)>1

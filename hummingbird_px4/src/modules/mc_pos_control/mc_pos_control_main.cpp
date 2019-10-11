@@ -169,6 +169,7 @@ private:
 	control::BlockDerivative _vel_z_deriv;
 
 	struct {
+		param_t mass;
 		param_t thr_min;
 		param_t thr_max;
 		param_t thr_hover;
@@ -213,6 +214,7 @@ private:
 	}		_params_handles;		/**< handles for interesting parameters */
 
 	struct {
+		float mass;
 		float thr_min;
 		float thr_max;
 		float thr_hover;
@@ -475,6 +477,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_params.vel_cruise.zero();
 	_params.vel_ff.zero();
 	_params.sp_offs_max.zero();
+	_params.mass = 0; // underestimate so that thrust is minimal incase of error
 
 	_pos.zero();
 	_pos_sp.zero();
@@ -491,6 +494,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 
 	_thrust_int.zero();
 
+	_params_handles.mass 		= param_find("TS_MASS");
 	_params_handles.thr_min		= param_find("MPC_THR_MIN");
 	_params_handles.thr_max		= param_find("MPC_THR_MAX");
 	_params_handles.thr_hover	= param_find("MPC_THR_HOVER");
@@ -585,6 +589,7 @@ MulticopterPositionControl::parameters_update(bool force)
 		updateParams();
 
 		/* update legacy C interface params */
+		param_get(_params_handles.mass, &_params.mass);
 		param_get(_params_handles.thr_min, &_params.thr_min);
 		param_get(_params_handles.thr_max, &_params.thr_max);
 		param_get(_params_handles.thr_hover, &_params.thr_hover);
@@ -657,11 +662,11 @@ MulticopterPositionControl::parameters_update(bool force)
 		_params.pos_tc(2) = v;
 
 		param_get(_params_handles.pos_dr_x, &v);
-		_params.pos_dr(0) = 2*v;
+		_params.pos_dr(0) = v;
 		param_get(_params_handles.pos_dr_y, &v);
-		_params.pos_dr(1) = 2*v;
+		_params.pos_dr(1) = v;
 		param_get(_params_handles.pos_dr_z, &v);
-		_params.pos_dr(2) = 2*v;
+		_params.pos_dr(2) = v;
 		/*
 		 * increase the maximum horizontal acceleration such that stopping
 		 * within 1 s from full speed is feasible
@@ -1192,7 +1197,6 @@ MulticopterPositionControl::control_non_manual(float dt)
 		}
 
 		if (!_takeoff_jumped) {
-			printf("taking off");
 			// ramp thrust setpoint up
 			if (_vel(2) > -(_params.tko_speed / 2.0f)) {
 				_takeoff_thrust_sp += 0.5f * dt;
@@ -1222,10 +1226,7 @@ MulticopterPositionControl::control_non_manual(float dt)
 	if (_pos_sp_triplet.current.valid
 	    && _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_IDLE) {
 		/* idle state, don't run controller and set zero thrust */
-		_R_setpoint.identity();
-
-
-		matrix::Quatf qd = _R_setpoint;
+		matrix::Quatf qd = matrix::Eulerf(0, 0, _yaw);
 		memcpy(&_att_sp.q_d[0], qd.data(), sizeof(_att_sp.q_d));
 		_att_sp.q_d_valid = true;
 
@@ -1814,8 +1815,9 @@ MulticopterPositionControl::control_position(float dt)
 //			thrust_sp(2) = 0.0f;
 //		}
 
-		math::Vector<3> gravity(0, 0, 0.63f * ONE_G);
-		math::Vector<3> f_prop = thrust_sp * 0.63f - gravity;
+		float mass = _params.mass; 
+		math::Vector<3> gravity(0, 0, mass * ONE_G);
+		math::Vector<3> f_prop = thrust_sp*mass - gravity;
 		//warnx("Before Before Thrust setpoint: %f, %f, %f\n", (double)thrust_sp(0),(double)thrust_sp(1),(double)thrust_sp(2));
 		thrust_sp = f_prop;
 		//warnx("Before Thrust setpoint: %f, %f, %f\n", (double)thrust_sp(0),(double)thrust_sp(1),(double)thrust_sp(2));
@@ -2001,7 +2003,7 @@ MulticopterPositionControl::control_position(float dt)
 			float psi = asin(thrust_sp(0) / l);
 			psi = _att_sp.yaw_body;
 			math::Vector<3> y_C(-sin(psi), cos(psi), 0.0f);
-			if(!_pos_sp_triplet.current.yaw_valid || PX4_ISFINITE(psi)){
+			if(!_pos_sp_triplet.current.yaw_valid || !PX4_ISFINITE(psi)){
 				y_C.zero();
 				y_C(0) = -1.0f;
 				//warnx("Yaw %f \n", (double) psi);

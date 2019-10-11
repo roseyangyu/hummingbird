@@ -225,7 +225,7 @@ static uint64_t rc_signal_lost_timestamp;		// Time at which the RC reception was
 
 static float avionics_power_rail_voltage;		// voltage of the avionics power rail
 
-static bool can_arm_without_gps = false;
+static bool can_arm_without_gps = true;
 
 
 /**
@@ -403,9 +403,7 @@ int commander_main(int argc, char *argv[])
 
 	if (!strcmp(argv[1], "check")) {
 		int checkres = 0;
-		checkres = preflight_check(&status, &mavlink_log_pub, false, true, &status_flags, &battery, false, hrt_elapsed_time(&commander_boot_timestamp));
-		warnx("Preflight check: %s", (checkres == 0) ? "OK" : "FAILED");
-		checkres = preflight_check(&status, &mavlink_log_pub, true, true, &status_flags, &battery, true, hrt_elapsed_time(&commander_boot_timestamp));
+		checkres = preflight_check(&status, &mavlink_log_pub, true, true, &status_flags, &battery, can_arm_without_gps, hrt_elapsed_time(&commander_boot_timestamp));
 		warnx("Prearm check: %s", (checkres == 0) ? "OK" : "FAILED");
 		return 0;
 	}
@@ -838,59 +836,18 @@ bool handle_command(struct vehicle_status_s *status_local, const struct safety_s
 
 	case vehicle_command_s::VEHICLE_CMD_COMPONENT_ARM_DISARM: {
 
-			// Adhere to MAVLink specs, but base on knowledge that these fundamentally encode ints
-			// for logic state parameters
-			if (static_cast<int>(cmd->param1 + 0.5f) != 0 && static_cast<int>(cmd->param1 + 0.5f) != 1) {
-				mavlink_log_critical(&mavlink_log_pub, "Unsupported ARM_DISARM param: %.3f", (double)cmd->param1);
+		bool cmd_arms = (static_cast<int>(cmd->param1 + 0.5f) == 1);
 
-			} else {
+		transition_result_t arming_res = arm_disarm(cmd_arms, &mavlink_log_pub, "arm/disarm component command");
 
-				bool cmd_arms = (static_cast<int>(cmd->param1 + 0.5f) == 1);
-
-				// Flick to inair restore first if this comes from an onboard system
-				if (cmd->source_system == status_local->system_id && cmd->source_component == status_local->component_id) {
-					status.arming_state = vehicle_status_s::ARMING_STATE_IN_AIR_RESTORE;
-
-				} else {
-					// Refuse to arm if preflight checks have failed
-					if ((!status_local->hil_state) != vehicle_status_s::HIL_STATE_ON && !status_flags.condition_system_sensors_initialized) {
-						mavlink_log_critical(&mavlink_log_pub, "Arming DENIED. Preflight checks have failed.");
-						cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_DENIED;
-						break;
-					}
-
-					// Refuse to arm if in manual with non-zero throttle
-					if (cmd_arms
-						&& (status_local->nav_state == vehicle_status_s::NAVIGATION_STATE_MANUAL
-						|| status_local->nav_state == vehicle_status_s::NAVIGATION_STATE_ACRO
-						|| status_local->nav_state == vehicle_status_s::NAVIGATION_STATE_STAB
-						|| status_local->nav_state == vehicle_status_s::NAVIGATION_STATE_RATTITUDE)
-						&& (sp_man.z > 0.1f)) {
-
-						mavlink_log_critical(&mavlink_log_pub, "Arming DENIED. Manual throttle non-zero.");
-						cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_DENIED;
-						break;
-					}
-				}
-
-				transition_result_t arming_res = arm_disarm(cmd_arms, &mavlink_log_pub, "arm/disarm component command");
-
-				if (arming_res == TRANSITION_DENIED) {
-					mavlink_log_critical(&mavlink_log_pub, "REJECTING component arm cmd");
-					cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
-
-				} else {
-					cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
-
-					/* update home position on arming if at least 500 ms from commander start spent to avoid setting home on in-air restart */
-					if (cmd_arms && (arming_res == TRANSITION_CHANGED) &&
-						(hrt_absolute_time() > (commander_boot_timestamp + INAIR_RESTART_HOLDOFF_INTERVAL))) {
-
-						commander_set_home_position(*home_pub, *home, *local_pos, *global_pos, *attitude);
-					}
-				}
-			}
+		if (arming_res == TRANSITION_DENIED) {
+			mavlink_log_critical(&mavlink_log_pub, "REJECTING component arm cmd");
+			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
+		} else {
+			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
 		}
+
+	    }
 		break;
 
 	case vehicle_command_s::VEHICLE_CMD_OVERRIDE_GOTO: {
@@ -1643,7 +1600,7 @@ int commander_thread_main(int argc, char *argv[])
 	}
 
 	// Run preflight check
-	int32_t rc_in_off = 0;
+	int32_t rc_in_off = 1;
 	bool hotplug_timeout = hrt_elapsed_time(&commander_boot_timestamp) > HOTPLUG_SENS_TIMEOUT;
 	int32_t arm_without_gps = 0;
 	param_get(_param_autostart_id, &autostart_id);

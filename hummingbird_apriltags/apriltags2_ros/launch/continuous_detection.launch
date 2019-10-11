@@ -5,10 +5,6 @@
     <arg name="camera_frame" default="camera"/>
     <arg name="image_topic" default="image_raw"/>
 
-    <!-- Set parameters -->
-    <rosparam command="load" file="$(find apriltags2_ros)/config/settings.yaml"/>
-    <rosparam command="load" file="$(find apriltags2_ros)/config/tags.yaml"/>
-
     <!-- Translates 2D into 3D using SolvePnP -->
     <node pkg="apriltags2_ros" type="continuous_detector_node" name="continuous_detector_node"
           clear_params="false" output="screen" launch-prefix="$(arg launch_prefix)">

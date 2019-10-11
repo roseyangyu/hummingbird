@@ -10,13 +10,23 @@
         <arg name="image_topic" default="image_raw"/>
     </include>
 
+    <include file="$(find static_tf_publisher)/launch/static_tf_publisher.launch">
+        <arg name="transformations_file" value="$(find static_tf_publisher)/config/simulation/transformations.yaml" />
+    </include>
+
     <!-- Launches odometry and tf publishers -->
-    <include file="$(find hummingbird_odometry)/launch/odometry.launch"/>
+    <include file="$(find hummingbird_odometry)/launch/odometry.launch">
+    </include>
 
     <!-- Launches the simulation -->
     <include file="$(find hummingbird_px4)/launch/mavros_posix_sitl.launch">
         <arg name="gui" value="$(arg gui)"/>
     </include>
+
+    <node pkg="joy" type="joy_node" name="joy" />
+    <node pkg="hummingbird_joy" type="main.py" name="hummingbird_joy" output="screen">
+        <param name="command_service" value="/mavros/cmd/command_int" />
+    </node>
 
     <!-- Launches the display -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hummingbird)/rviz/hummingbird.rviz"/>
