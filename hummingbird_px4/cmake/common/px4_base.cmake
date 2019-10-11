@@ -659,7 +659,6 @@ function(px4_add_common_flags)
 
 	set(warnings
 		-Wall
-		-Werror
 		-Wextra
 		-Wno-sign-compare
 		-Wshadow
@@ -674,6 +673,9 @@ function(px4_add_common_flags)
 		-Werror=reorder
 		-Werror=uninitialized
 		-Werror=init-self
+		-Wimplicit-fallthrough=0
+        -Wformat-truncation=0
+        -Wno-int-in-bool-context
 		#-Wcast-qual  - generates spurious noreturn attribute warnings,
 		#               try again later
 		#-Wconversion - would be nice, but too many "risky-but-safe"

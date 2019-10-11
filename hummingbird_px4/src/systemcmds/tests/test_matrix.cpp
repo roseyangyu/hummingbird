@@ -625,9 +625,9 @@ bool MatrixTest::vector2Tests(void)
 	ut_test(fabs(d(0, 0) - 1) < 1e-5);
 	ut_test(fabs(d(1, 0) - 0) < 1e-5);
 
-	Vector2f e(d);
-	ut_test(fabs(e(0) - 1) < 1e-5);
-	ut_test(fabs(e(1) - 0) < 1e-5);
+//	Vector2f e(d);
+//	ut_test(fabs(e(0) - 1) < 1e-5);
+//	ut_test(fabs(e(1) - 0) < 1e-5);
 
 	float data[] = {4, 5};
 	Vector2f f(data);

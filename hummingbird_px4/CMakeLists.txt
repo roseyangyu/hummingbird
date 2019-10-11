@@ -18,11 +18,6 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set(PX4_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(PX4_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
-execute_process(
-	COMMAND Tools/check_submodules.sh
-	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
-	)
-
 #=============================================================================
 # parameters
 #
@@ -117,7 +112,6 @@ project(hummingbird_px4 CXX C ASM)
 if (NOT ${CMAKE_VERSION} VERSION_LESS 3.0.0)
 	cmake_policy(SET CMP0045 NEW) # error on non-existent target in get prop
 	cmake_policy(SET CMP0046 NEW) # no non-existent targets as dependencies
-	cmake_policy(SET CMP0025 OLD) # still report AppleClang as Clang
 endif()
 if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1.0)
 	cmake_policy(SET CMP0054 NEW) # don't dereference quoted variables
@@ -244,7 +238,7 @@ px4_generate_messages(TARGET msg_gen
 	OS ${OS}
 	DEPENDS git_genmsg git_gencpp prebuild_targets
 	)
-px4_generate_parameters_xml(OUT parameters.xml 
+px4_generate_parameters_xml(OUT parameters.xml
                             BOARD ${BOARD}
                             SCOPE ${PX4_SOURCE_DIR}/cmake/configs/${OS}_${BOARD}_${LABEL}.cmake)
 px4_generate_airframes_xml(OUT airframes.xml BOARD ${BOARD})
@@ -293,9 +287,9 @@ if(NOT EXTERNAL_MODULES_LOCATION STREQUAL "")
 		)
 endif()
 
-#=============================================================================
-# subdirectories
-#
+##=============================================================================
+## subdirectories
+##
 set(module_libraries)
 foreach(module ${config_module_list})
 	string(REGEX MATCH "^[./]" external_module ${module})
@@ -311,68 +305,68 @@ foreach(module ${config_module_list})
 	#message(STATUS "adding module: ${module}")
 endforeach()
 
-# Keep track of external shared libs required for modules
+## Keep track of external shared libs required for modules
 set(module_external_libraries "${module_external_libraries}" CACHE INTERNAL "module_external_libraries")
 
 add_subdirectory(src/firmware/${OS})
-
-#add_dependencies(df_driver_framework nuttx_export_${CONFIG})
-if (NOT "${OS}" STREQUAL "nuttx")
-endif()
-
-if (config_io_board)
-	add_subdirectory(src/modules/px4iofirmware)
-endif()
-
-#=============================================================================
-# generate custom target to print for all executable and module cmake targets
 #
-if(all_posix_cmake_targets)
-	list(SORT all_posix_cmake_targets)
-	px4_join(OUT posix_cmake_target_list LIST ${all_posix_cmake_targets} GLUE "\\n")
-	add_custom_target(list_cmake_targets
-		COMMAND sh -c "printf \"${posix_cmake_target_list}\\n\""
-		COMMENT "List of cmake targets that can be matched by PX4_NO_OPTIMIZATION:"
-		VERBATIM
-		)
-endif()
-
-#=============================================================================
-# generate git version
+##add_dependencies(df_driver_framework nuttx_export_${CONFIG})
+#if (NOT "${OS}" STREQUAL "nuttx")
+#endif()
 #
-px4_create_git_hash_header(OUT ${PX4_BINARY_DIR}/build_git_version.h)
-
-#=============================================================================
-# packaging
+#if (config_io_board)
+#	add_subdirectory(src/modules/px4iofirmware)
+#endif()
 #
-# Important to having packaging at end of cmake file.
+##=============================================================================
+## generate custom target to print for all executable and module cmake targets
+##
+#if(all_posix_cmake_targets)
+#	list(SORT all_posix_cmake_targets)
+#	px4_join(OUT posix_cmake_target_list LIST ${all_posix_cmake_targets} GLUE "\\n")
+#	add_custom_target(list_cmake_targets
+#		COMMAND sh -c "printf \"${posix_cmake_target_list}\\n\""
+#		COMMENT "List of cmake targets that can be matched by PX4_NO_OPTIMIZATION:"
+#		VERBATIM
+#		)
+#endif()
 #
-execute_process(
-	COMMAND git describe --always --tags
-	OUTPUT_VARIABLE git_tag
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
-	)
-set(CPACK_PACKAGE_NAME ${PROJECT_NAME}-${CONFIG})
-set(CPACK_PACKAGE_VERSION ${version})
-set(CPACK_PACKAGE_CONTACT ${package-contact})
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
-set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-set(short-description "The px4 autopilot.")
-set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${short-description})
-set(CPACK_GENERATOR "ZIP")
-set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CONFIG}-${git_tag}")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${version}")
-set(CPACK_SOURCE_GENERATOR "ZIP;TBZ2")
-set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
-set(CPACK_SET_DESTDIR "OFF")
-if ("${CMAKE_SYSTEM}" MATCHES "Linux")
-	find_program(DPKG_PROGRAM dpkg)
-	if (EXISTS ${DPKG_PROGRAM})
-		list (APPEND CPACK_GENERATOR "DEB")
-	endif()
-endif()
-include(CPack)
-
-# vim: set noet fenc=utf-8 ff=unix ft=cmake :
+##=============================================================================
+## generate git version
+##
+#px4_create_git_hash_header(OUT ${PX4_BINARY_DIR}/build_git_version.h)
+#
+##=============================================================================
+## packaging
+##
+## Important to having packaging at end of cmake file.
+##
+#execute_process(
+#	COMMAND git describe --always --tags
+#	OUTPUT_VARIABLE git_tag
+#	OUTPUT_STRIP_TRAILING_WHITESPACE
+#	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+#	)
+#set(CPACK_PACKAGE_NAME ${PROJECT_NAME}-${CONFIG})
+#set(CPACK_PACKAGE_VERSION ${version})
+#set(CPACK_PACKAGE_CONTACT ${package-contact})
+#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+#set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
+#set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+#set(short-description "The px4 autopilot.")
+#set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${short-description})
+#set(CPACK_GENERATOR "ZIP")
+#set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CONFIG}-${git_tag}")
+#set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${version}")
+#set(CPACK_SOURCE_GENERATOR "ZIP;TBZ2")
+#set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+#set(CPACK_SET_DESTDIR "OFF")
+#if ("${CMAKE_SYSTEM}" MATCHES "Linux")
+#	find_program(DPKG_PROGRAM dpkg)
+#	if (EXISTS ${DPKG_PROGRAM})
+#		list (APPEND CPACK_GENERATOR "DEB")
+#	endif()
+#endif()
+#include(CPack)
+#
+## vim: set noet fenc=utf-8 ff=unix ft=cmake :
