@@ -1,5 +1,8 @@
 # Hummingbird
  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Travis build](https://travis-ci.org/utra-robosoccer/soccer_ws.svg?branch=master)](https://travis-ci.org/utra-robosoccer/soccer_ws)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/utra-robosoccer/soccer_ws.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/utra-robosoccer/soccer_ws/alerts/)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/utra-robosoccer-soccer_ws/badge.svg)](https://scan.coverity.com/projects/utra-robosoccer-soccer_ws)
 
 Copyright &copy;2018 [STARS Lab](http://www.starslab.ca/)
 
@@ -46,9 +49,9 @@ Our modified BLHeli firmware released under `BLHeli` allows DYS-SN20A ESCs to se
 This repo (`PX4-Hummingbird`) contains all of the flight code (controller, state estimator, state machine, drivers, communication software) running onboard the flight computer. One may use QGroundControl (the default PX4 GCS), or any MAVlink-enabled clients such as MAVROS to communicate with the onboard computer to receive telemtry and send commands.
 
 ## Contact
-Yilun Wu  <yl.wu@robotics.utias.utoronto.ca>
-
 Jason Wang <jiashen.wang@robotics.utias.utoronto.ca>
+
+Yilun Wu  <yl.wu@robotics.utias.utoronto.ca>
 
 Rahman Qureshi <rahman.qureshi@robotics.utias.utoronto.ca>
   
@@ -66,38 +69,64 @@ If you use any of the resources in academic work, please cite the [relevant publ
 
 ## Documentation
 
-#### Getting Started
-Welcome to the software repository, to start working on the robot, use the [PX4 Setup Script](https://github.com/PX4/Devguide/blob/master/build_scripts/ubuntu_sim_ros_gazebo.sh) to install
-ROS Kinetic and gazebo, as well as setup a catkin workspace with mavros and mavlink inside it. 
 
-Next, clone this repository into catkin_ws/src and build the code using the following instructions.
+Welcome to the software repository, to start working on the robot, follow the instructions to install ros
 
+http://wiki.ros.org/ROS/Installation
+
+#### Prerequisites
+
+Debian packages needed for robots (sudo apt-get install)
+- git
+- git-lfs
+- python-catkin-tools
+- net-tools
+- indicator-ip
+
+#### Setting up your IDE
+- Use Jetbrains installer (https://www.jetbrains.com/toolbox/app/)
+- Follow the CLion Setup here, use method 2 to add bash to the launch file https://github.com/ethz-asl/programming_guidelines/wiki/CLion
+- In CLion, once you finish following the instructions, you should be able to reload CMake to have code hinting enabled
+- Install the *.launch file plugins if you want to. Look up duckietown/hatchery from the third party repositories in Preferences/Plugins
+- Add the python2.7 intepretor to CLion to get Clion code hinting. In Settings/Build,Execution,Deployment/Python Intepretor, add the system intepretor /usr/bin/python 2.7
+- For debugging processes follow the steps here https://www.jetbrains.com/help/clion/attaching-to-local-process.html
+
+#### Initialization of the code
 ```bash
+mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws/src
-git clone --recurse-submodules https://github.com/RahmanQureshi/hummingbird_ws #  To clone the repository
+sudo apt-get install python-catkin-tools # If you don't have the package installed yet.
+catkin_init_workspace
+git clone --recurse-submodules https://github.com/utiasSTARS/hummingbird #  To clone the repository
+git lfs init
+git lfs pull
+cd hummingbird
+git checkout initials_branchname  # TO create a new branch, use git checkout -b initials_branchname
 cd ~/catkin_ws
-catkin build hummingbird
-catkin build mavros_extras
-catkin build hummingbird_joy
-catkin build joy
-catkin build hummingbird_vicon
+```
+#### Installing submodules and dependencies
+```
+cd ~/catkin_ws/src/hummingbird
+git submodule update --recursive --init
+sudo rosdep init # If first time using ROS in your environment.
+rosdep update
+cd ~/catkin_ws/
+rosdep install --from-paths src --ignore-src -r -y --rosdistro melodic # To install all dependencies (use correct ROS distro version), add --os ubuntu:xenial if your linux is based on it but has different distro name and version. Ubuntu 16.04 uses kinetic instead of melodic. For Jetson TX2 use kinetic.
+```
+
+#### Building the code
+```
+catkin build hummingbird # Use catkin clean to start with a clean build
 source devel/setup.bash # Needs to be done everytime you finish building
 ```
 
-Append the following to your .basrc, but you have to run ifconfig to see the correct interface for your Wifi. Replace wlp110s0 with your wifi interface name
-
-```bash
-source /opt/ros/kinetic/setup.bash
-source ~/catkin_ws/devel/setup.bash
-source ~/catkin_ws/src/hummingbird_ws/hummingbird_px4/Tools/setup_gazebo.bash ~/catkin_ws/src/hummingbird_ws/hummingbird_px4 ~/catkin_ws/build/hummingbird_px4 
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/catkin_ws/src
-MY_IP=$(ifconfig wlp59s0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-export ROS_IP=$MY_IP
-export ROS_MASTER_URI=http://$ROS_IP:11311
-
+Build and run tests
+```
+catkin build <pkg name> --verbose --catkin-make-args run_tests
 ```
 
-Source your bashrc. You should be ready to go now. To run the robot:
+#### Launching the robot
+You should be ready to go now. Before running, setup your CLion IDE (above),  To run the robot:
 
 ```bash
 roslaunch hummingbird hummingbird.launch
@@ -106,11 +135,5 @@ roslaunch hummingbird hummingbird.launch
 For simulation you can just run this
 
 ```bash
-roslaunch hummingbird hummingbird_simulation.launch
+roslaunch hummingbird hummingbird.launch simulation:=true
 ```
-
-#### Matlab Code instructions
-
-See `hummingbird_ws/hummingbird_design/Docking Simulink` for useful scripts.
-
-Install the custom ROS messages for MATLAB in `hummingbird_design/Docking Simulink/msgs`
