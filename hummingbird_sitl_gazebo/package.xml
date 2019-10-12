@@ -2,7 +2,7 @@
 <package format="2">
   <name>hummingbird_sitl_gazebo</name>
   <version>1.0.0</version>
-  <description>Mavlink Sitl Gazebo</description>
+  <description>Tailsitter sitl gazebo</description>
 
   <maintainer email="jiashen.wang@robotics.utias.utoronto.ca">Jason Wang</maintainer>
 
@@ -11,16 +11,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>gazebo_ros</buildtool_depend>
 
-  <depend>rospy</depend>
-  <depend>sensor_msgs</depend>
-  <depend>roscpp</depend>
-  <depend>std_msgs</depend>
-
-
-  <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
-	<gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}"
-		gazebo_model_path="${prefix}/models"/>
+	<gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" gazebo_model_path="${prefix}/models"/>
   </export>
 </package>

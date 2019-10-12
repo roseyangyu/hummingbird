@@ -1,6 +1,3 @@
-[submodule "vicon_bridge"]
-	path = vicon_bridge
-	url = https://github.com/ethz-asl/vicon_bridge
 [submodule "hummingbird_firmware/BLHeli"]
 	path = hummingbird_firmware/BLHeli
 	url = https://github.com/utiasSTARS/BLHeli
@@ -38,3 +35,9 @@
 [submodule "NuttX"]
 	path = hummingbird_px4/NuttX
 	url = https://github.com/PX4/PX4NuttX.git
+[submodule "external/sitl_gazebo"]
+	path = external/sitl_gazebo
+	url = https://github.com/PX4/sitl_gazebo/
+[submodule "external/vicon_bridge"]
+	path = external/vicon_bridge
+	url = https://github.com/ethz-asl/vicon_bridge

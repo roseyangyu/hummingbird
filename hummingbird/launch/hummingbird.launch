@@ -1,6 +1,6 @@
 <!-- The real launch files for the robot -->
 <launch>
-
+    <arg name="simulation" default="false" />
     <!--wifly :14551 <-> :14556 -->
     <!--expressif :14552 <-> :14555 -->
     <arg name="wifly_fcu_url" default="udp://:14551@192.168.1.214:14556" />

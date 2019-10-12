@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(realsense_gazebo_plugin)
 
+cmake_policy(SET CMP0054 NEW)
+
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
     roscpp
@@ -11,17 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     rostest
 )
-cmake_policy(SET CMP0054 NEW)
-function(message)
-    if (NOT MESSAGE_QUIET)
-        _message(${ARGN})
-    endif()
-endfunction()
-
-set(MESSAGE_QUIET ON)
-find_package(gazebo REQUIRED QUIET)
-set(MESSAGE_QUIET OFF)
-
+find_package(gazebo REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 find_package(Threads REQUIRED)
 
