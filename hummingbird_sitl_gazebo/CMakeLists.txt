@@ -24,7 +24,16 @@ option(BUILD_GSTREAMER_PLUGIN "enable gstreamer plugin" "OFF")
 
 ## System dependencies are found with CMake's conventions
 find_package(PkgConfig REQUIRED)
-find_package(gazebo REQUIRED)
+
+function(message)
+  if (NOT MESSAGE_QUIET)
+    _message(${ARGN})
+  endif()
+endfunction()
+
+set(MESSAGE_QUIET ON)
+find_package(gazebo REQUIRED QUIET)
+set(MESSAGE_QUIET OFF)
 find_program(px4 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread timer)

@@ -309,64 +309,64 @@ endforeach()
 set(module_external_libraries "${module_external_libraries}" CACHE INTERNAL "module_external_libraries")
 
 add_subdirectory(src/firmware/${OS})
+
+#add_dependencies(df_driver_framework nuttx_export_${CONFIG})
+if (NOT "${OS}" STREQUAL "nuttx")
+endif()
+
+if (config_io_board)
+	add_subdirectory(src/modules/px4iofirmware)
+endif()
+
+#=============================================================================
+# generate custom target to print for all executable and module cmake targets
 #
-##add_dependencies(df_driver_framework nuttx_export_${CONFIG})
-#if (NOT "${OS}" STREQUAL "nuttx")
-#endif()
+if(all_posix_cmake_targets)
+	list(SORT all_posix_cmake_targets)
+	px4_join(OUT posix_cmake_target_list LIST ${all_posix_cmake_targets} GLUE "\\n")
+	add_custom_target(list_cmake_targets
+			COMMAND sh -c "printf \"${posix_cmake_target_list}\\n\""
+			COMMENT "List of cmake targets that can be matched by PX4_NO_OPTIMIZATION:"
+			VERBATIM
+			)
+endif()
+
+#=============================================================================
+# generate git version
 #
-#if (config_io_board)
-#	add_subdirectory(src/modules/px4iofirmware)
-#endif()
+px4_create_git_hash_header(OUT ${PX4_BINARY_DIR}/build_git_version.h)
+
+#=============================================================================
+# packaging
 #
-##=============================================================================
-## generate custom target to print for all executable and module cmake targets
-##
-#if(all_posix_cmake_targets)
-#	list(SORT all_posix_cmake_targets)
-#	px4_join(OUT posix_cmake_target_list LIST ${all_posix_cmake_targets} GLUE "\\n")
-#	add_custom_target(list_cmake_targets
-#		COMMAND sh -c "printf \"${posix_cmake_target_list}\\n\""
-#		COMMENT "List of cmake targets that can be matched by PX4_NO_OPTIMIZATION:"
-#		VERBATIM
-#		)
-#endif()
+# Important to having packaging at end of cmake file.
 #
-##=============================================================================
-## generate git version
-##
-#px4_create_git_hash_header(OUT ${PX4_BINARY_DIR}/build_git_version.h)
-#
-##=============================================================================
-## packaging
-##
-## Important to having packaging at end of cmake file.
-##
-#execute_process(
-#	COMMAND git describe --always --tags
-#	OUTPUT_VARIABLE git_tag
-#	OUTPUT_STRIP_TRAILING_WHITESPACE
-#	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
-#	)
-#set(CPACK_PACKAGE_NAME ${PROJECT_NAME}-${CONFIG})
-#set(CPACK_PACKAGE_VERSION ${version})
-#set(CPACK_PACKAGE_CONTACT ${package-contact})
-#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-#set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
-#set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-#set(short-description "The px4 autopilot.")
-#set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${short-description})
-#set(CPACK_GENERATOR "ZIP")
-#set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CONFIG}-${git_tag}")
-#set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${version}")
-#set(CPACK_SOURCE_GENERATOR "ZIP;TBZ2")
-#set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
-#set(CPACK_SET_DESTDIR "OFF")
-#if ("${CMAKE_SYSTEM}" MATCHES "Linux")
-#	find_program(DPKG_PROGRAM dpkg)
-#	if (EXISTS ${DPKG_PROGRAM})
-#		list (APPEND CPACK_GENERATOR "DEB")
-#	endif()
-#endif()
-#include(CPack)
-#
-## vim: set noet fenc=utf-8 ff=unix ft=cmake :
+execute_process(
+		COMMAND git describe --always --tags
+		OUTPUT_VARIABLE git_tag
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+		WORKING_DIRECTORY ${PX4_SOURCE_DIR}
+)
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME}-${CONFIG})
+set(CPACK_PACKAGE_VERSION ${version})
+set(CPACK_PACKAGE_CONTACT ${package-contact})
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(short-description "The px4 autopilot.")
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${short-description})
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CONFIG}-${git_tag}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${version}")
+set(CPACK_SOURCE_GENERATOR "ZIP;TBZ2")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+set(CPACK_SET_DESTDIR "OFF")
+if ("${CMAKE_SYSTEM}" MATCHES "Linux")
+	find_program(DPKG_PROGRAM dpkg)
+	if (EXISTS ${DPKG_PROGRAM})
+		list (APPEND CPACK_GENERATOR "DEB")
+	endif()
+endif()
+include(CPack)
+
+# vim: set noet fenc=utf-8 ff=unix ft=cmake :

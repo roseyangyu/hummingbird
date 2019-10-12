@@ -11,8 +11,18 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     rostest
 )
+cmake_policy(SET CMP0054 NEW)
+function(message)
+    if (NOT MESSAGE_QUIET)
+        _message(${ARGN})
+    endif()
+endfunction()
+
+set(MESSAGE_QUIET ON)
+find_package(gazebo REQUIRED QUIET)
+set(MESSAGE_QUIET OFF)
+
 find_package(Boost REQUIRED COMPONENTS thread)
-find_package(gazebo REQUIRED)
 find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
